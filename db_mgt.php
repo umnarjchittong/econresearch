@@ -1,494 +1,497 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <title>Title</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS v5.0.2 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"  integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<head>
+  <title>Title</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  </head>
-  <body>
-      <div class="container my-5 p-5">
-          <div class="col-6 mx-auto my-5 p-5 text-center">
-              <img src="images/loading.gif" width="50px;">
-          </div>
-      </div>
-    <!-- Bootstrap JavaScript Libraries -->
-  </body>
+  <!-- Bootstrap CSS v5.0.2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+</head>
+
+<body>
+  <div class="container my-5 p-5">
+    <div class="col-6 mx-auto my-5 p-5 text-center">
+      <img src="images/loading.gif" width="50px;">
+    </div>
+  </div>
+  <!-- Bootstrap JavaScript Libraries -->
+</body>
+
 </html>
 
 <?php
 include("core.php");
 $fnc = new Web();
+$MJU_API = new MJU_API();
 
-// * set so
-if (isset($_GET["p"]) && $_GET["p"] == "duty" && isset($_GET["mid"]) && isset($_POST["fst"]) && $_POST["fst"] == "ondutyadd" && isset($_POST["mid"]) && isset($_POST["so_id"]) && isset($_POST["position"]) && isset($_POST["submit"])) {
-    if (is_array($_POST["so_id"])) {
-        $sql = "";
-        foreach ($_POST["so_id"] as $so_id) {
-            if (is_array($_POST["position"])) {
-                $priority = explode(",", $_POST["position"][0])[0];
-                $position = array();
-                for ($i = 0; $i < count($_POST["position"]); $i++) {
-                    array_push($position, explode(",", $_POST["position"][$i])[1]);
-                }
-                $sql .= "INSERT INTO `on-duty` (`match_id`, `so_id`, `on-duty_priority`, `on-duty_position`, `on-duty_status`, `on-duty_editor`, `on-duty_lastupdate`) VALUES (" . $_POST["mid"] . ", " . $so_id . ", " . $priority . ", '" . implode(", ", $position) . "', 'enable', '" . $_SESSION["member"]["so_firstname_en"] . "', current_timestamp()); ";
-            } else {
-                $position = explode(",", $_POST["position"]);
-                $sql .= "INSERT INTO `on-duty` (`match_id`, `so_id`, `on-duty_priority`, `on-duty_position`, `on-duty_status`, `on-duty_editor`, `on-duty_lastupdate`) VALUES (" . $_POST["mid"] . ", " . $so_id . ", " . $position[0] . ", '" . $position["1"] . "', 'enable', '" . $_SESSION["member"]["so_firstname_en"] . "', current_timestamp()); ";
-            }
-        }
-    } else {
-        $sql = "INSERT INTO `on-duty` (`match_id`, `so_id`, `on-duty_priority`, `on-duty_position`, `on-duty_status`, `on-duty_editor`, `on-duty_lastupdate`) VALUES (" . $_POST["mid"] . ", " . $_POST["so_id"] . ", " . $position[0] . ", '" . $position["1"] . "', 'enable', '" . $_SESSION["member"]["so_firstname_en"] . "', current_timestamp())";
-    }
-    // die($sql);
-    $fnc->sql_execute_multi($sql);
-    echo '<meta http-equiv="refresh" content="0.0; URL=admin/?p=duty&mid=' . $_GET["mid"] . '&alert=success&msg=บันทึกเรียบร้อย&listview=' . $_GET["listview"] . '" />';
-    die();
-}
+if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST["ref_table"]) && isset($_POST["ref_id"])) {
+  // echo "uploading...";
+  $target_dir = "uploads/" . $_POST["ref_table"] . "/" . $_POST["ref_id"] . "/";
+  if (!file_exists($target_dir)) {
+    mkdir($target_dir);
+  }
+  if (isset($_FILES["file_attach"])) {
+    // echo "<pre>" . print_r($_FILES["file_attach"]) . "</pre>";
+    foreach ($_FILES['file_attach']['tmp_name'] as $key => $val) {
 
-// if (isset($_POST["fst"]) && $_POST["fst"] == "ondutyadd" && isset($_POST["mid"]) && isset($_POST["so_id"]) && isset($_POST["position"]) && isset($_POST["submit"])) {
-//     $position = explode(",",$_POST["position"]);
-//     print_r($_POST["so_id"]);
-//     echo "<br>";
-//     $sql = "INSERT INTO `on-duty` (`match_id`, `so_id`, `on-duty_priority`, `on-duty_position`, `on-duty_status`, `on-duty_editor`, `on-duty_lastupdate`) VALUES (" . $_POST["mid"] . ", " . $_POST["so_id"] . ", " . $position[0] . ", '" . $position["1"] . "', 'enable', '" . $_SESSION["member"]["so_firstname_en"] ."', current_timestamp())";
-//      $fnc->sql_execute($sql);
-// die($sql);
-// echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=index.php?p=duty&mid=' . $_GET["mid"] . '&alert=success&msg=บันทึกเรียบร้อย" />';
-// die();
-// }
-
-if (isset($_GET["p"]) && $_GET["p"] == "duty" && isset($_GET["mid"]) && isset($_GET["act"]) && $_GET["act"] == "dutydelete" && isset($_GET["odid"])) {
-    // $sql = "DELETE FROM `on-duty` WHERE `on-duty_id` = " . $_GET["odid"];
-    $sql = "UPDATE `on-duty` SET `on-duty_status`='delete',`on-duty_editor`='" . $_SESSION["member"]["so_firstname_en"] . "',`on-duty_lastupdate`=current_timestamp() WHERE `on-duty_id` = " . $_GET["odid"];
-    //  die($sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/?p=duty&mid=' . $_GET["mid"] . '&alert=info&msg=ลบเรียบร้อย" />';
-    die();
-}
-
-if (isset($_POST["fst"]) && $_POST["fst"] == "ondutyupdate" && isset($_POST["mid"]) && isset($_POST["so_id"]) && isset($_POST["odid"]) && isset($_POST["position"]) && isset($_POST["submit"])) {
-    $position = explode(",", $_POST["position"]);
-    $sql = "UPDATE `on-duty` SET `so_id`=" . $_POST["so_id"] . ", `on-duty_priority`=" . $position[0] . ", `on-duty_position`='" . $position[1] . "', `on-duty_editor`='" . $_SESSION["member"]["so_firstname_en"] . "',`on-duty_lastupdate`=current_timestamp() WHERE `on-duty_id` = " . $_POST["odid"];
-    // die($sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/?p=duty&mid=' . $_POST["mid"] . '&alert=info&msg=อัพเดทเรียบร้อย" />';
-    die();
-}
-
-if (isset($_POST["fst"]) && $_POST["fst"] == "soregist" && isset($_GET["p"]) && $_GET["p"] == "soregist" && isset($_GET["act"]) && $_GET["act"] == "soregist" && isset($_POST["submit"])) {
-    $sql = "SELECT `so_id` FROM `so-member` WHERE `so_citizen_id` LIKE '" . $_POST["citizen_id"] . "' OR `so_email` LIKE '" . $_POST["email"] . "'";
-    if (!empty($fnc->get_db_col($sql))) {
-        echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=guest/register.php?p=exists&alert=danger&msg=ขออภัย...มีการลงทะเบียนด้วยหมายเลขปัตรประชาชน หรืออีเมลนี้แล้ว" />';
-        die();
-    }
-
-    $auth = 0;
-    $sql = "INSERT INTO `so-member` (`so_firstname`, `so_lastname`, `so_firstname_en`, `so_lastname_en`, `so_nickname`, 
-    `so_citizen_id`, `so_dob`, `so_email`, `so_auth_lv`, `so_status`, `so_regis_datetime`, `so_editor`) 
-    VALUES ('" . $_POST["firstname"] . "', '" . $_POST["lastname"] . "', '" . $_POST["firstname_en"] . "', '" . $_POST["lastname_en"] . "', '" . $_POST["nickname"] .
-        "', '" . $_POST["citizen_id"] . "', '" . $_POST["dob"] . "', '" . $_POST["email"] . "', " . $auth . ", 'register', current_timestamp(), '" . $_POST["firstname_en"] . "')";
-
-    // die("so regist sql: <br><br>" . $sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=guest/register.php?p=registered&alert=info&msg=ลงทะเบียนข้อมูล SO เรียบร้อย. โปรด Login เพื่อเข้าสู่ระบบ" />';
-    die();
-}
-
-if (isset($_POST["fst"]) && $_POST["fst"] == "soappend" && isset($_GET["p"]) && $_GET["p"] == "so" && isset($_GET["act"]) && $_GET["act"] == "soappend" && isset($_POST["so_editor"]) && isset($_POST["submit"])) {
-    if ($_POST["idpa_id"] != "") {
-        $auth = 3;
-    } else {
-        $auth = 1;
-    }
-    $sql = "INSERT INTO `so-member` (`so_idpa_id`, `so_club`, `so_firstname`, `so_lastname`, `so_firstname_en`, `so_lastname_en`, `so_nickname`, 
-    `so_citizen_id`, `so_dob`, `so_blood_type`, `so_sex`, `so_address`, `so_subdistrict`, `so_district`, `so_province`, `so_zipcode`, 
-    `so_phone`, `so_email`, `so_line_id`, `so_idpa_expire`, `so_license_expire`, `so_pwd`, `so_auth_lv`, `so_status`, `so_regis_datetime`, `so_editor`, `so_lastupdate`) 
-    VALUES ('" . strtoupper($_POST["idpa_id"]) . "', '" . $_POST["club"] . "', '" . $_POST["firstname"] . "', '" . $_POST["lastname"] . "', '" . $_POST["firstname_en"] . "', '" . $_POST["lastname_en"] . "', '" . $_POST["nickname"] .
-        "', '" . $_POST["citizen_id"] . "', '" . $_POST["dob"] . "', '" . $_POST["blood"] . "', '" . $_POST["sex"] . "', '" . $_POST["address"] . "', '" . $_POST["subdistrict"] . "', '" . $_POST["district"] . "', '" . $_POST["province"] . "', '" . $_POST["zip"] .
-        "', '" . $_POST["phone"] . "', '" . $_POST["email"] . "', '" . $_POST["line_id"] . "', '" . $_POST["idpa_exp"] . "', '" . $_POST["so_exp"] . "', '" . $_POST["pwd"] . "', " . $auth . ", 'enable', current_timestamp(), '" . $_POST["so_editor"] . "', current_timestamp())";
-
-    // die("so add sql: <br><br>" . $sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/?p=so&alert=info&msg=เพิ่มข้อมูล SO เรียบร้อย" />';
-    die();
-}
-
-// so delete
-if (isset($_GET["p"]) && $_GET["p"] == "so" && isset($_GET["act"]) && $_GET["act"] == "sodelete" && isset($_GET["soid"])) {
-    $sql = "UPDATE `so-member` SET `so_status`='delete', `so_editor`='" . $_SESSION["member"]["so_firstname_en"] . "',`so_lastupdate`=current_timestamp() WHERE `so_id` = " . $_GET["soid"];
-    echo $sql;
-    die("so delete " . $sql);
-    // $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/?p=so&alert=info&msg=ลบข้อมูล SO เรียบร้อย" />';
-    die();
-}
-
-if (isset($_POST["fst"]) && $_POST["fst"] == "soupdate" && isset($_GET["p"]) && $_GET["p"] == "so" && isset($_GET["act"]) && $_GET["act"] == "soedit" && isset($_POST["so_id"]) && isset($_POST["submit"])) {
-    if (isset($_POST["pwd"]) && $_POST["pwd"] != "") {
-        // $pwd = ",`so_pwd`='" . $_POST["pwd"] . "'";
-        $pwd = "";
-    } else {
-        $pwd = "";
-    }
-    if (isset($_POST["so_level"]) && $_POST["so_level"] != "") {
-        $so_level = ",`so_level`='" . $_POST["so_level"] . "'";
-    } else {
-        $so_level = "";
-    }
-    // if (isset($_POST["idpa_id"]) && $_POST["idpa_id"] != "") {
-    //     $auth = ",`so_auth_lv`=3";
-    // } else {
-    //     $auth = ",`so_auth_lv`=1";
-    // }
-    if (isset($_POST["so_auth_lv"]) && $_POST["so_auth_lv"] != "") {
-        $auth = ",`so_auth_lv`=" . $_POST["so_auth_lv"];
-    }
-    if (isset($_POST["status"]) && $_POST["status"] == "register") {
-        $_POST["status"] = "enable";
-    }
-    if (isset($_POST["idpa_exp"]) && $_POST["idpa_exp"] != "") {
-        $idpa_exp = ",`so_idpa_expire`='" . $_POST["idpa_exp"] . "'";
-    } else {
-        $idpa_exp = ",`so_idpa_expire`=NULL";
-    }
-    if (isset($_POST["so_exp"]) && $_POST["so_exp"] != "") {
-        $so_exp = ",`so_license_expire`='" . $_POST["so_exp"] . "'";
-    } else {
-        $so_exp = ",`so_license_expire`=NULL";;
-    }
-    // ! $system_auth_lv = array("1" => "idpa member", "3" => "so member", "5" => "md", "7" => "admin", "9" => "developer");
-    switch ($_POST["citizen_id"]) {            
-        case "3500700238956": // อำนาจ
-            $auth = ",`so_auth_lv`=9";
-            break;            
-        case "3120101111910": // ก้องเกียรติ admin
-            $auth = ",`so_auth_lv`=7";
-            break;            
-        case "3100601917557": // ทรงศักดิ์ admin
-            $auth = ",`so_auth_lv`=7";
-            break;
-        case "3100400140393": // พี่โอ Stat
-            $auth = ",`so_auth_lv`=6";
-            break;
-        case "1101200020151": // พี่น้อง stat
-            $auth = ",`so_auth_lv`=6";
-            break;
-    }
-
-    if (!empty($_FILES["avatar"]["tmp_name"])) {
-        $target_dir = "uploads/";
-        $target_file = $target_dir . basename($_FILES["avatar"]["name"]);
-        $extension = explode(".", $_FILES["avatar"]["name"]);
-        $extension = end($extension);
-        $target_newfilename = $_POST["so_id"] . "-" . $_POST["firstname_en"] . "_" . $_POST["lastname_en"] . "." . $extension;
-        $uploadOk = 1;
-        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        $check = getimagesize($_FILES["avatar"]["tmp_name"]);
-        if ($check !== false) {
-            // echo "File is an image - " . $check["mime"] . ".<br>";
-            $uploadOk = 1;
-        } else {
-            // echo "File is not an image.<br>";
-            $uploadOk = 0;
-        }
-        // check file size > 2mb
-        if ($_FILES["avatar"]["size"] > (2 * (1000 * 1000))) {
-            echo 'Sorry, your file is too large (> 2Mb).<a href="member/?p=profile" target="_TOP">Try again.</a><br>';
-            $uploadOk = 0;
-        }
-        // Allow certain file formats
-        if (
-            $imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-            && $imageFileType != "gif"
-        ) {
-            echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.<br>";
-            $uploadOk = 0;
-        }
-
-        // Check if $uploadOk is set to 0 by an error
-        if ($uploadOk == 0) {
-            echo "Sorry, your file was not uploaded.<br>";
-            // if everything is ok, try to upload file
-        } else {
-            if (move_uploaded_file($_FILES["avatar"]["tmp_name"], $target_file)) {
-                // echo "The file " . htmlspecialchars(basename($_FILES["avatar"]["name"])) . " has been uploaded.<br>";
-            } else {
-                echo "Sorry, there was an error uploading your file. Please contact admin.<br>";
-            }
-        }
-        rename($target_file, $target_dir . $target_newfilename);
-        $target_newfilename = ", `so_avatar`='" . $target_dir . $target_newfilename . "'";
-    } else {
-        $target_newfilename = "";
-    }
-
-    $sql = "UPDATE `so-member` SET `so_idpa_id`='" . $_POST["idpa_id"] . "',`so_club`='" . $_POST["club"] . "',`so_firstname`='" . $_POST["firstname"] . "',`so_lastname`='" . $_POST["lastname"] . "',`so_firstname_en`='" . $_POST["firstname_en"] . "',`so_lastname_en`='" . $_POST["lastname_en"] . "',`so_nickname`='" . $_POST["nickname"] . "',
-    `so_citizen_id`='" . $_POST["citizen_id"] . "',`so_dob`='" . $_POST["dob"] . "',`so_blood_type`='" . $_POST["blood"] . "',`so_sex`='" . $_POST["sex"] . "',`so_address`='" . $_POST["address"] . "',`so_subdistrict`='" . $_POST["subdistrict"] . "',`so_district`='" . $_POST["district"] . "',`so_province`='" . $_POST["province"] . "',`so_zipcode`='" . $_POST["zip"] . "',
-    `so_phone`='" . $_POST["phone"] . "',`so_email`='" . $_POST["email"] . "',`so_line_id`='" . $_POST["line_id"] . "'" . $idpa_exp . $so_exp . $pwd . $auth . $target_newfilename . $so_level . ",`so_status`='" . $_POST["status"] . "',`so_editor`='" . $_SESSION["member"]["so_firstname_en"] . "',`so_lastupdate`=current_timestamp() WHERE `so_id` = " . $_POST["so_id"];
-    // die("<hr>" . $sql);
-    $fnc->sql_execute($sql);
-    if ($_SESSION["member"]["auth_lv"] >= 7) {
-        echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/index.php?p=so&alert=success&msg=อัพเดทเรียบร้อย" />';
-    } elseif (!empty($_SESSION["member"])) {
-        echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=member/?alert=success&msg=อัพเดทเรียบร้อย" />';
-    }
-    die();
-}
-
-/*if (isset($_POST["fst"]) && $_POST["fst"] == "soupdate" && isset($_GET["p"]) && $_GET["p"] == "so" && isset($_GET["act"]) && $_GET["act"] == "soedit" && isset($_POST["so_id"]) && isset($_POST["submit"])) {
-    if (isset($_POST["pwd"]) && $_POST["pwd"] != "") {
-        $pwd = ",`so_pwd`='" . $_POST["pwd"] . "'";
-    } else {
-        $pwd = "";
-    }
-    if ($_POST["idpa_exp"] != "") {
-        $auth = ",`so_auth_lv`=3";
-    } else {
-        $auth = ",`so_auth_lv`=1";
-    }
-    // ! $system_auth_lv = array("1" => "idpa member", "3" => "so member", "5" => "md", "7" => "admin", "9" => "developer");
-    switch ($_POST["citizen_id"]) {
-            // อำนาจ
-        case "3500700238956":
-            $auth = ",`so_auth_lv`=9";
-            break;
-            // ก้องเกียรติ admin
-        case "3120101111910":
-            $auth = ",`so_auth_lv`=7";
-            break;
-            // ทรงศักดิ์ admin
-        case "3100601917557":
-            $auth = ",`so_auth_lv`=7";
-            break;
-    }
-
-    $sql = "UPDATE `so-member` SET `so_idpa_id`='" . $_POST["idpa_id"] . "',`so_club`='" . $_POST["club"] . "',`so_firstname`='" . $_POST["firstname"] . "',`so_lastname`='" . $_POST["lastname"] . "',`so_firstname_en`='" . $_POST["firstname_en"] . "',`so_lastname_en`='" . $_POST["lastname_en"] . "',`so_nickname`='" . $_POST["nickname"] . "',
-    `so_citizen_id`='" . $_POST["citizen_id"] . "',`so_dob`='" . $_POST["dob"] . "',`so_blood_type`='" . $_POST["blood"] . "',`so_sex`='" . $_POST["sex"] . "',`so_address`='" . $_POST["address"] . "',`so_subdistrict`='" . $_POST["subdistrict"] . "',`so_district`='" . $_POST["district"] . "',`so_province`='" . $_POST["province"] . "',`so_zipcode`='" . $_POST["zip"] . "',
-    `so_phone`='" . $_POST["phone"] . "',`so_email`='" . $_POST["email"] . "',`so_line_id`='" . $_POST["line_id"] . "',`so_idpa_expire`='" . $_POST["idpa_exp"] . "',`so_license_expire`='" . $_POST["so_exp"] . "',`so_idpa_profile`='" . $_POST["idpa_profile"] . "'" . $pwd . $auth . ",`so_status`='" . $_POST["status"] . "',`so_editor`='" . $_SESSION["member"]["so_firstname_en"] . "',`so_lastupdate`=current_timestamp() WHERE `so_id` = " . $_POST["so_id"];
-    $fnc->sql_execute($sql);
-    // die($sql);
-    if (!empty($_SESSION["member"])) {
-        echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/index.php?p=so&alert=success&msg=อัพเดทเรียบร้อย" />';
-    } elseif (!empty($_SESSION["member"])) {
-        echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=member/index.php?p=profile&alert=success&msg=อัพเดทเรียบร้อย" />';
-    }
-    die();
-} */
-
-if (isset($_POST["fst"]) && $_POST["fst"] == "matchappend" && isset($_GET["p"]) && $_GET["p"] == "match" && isset($_GET["act"]) && $_GET["act"] == "matchappend" && isset($_POST["match_editor"]) && isset($_POST["submit"])) {
-    if (!is_numeric($_POST["match_coordinator"])) {
-        $_POST["match_coordinator"] = 'NULL';
-    }
-    if (!is_numeric($_POST["match_finish"])) {
-        $_POST["match_finish"] = $_POST["match_begin"];
-    }
-    $sql = "INSERT INTO `match-idpa` (`match_regist_datetime`, `match_name`, `match_location`, `match_detail`, `match_level`, `match_stages`, `match_rounds`, `match_begin`, `match_finish`, 
-    `match_md`, `match_md_contact`, `match_coordinator`, `match_status`, `match_editor`, `match_lastupdate`) 
-    VALUES (current_timestamp(), '" . $_POST["match_name"] . "', '" . $_POST["match_location"] . "', '" . $_POST["match_detail"] . "', '" . $_POST["match_level"] . "', " . $_POST["match_stages"] . ", " . $_POST["match_rounds"] . ", '" . $_POST["match_begin"] . "', '" . $_POST["match_finish"] . "', 
-    '" . $_POST["match_md"] . "', '" . $_POST["match_md_contact"] . "', " . $_POST["match_coordinator"] . ", 'enable', '" . $_POST["match_editor"] . "', current_timestamp())";
-    // die($sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/?p=match&alert=success&msg=ลงทะเบียนเรียบร้อย" />';
-    die();
-}
-
-if (isset($_POST["fst"]) && $_POST["fst"] == "matchupdate" && isset($_GET["p"]) && $_GET["p"] == "match" && isset($_GET["act"]) && $_GET["act"] == "matchupdate" && isset($_POST["match_editor"]) && isset($_POST["submit"]) && isset($_POST["m_id"])) {
-    if (!empty($_FILES["match_upload_file"]["tmp_name"])) {
-        $target_dir = "uploads/pdf/";
-        $target_file = $target_dir . basename($_FILES["match_upload_file"]["name"]);
-        $extension = explode(".", $_FILES["match_upload_file"]["name"]);
-        $extension = end($extension);
-        $target_newfilename = $_POST["m_id"] . "-" . str_replace("#", "", str_replace("$", "", str_replace("%", "", str_replace("/", "", str_replace(".", "", str_replace(":", "", $_POST["match_name"])))))) . "." . $extension;
-        $uploadOk = 1;
-        // $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        // $check = getimagesize($_FILES["match_upload_file"]["tmp_name"]);
-        // if ($check !== false) {
-        //     echo "File is an image - " . $check["mime"] . ".<br>";
-        //     $uploadOk = 1;
-        // } else {
-        //     echo "File is not an image.<br>";
-        //     $uploadOk = 0;
-        // }
-        // check file size > 1.5mb
-        if ($_FILES["match_upload_file"]["size"] > (1.5 * (1000 * 1000))) {
-            echo 'Sorry, your file is too large (> 2Mb).<a href="member/?p=profile" target="_TOP">Try again.</a><br>';
-            $uploadOk = 0;
-        }
-        // Check if $uploadOk is set to 0 by an error
-        if ($uploadOk == 0) {
-            echo "Sorry, your file was not uploaded.<br>";
-            // if everything is ok, try to upload file
-        } else {
-            if (move_uploaded_file($_FILES["match_upload_file"]["tmp_name"], $target_file)) {
-                // echo "The file " . htmlspecialchars(basename($_FILES["avatar"]["name"])) . " has been uploaded.<br>";
-            } else {
-                echo "Sorry, there was an error uploading your file. Please contact admin.<br>";
-            }
-        }
-        rename($target_file, $target_dir . $target_newfilename);
-        $target_newfilename = ", `match_upload_file`='" . $target_dir . $target_newfilename . "'";
-    } else {
-        $target_newfilename = "";
-    }
-
-    $sql = "UPDATE `match-idpa` SET `match_name`='" . $_POST["match_name"] . "',`match_location`='" . $_POST["match_location"] . "',`match_detail`='" . $_POST["match_detail"] . "',`match_level`='" . $_POST["match_level"] . "',`match_stages`=" . $_POST["match_stages"] . ",`match_rounds`=" . $_POST["match_rounds"] . ",`match_begin`='" . $_POST["match_begin"] . "',`match_finish`='" . $_POST["match_finish"] . "',`match_md`='" . $_POST["match_md"] . "'";
-    if ($_POST["match_md_contact"]) {
-        $sql .= ",`match_md_contact`='" . $_POST["match_md_contact"] . "'";
-    }
-    if ($_POST["match_coordinator"]) {
-        $sql .= ",`match_coordinator`=" . $_POST["match_coordinator"];
-    }
-    $sql .= $target_newfilename . ",`match_editor`='" . $_POST["match_editor"] . "',`match_lastupdate`=current_timestamp() WHERE `match_id` = " . $_POST["m_id"];
-    // die($sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/?p=matchinfo&mid=' . $_POST["m_id"] . '&alert=success&msg=อัพเดทเรียบร้อย" />';
-    die();
-}
-
-/*if (isset($_POST["fst"]) && $_POST["fst"] == "matchupdate" && isset($_GET["p"]) && $_GET["p"] == "match" && isset($_GET["act"]) && $_GET["act"] == "matchupdate" && isset($_POST["match_editor"]) && isset($_POST["submit"]) && isset($_POST["m_id"])) {
-    $sql = "UPDATE `match-idpa` SET `match_name`='" . $_POST["match_name"] . "',`match_location`='" . $_POST["match_location"] . "',`match_detail`='" . $_POST["match_detail"] . "',`match_level`='" . $_POST["match_level"] . "',`match_stages`=" . $_POST["match_stages"] . ",`match_rounds`=" . $_POST["match_rounds"] . ",`match_begin`='" . $_POST["match_begin"] . "',`match_finish`='" . $_POST["match_finish"] . "',`match_md`='" . $_POST["match_md"] . "'";
-    if ($_POST["match_md_contact"]) {
-        $sql .= ",`match_md_contact`='" . $_POST["match_md_contact"] . "'";
-    }
-    if ($_POST["match_coordinator"]) {
-        $sql .= ",`match_coordinator`=" . $_POST["match_coordinator"];
-    }
-    $sql .= ",`match_editor`='" . $_POST["match_editor"] . "',`match_lastupdate`=current_timestamp() WHERE `match_id` = " . $_POST["m_id"];
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/?p=matchinfo&mid=' . $_POST["m_id"] . '&alert=success&msg=อัพเดทเรียบร้อย" />';
-    die();
-}*/
-
-if (isset($_GET["p"]) && $_GET["p"] == "match" && isset($_GET["act"]) && $_GET["act"] == "matchdelete" && isset($_GET["mid"])) {
-    $sql = "UPDATE `match-idpa` SET `match_status`='delete',`match_editor`='" . $_SESSION["member"]["so_firstname_en"] . "',`match_lastupdate`=CURRENT_TIMESTAMP() WHERE `match_id` =" . $_GET["mid"];
-    // die($sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/?p=matchinfo&mid=' . $_POST["m_id"] . '&alert=success&msg=อัพเดทเรียบร้อย" />';
-    die();
-}
-// echo "so change password";
-if (isset($_GET["p"]) && $_GET["p"] == "so" && isset($_GET["act"]) && $_GET["act"] == "changePassword" && isset($_POST["fst"]) && $_POST["fst"] == "SOChangePassword" && isset($_POST["passwordNew"])) {
-    if (isset($_POST["passwordOld"])) {
-        $sql_chk = "Select `so-member`.so_id, `so-member`.so_citizen_id From `so-member` Where `so_id` = " . $_POST["soid"] . " And `so-member`.so_pwd Like '" . $_POST["passwordOld"] . "'";
-        $data_row = $fnc->get_db_row($sql_chk);
-        if (!empty($data_row)) {
-            $sql = "UPDATE `so-member` SET `so_pwd`='" . $_POST["passwordNew"] . "',`so_editor`='" . $_SESSION["member"]["so_firstname_en"] . "',`so_lastupdate`=CURRENT_TIMESTAMP() WHERE `so_id` = " . $_POST["soid"] . " AND `so_citizen_id` LIKE '" . $data_row["so_citizen_id"] . "'";
-        } else {
-            echo "your password is incorrect";
-            echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=member/?p=profile&alert=danger&msg=ท่านระบุรหัสผ่านไม่ถูกต้อง." />';
-            die();
-        }
-    } else {
-        $sql = "UPDATE `so-member` SET `so_pwd`='" . $_POST["passwordNew"] . "',`so_editor`='" . $_SESSION["member"]["so_firstname_en"] . "',`so_lastupdate`=CURRENT_TIMESTAMP() WHERE `so_id` = " . $_POST["soid"];
-    }
-
-    if (!empty($sql)) {
+      $file_name = $_FILES['file_attach']['name'][$key];
+      $file_type = $_FILES['file_attach']['type'][$key];
+      $upload_filename = explode(".", $_FILES["file_attach"]["name"][$key])[0];
+      $filename = explode(".", $_FILES["file_attach"]["name"][$key]);
+      $extension = end($filename);
+      unset($filename[count($filename) - 1]);
+      $file_name = implode("", $filename);
+      $file_name = str_replace("#", "", str_replace("$", "", str_replace("%", "", str_replace("/", "", str_replace(".", "", str_replace(":", "", $file_name))))));
+      $file_name .= '.' . $extension;
+      $target_file = $target_dir . $file_name;
+      if (move_uploaded_file($_FILES["file_attach"]["tmp_name"][$key], $target_file)) {
+        // echo "<br>The file " . htmlspecialchars(basename($_FILES["file_attach"]["name"][$key])) . " has been uploaded.";
+        $sql = "INSERT INTO `attachment`(`att_ref_table`, `att_ref_id`, `att_filename`, `att_filetype`, `att_filepath`, `att_status`, `att_editor`) VALUES 
+        ('" . $_POST["ref_table"] . "','" . $_POST["ref_id"] . "','" . $file_name . "','" . $file_type . "','" . $target_dir . "','enable','Admin')";
         // die($sql);
         $fnc->sql_execute($sql);
-        if ($_SESSION["member"]["so_status"] == "forcepwd") {
-            $fnc->sql_execute("UPDATE `so-member` SET `so_status`='enable' WHERE `so_id` = " . $_POST["soid"]);
-        }
-        echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=member/?p=profile&alert=success&msg=รหัสผ่านถูกเปลี่ยนเรียบร้อย." />';
+      } else {
+        echo "Sorry, there was an error uploading your file. Please contact admin.<br>";
+        echo '<meta http-equiv="refresh" content="3; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"] . '&alert=warning&title=ผิดพลาด&msg=เพิ่มเอกสารแนบใน Proceeding ไม่สำเร็จ." />';
         die();
+      }
+      // rename($target_file, $target_dir . $target_newfilename);
     }
-}
 
-if (isset($_GET["p"]) && $_GET["p"] == "setting" && isset($_GET["act"]) && $_GET["act"] == "settingupdate" && isset($_POST["fst"]) && $_POST["fst"] == "settingupdate" && isset($_POST["setting_id"])) {
-    // $sql = "UPDATE `settings` SET `setting_max_stage`='" . $_POST["setting_max_stage"] . "',`setting_db_name`='" . $_POST["setting_db_name"] . "',`setting_debug_show`='" . $_POST["setting_debug_show"] . "',`setting_alert`='" . $_POST["setting_alert"] . "',`setting_meta_redirect`='" . $_POST["setting_meta_redirect"] . "',`setting_system_name`='" . $_POST["setting_system_name"] . "',`setting_version`='" . $_POST["setting_version"] . "',`setting_match_active`='" . $_POST["setting_match_active"] . "' WHERE `setting_id` = " . $_POST["setting_id"];
-    $sql = "INSERT INTO `settings` (`setting_max_stage`, `setting_db_name`, `setting_debug_show`, `setting_alert`, `setting_meta_redirect`, 
-    `setting_system_name`, `setting_version`, `setting_version_notes`, `setting_match_active`, `setting_view_result`, `setting_editor`) 
-    VALUES ('" . $_POST["setting_max_stage"] . "', '" . $_POST["setting_db_name"] . "', '" . $_POST["setting_debug_show"] . "', '" . $_POST["setting_alert"] . "', '" . $_POST["setting_meta_redirect"] . "', 
-    '" . $_POST["setting_system_name"] . "', '" . $_POST["setting_version"] . "', '" . $_POST["setting_version_notes"] . "', '" . $_POST["setting_match_active"] . "', '" . $_POST["setting_view_result"] . "', '" . $_SESSION["member"]["so_firstname_en"] . "')";
-    // die($sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=admin/setting.php?alert=success&msg=บันทึกข้อมูลการตั้งค่าเรียบร้อย." />';
-    die();
-}
 
-if (isset($_GET["p"]) && $_GET["p"] == "result" && isset($_GET["act"]) && $_GET["act"] == "csvupload" && isset($_POST["m_id"]) && isset($_POST["fst"]) && $_POST["fst"] == "csvupload") {
-    if (!empty($_FILES["upload_file"]["tmp_name"])) {
-        $target_dir = "uploads/result/";
-        $target_file = $target_dir . basename($_FILES["upload_file"]["name"]);
-        $upload_filename = explode(".", $_FILES["upload_file"]["name"])[0];
-        $extension = explode(".", $_FILES["upload_file"]["name"]);
-        $extension = end($extension);
-        $target_newfilename = $_POST["m_id"] . "-" . date("YMd-Hi") . "-" . str_replace("#", "", str_replace("$", "", str_replace("%", "", str_replace("/", "", str_replace(".", "", str_replace(":", "", $upload_filename)))))) . "." . $extension;
-        $uploadOk = 1;
-        // $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        // $check = getimagesize($_FILES["upload_file"]["tmp_name"]);
-        // if ($check !== false) {
-        //     echo "File is an image - " . $check["mime"] . ".<br>";
-        //     $uploadOk = 1;
-        // } else {
-        //     echo "File is not an image.<br>";
-        //     $uploadOk = 0;
-        // }
-        // check file size > 1.5mb
-        if ($_FILES["upload_file"]["size"] > (1.5 * (1000 * 1000))) {
-            echo 'Sorry, your file is too large (> 2Mb).<a href="member/?p=profile" target="_TOP">Try again.</a><br>';
-            $uploadOk = 0;
-        }
-        // Check if $uploadOk is set to 0 by an error
-        if ($uploadOk == 0) {
-            echo "Sorry, your file was not uploaded.<br>";
-            // if everything is ok, try to upload file
-        } else {
-            if (move_uploaded_file($_FILES["upload_file"]["tmp_name"], $target_file)) {
-                // echo "The file " . htmlspecialchars(basename($_FILES["avatar"]["name"])) . " has been uploaded.<br>";
-            } else {
-                echo "Sorry, there was an error uploading your file. Please contact admin.<br>";
-            }
-        }
-        rename($target_file, $target_dir . $target_newfilename);
-        // $target_newfilename = ", `upload_file`='" . $target_dir . $target_newfilename . "'";
-        $sql = "UPDATE `match-idpa` SET `match_csv_file`='" . $target_dir . $target_newfilename . "' WHERE `match_id` = " . $_POST["m_id"];
+    // if (!empty($_FILES["upload_file"]["tmp_name"])) {
+    //   $target_dir = "uploads/" . $_POST["ref_table"] . "/" . $_POST["ref_id"] . "/";
+    //   $target_file = $target_dir . basename($_FILES["upload_file"]["name"]);
+    //   $upload_filename = explode(".", $_FILES["upload_file"]["name"])[0];
+    //   $extension = explode(".", $_FILES["upload_file"]["name"]);
+    //   $extension = end($extension);
+    //   $target_newfilename = $_POST["m_id"] . "-" . date("YMd-Hi") . "-" . str_replace("#", "", str_replace("$", "", str_replace("%", "", str_replace("/", "", str_replace(".", "", str_replace(":", "", $upload_filename)))))) . "." . $extension;
+    //   $uploadOk = 1;
+    // }
+    if ($sql) {
+      switch ($_POST["ref_table"]) {
+        case "proceeding":
+          $fnc->sql_execute("UPDATE `proceeding` SET `pro_attach`='true',`pro_lastupdate`=CURRENT_TIMESTAMP() WHERE `pro_id` =" . $_POST["ref_id"]);
+          $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=';
+          break;
+        case "journal":
+          $fnc->sql_execute("UPDATE `journal` SET `jour_attach`='true',`jour_lastupdate`=CURRENT_TIMESTAMP() WHERE `jour_id` =" . $_POST["ref_id"]);
+          $link_back = 'journal.php?p=journal&act=coWorker&jid=';
+          break;
+      }
+      echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . $_POST["ref_id"] . '&alert=success&title=สำเร็จ&msg=เพิ่มเอกสารแนบใน ' . $_POST["ref_table"] . ' เรียบร้อย." />';
     } else {
-        die("no target new filename");
-        // $target_newfilename = "";
+      echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . $_POST["ref_id"] . '&alert=warning&title=ผิดพลาด&msg=เพิ่มเอกสารแนบใน ' . $_POST["ref_table"] . ' ไม่สำเร็จ." />';
     }
-    // die($sql);
-    $fnc->sql_execute($sql);
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=score/?p=upload&v=readcsv&alert=success&msg=อัพโหลดไฟล์เรียบร้อย." />';
-    die();
+  } else {
+    // echo "<br>no file upload.";
+  }
+  die();
 }
 
-if (isset($_GET["p"]) && $_GET["p"] == "viewresult" && isset($_GET["act"]) && $_GET["act"] == "openview") {
-    $sql = "UPDATE `settings` SET `setting_view_result`='true' WHERE `setting_id` = " . $_GET["set_id"];
-    // die($sql);
-    $fnc->sql_execute($sql);
-    $_SESSION["member"]["setting"]["setting_view_result"] = "true";
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=score/?p=showscore&alert=success&msg=เปิดการแสดงผล Shooter Score เรียบร้อย." />';
-    die();
+
+// * insert proceeding
+if (isset($_POST["fst"]) && $_POST["fst"] == "proceeding_append") {
+  $api_url = $fnc->api_url_personal . $_POST["pro_owner_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+
+  if (empty($_POST["pro_date_end"])) {
+    $_POST["pro_date_end"] = $_POST["pro_date_begin"];
+  }
+  if (!isset($_POST["department_name"])) {
+    $_POST["department_name"] = '';
+  }
+  if (!isset($_POST["pro_conf_owner"])) {
+    $_POST["pro_conf_owner"] = '';
+  }
+  if (!isset($_POST["pro_volume_issue"])) {
+    $_POST["pro_volume_issue"] = '';
+  }
+  if (!isset($_POST["pro_page"])) {
+    $_POST["pro_page"] = '';
+  }
+  if (!isset($_POST["pro_link"])) {
+    $_POST["pro_link"] = '';
+  }
+  $fiscal_year = $fnc->get_fiscal_year($_POST["pro_date_begin"]);
+  $sql = "INSERT INTO proceeding (pro_owner_citizenid, pro_owner_prename, pro_owner_firstname, pro_owner_lastname, department_name, 
+  pro_ratio, pro_study, pro_tier, pro_date_begin, pro_date_end, pro_fiscalyear, 
+  pro_conf, pro_conf_owner, pro_volume_issue, pro_page, pro_link, pro_detail, pro_location, pro_status, pro_editor) VALUES 
+  ('" . $_POST["pro_owner_citizenid"] . "', '" . $owner["titlePosition"] . "', '" . $owner["firstName"] . "', '" . $owner["lastName"] . "', '" . $_POST["department_name"] . "',
+   '" . $_POST["pro_ratio"] . "', '" . addslashes($_POST["pro_study"]) . "', '" . $_POST["pro_tier"] . "', '" . $_POST["pro_date_begin"] . "', '" . $_POST["pro_date_end"] . "', '" . $fiscal_year . "', 
+   '" . addslashes($_POST["pro_conf"]) . "', '" . addslashes($_POST["pro_conf_owner"]) . "', '" . addslashes($_POST["pro_volume_issue"]) . "', '" . addslashes($_POST["pro_page"]) . "', '" . addslashes($_POST["pro_link"]) . "', '" . addslashes($_POST["pro_detail"]) . "', '" . addslashes($_POST["pro_location"]) . "', 'enable', 'Admin')";
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&alert=success&title=สำเร็จ&msg=บันทึกข้อมูล Proceeding เรียบร้อย." />';
+  die();
 }
 
-if (isset($_GET["p"]) && $_GET["p"] == "viewresult" && isset($_GET["act"]) && $_GET["act"] == "closeview") {
-    $sql = "UPDATE `settings` SET `setting_view_result`='false' WHERE `setting_id` = " . $_GET["set_id"];
-    // die($sql);
-    $fnc->sql_execute($sql);
-    $_SESSION["member"]["setting"]["setting_view_result"] = "false";
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=score/?p=showscore&alert=success&msg=ปิดการแสดงผล Shooter Score เรียบร้อย." />';
-    die();
+if (isset($_POST["fst"]) && $_POST["fst"] == "proceeding_update") {
+  $api_url = $fnc->api_url_personal . $_POST["pro_owner_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+
+  if (empty($_POST["pro_date_end"])) {
+    $_POST["pro_date_end"] = $_POST["pro_date_begin"];
+  }
+  if (isset($_POST["department_name"])) {
+    $department_name = ",department_name='" . $_POST["department_name"] . "'";
+  }
+  $fiscal_year = $fnc->get_fiscal_year($_POST["pro_date_begin"]);
+  $sql = "UPDATE proceeding SET pro_owner_citizenid='" . $_POST["pro_owner_citizenid"] . "',pro_owner_prename='" . $owner["titlePosition"] . "',pro_owner_firstname='" . $owner["firstName"] . "',pro_owner_lastname='" . $owner["lastName"] . "'" . $department_name . ", 
+   pro_ratio='" . $_POST["pro_ratio"] . "',pro_study='" . addslashes($_POST["pro_study"]) . "',pro_tier='" . $_POST["pro_tier"] . "',pro_date_begin='" . $_POST["pro_date_begin"] . "',pro_date_end='" . $_POST["pro_date_end"] . "',pro_fiscalyear='" . $fiscal_year . "',
+   pro_conf='" . addslashes($_POST["pro_conf"]) . "',pro_conf_owner='" . addslashes($_POST["pro_conf_owner"]) . "',pro_page='" . addslashes($_POST["pro_page"]) . "',pro_detail='" . addslashes($_POST["pro_detail"]) . "',pro_location='" . addslashes($_POST["pro_location"]) . "',pro_status='enable',pro_editor='Admin',pro_lastupdate=CURRENT_TIMESTAMP() WHERE pro_id = " . $_POST["pro_id"];
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&act=viewinfo&pid=' . $_POST["pro_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Proceeding เรียบร้อย." />';
+  die();
 }
 
-if (isset($_GET["p"]) && $_GET["p"] == "matchresult" && isset($_GET["act"]) && $_GET["act"] == "openview") {
-    $sql = "UPDATE `settings` SET `setting_match_result`='true' WHERE `setting_id` = " . $_GET["set_id"];
+if (isset($_GET["p"]) && $_GET["p"] == "proceeding" && isset($_GET["act"]) && $_GET["act"] == "delete" && isset($_GET["pid"])) {
+  // $sql = "UPDATE proceeding SET pro_status='delete',pro_editor='admin',pro_lastupdate=CURRENT_TIMESTAMP() WHERE pro_id = " . $_GET["pid"];
+  // * delete proceeding
+  $sql = "DELETE FROM `proceeding` WHERE `pro_id` = " . $_GET["pid"];
+  // die($sql);
+  $fnc->sql_execute($sql);
+  // * delete co-worker
+  $sql = "DELETE FROM `co_worker` WHERE `cow_ref_table` like 'proceeding' and `cow_ref_id` = " . $_GET["pid"];
+  // die($sql);
+  $fnc->sql_execute($sql);
+  // * delete attachment file
+  $sql = "SELECT * FROM `attachment` WHERE `att_ref_table` = 'proceeding' AND `att_ref_id` = " . $_GET["pid"];
+  $attachments = $fnc->get_db_array($sql);
+  if (!empty($attachments)) {
+    foreach ($attachments as $row) {
+      if (!empty($row["att_filename"])) {
+        unlink($row["att_filepath"] . $row["att_filename"]);
+      }
+    }
+    $sql = "DELETE FROM `attachment` WHERE `att_ref_table` = 'proceeding' AND `att_ref_id` = " . $_GET["pid"];
     // die($sql);
     $fnc->sql_execute($sql);
-    $_SESSION["member"]["setting"]["setting_match_result"] = "true";
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=score/?p=showscore&alert=success&msg=เปิดการแสดงผล Match Result เรียบร้อย." />';
-    die();
+  }
+
+  echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&alert=success&title=สำเร็จ&msg=ลบข้อมูล Proceeding เรียบร้อย." />';
+  die();
 }
 
-if (isset($_GET["p"]) && $_GET["p"] == "matchresult" && isset($_GET["act"]) && $_GET["act"] == "closeview") {
-    $sql = "UPDATE `settings` SET `setting_match_result`='false' WHERE `setting_id` = " . $_GET["set_id"];
+if (isset($_GET["p"]) && $_GET["p"] == "proceeding" && isset($_GET["act"]) && $_GET["act"] == "restore" && isset($_GET["pid"])) {
+  $sql = "UPDATE proceeding SET pro_status='enable',pro_editor='admin',pro_lastupdate=CURRENT_TIMESTAMP() WHERE pro_id = " . $_GET["pid"];
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="3; URL=admin/proceeding.php?p=proceeding&alert=success&title=สำเร็จ&msg=ลบข้อมูล Proceeding เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "proceedingCoWorkerIntAppend") {
+  $api_url = $fnc->api_url_personal . $_POST["cow_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+
+  $sql = "INSERT INTO co_worker(cow_ref_table, cow_ref_id, cow_citizenid, cow_prename, cow_firstname, cow_lastname, 	department_name, cow_ratio, cow_status, cow_editor) VALUES 
+  ('" . $_POST["ref_table"] . "','" . $_POST["ref_id"] . "','" . $_POST["cow_citizenid"] . "','" . $owner["titlePosition"] . "','" . $owner["firstName"] . "','" . $owner["lastName"] . "','" . addslashes($_POST["department_name"]) . "','" . $_POST["cow_ratio"] . "','enable','Admin')";
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"] . '&alert=success&title=สำเร็จ&msg=เพิ่มผู้ร่วมงานใน Proceeding เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "proceedingCoWorkerExtAppend") {
+  $sql = "INSERT INTO co_worker(cow_ref_table, cow_ref_id, cow_citizenid, cow_prename, cow_firstname, cow_lastname, cow_ratio, cow_status, cow_editor) VALUES 
+  ('" . $_POST["ref_table"] . "','" . $_POST["ref_id"] . "',NULL,'" . $_POST["cow_prename"] . "','" . $_POST["cow_firstname"] . "','" . $_POST["cow_lastname"] . "','" . $_POST["cow_ratio"] . "','enable','Admin')";
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"] . '&alert=success&title=สำเร็จ&msg=เพิ่มผู้ร่วมงานใน Proceeding เรียบร้อย." />';
+  die();
+}
+
+if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "coWorkerRemove" && isset($_GET["id"]) && isset($_GET["cowid"])) {
+  // $sql = "UPDATE `co_worker` SET `cow_status`='delete',`cow_editor`='Admin',`cow_lastupdate`=CURRENT_TIMESTAMP() WHERE `cow_id` = " . $_GET["cowid"];
+  $sql = "DELETE FROM `co_worker` WHERE `cow_id` =" . $_GET["cowid"];
+  // die($sql);
+  $fnc->sql_execute($sql);
+  switch ($_GET["p"]) {
+    case "proceeding":
+      $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=' . $_GET["id"];
+      break;
+    case "journal":
+      $link_back = 'journal.php?p=journal&act=coWorker&jid=' . $_GET["id"];
+      break;
+  }
+  echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=นำรายชื่อผู้ร่วมงานออกเรียบร้อยแล้ว." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST["ref_table"]) && isset($_POST["ref_id"])) {
+  $target_dir = "uploads/" . $_POST["ref_table"] . "/" . $_POST["ref_id"] . "/";
+  if (!file_exists($target_dir)) {
+    mkdir($target_dir);
+  }
+  if (isset($_FILES["pro_attach"])) {
+    // echo "<pre>" . print_r($_FILES["pro_attach"]) . "</pre>";
+    foreach ($_FILES['pro_attach']['tmp_name'] as $key => $val) {
+
+      $file_name = $_FILES['pro_attach']['name'][$key];
+      // $file_size = $_FILES['pro_attach']['size'][$key];
+      // $file_tmp = $_FILES['pro_attach']['tmp_name'][$key];
+      $file_type = $_FILES['pro_attach']['type'][$key];
+      // move_uploaded_file($file_tmp, "myfile/" . $file_name);
+      $upload_filename = explode(".", $_FILES["pro_attach"]["name"][$key])[0];
+      $filename = explode(".", $_FILES["pro_attach"]["name"][$key]);
+      $extension = end($filename);
+      unset($filename[count($filename) - 1]);
+      $file_name = implode("", $filename);
+      $file_name = str_replace("#", "", str_replace("$", "", str_replace("%", "", str_replace("/", "", str_replace(".", "", str_replace(":", "", $file_name))))));
+      $file_name .= '.' . $extension;
+      $target_file = $target_dir . $file_name;
+      if (move_uploaded_file($_FILES["pro_attach"]["tmp_name"][$key], $target_file)) {
+        // echo "<br>The file " . htmlspecialchars(basename($_FILES["pro_attach"]["name"][$key])) . " has been uploaded.";
+        $sql = "INSERT INTO `attachment`(`att_ref_table`, `att_ref_id`, `att_filename`, `att_filetype`, `att_filepath`, `att_status`, `att_editor`) VALUES 
+        ('" . $_POST["ref_table"] . "','" . $_POST["ref_id"] . "','" . $file_name . "','" . $file_type . "','" . $target_dir . "','enable','Admin')";
+        // die($sql);
+        $fnc->sql_execute($sql);
+      } else {
+        echo "Sorry, there was an error uploading your file. Please contact admin.<br>";
+        echo '<meta http-equiv="refresh" content="3; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"] . '&alert=warning&title=ผิดพลาด&msg=เพิ่มเอกสารแนบใน Proceeding ไม่สำเร็จ." />';
+        die();
+      }
+      // rename($target_file, $target_dir . $target_newfilename);
+    }
+
+
+    // if (!empty($_FILES["upload_file"]["tmp_name"])) {
+    //   $target_dir = "uploads/" . $_POST["ref_table"] . "/" . $_POST["ref_id"] . "/";
+    //   $target_file = $target_dir . basename($_FILES["upload_file"]["name"]);
+    //   $upload_filename = explode(".", $_FILES["upload_file"]["name"])[0];
+    //   $extension = explode(".", $_FILES["upload_file"]["name"]);
+    //   $extension = end($extension);
+    //   $target_newfilename = $_POST["m_id"] . "-" . date("YMd-Hi") . "-" . str_replace("#", "", str_replace("$", "", str_replace("%", "", str_replace("/", "", str_replace(".", "", str_replace(":", "", $upload_filename)))))) . "." . $extension;
+    //   $uploadOk = 1;
+    // }
+    if ($sql) {
+      $fnc->sql_execute("UPDATE `proceeding` SET `pro_attach`='true',`pro_lastupdate`=CURRENT_TIMESTAMP WHERE `pro_id` =" . $_POST["ref_id"]);
+      echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"] . '&alert=success&title=สำเร็จ&msg=เพิ่มเอกสารแนบใน Proceeding เรียบร้อย." />';
+    } else {
+      echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"] . '&alert=warning&title=ผิดพลาด&msg=เพิ่มเอกสารแนบใน Proceeding ไม่สำเร็จ." />';
+    }
+  }
+  die();
+}
+
+/*if (isset($_GET["p"]) && $_GET["p"] == "proceeding" && isset($_GET["act"]) && $_GET["act"] == "deletefile" && isset($_GET["pid"]) && isset($_GET["fid"])) {
+  $att_file = $fnc->get_db_row("SELECT * FROM `attachment` WHERE `att_id` = " . $_GET["fid"]);
+  if (!empty($att_file)) {
+    // echo "no empty";
+    unlink($att_file["att_filepath"] . $att_file["att_filename"]);
+    $sql = "DELETE FROM `attachment` WHERE `att_id` =" . $_GET["fid"];
     // die($sql);
     $fnc->sql_execute($sql);
-    $_SESSION["member"]["setting"]["setting_match_result"] = "false";
-    echo '<meta http-equiv="refresh" content="' . $_SESSION["member"]["setting"]["setting_meta_redirect"] . '; URL=score/?p=showscore&alert=success&msg=ปิดการแสดงผล Match Result เรียบร้อย." />';
-    die();
+    echo "SELECT count(att_id) as cnt FROM `attachment` WHERE `att_status` = 'enable' AND `att_ref_table` = 'proceeding' AND `att_ref_id` = " . $_GET["pid"];
+    if (!$fnc->get_db_col("SELECT count(att_id) as cnt FROM `attachment` WHERE `att_status` = 'enable' AND `att_ref_table` = 'proceeding' AND `att_ref_id` = " . $_GET["pid"])) {
+      $fnc->sql_execute("UPDATE `proceeding` SET `pro_attach`=NULL,`pro_lastupdate`=CURRENT_TIMESTAMP WHERE `pro_id` =" . $_GET["pid"]);
+    }
+    echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_GET["pid"] . '&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ Proceeding เรียบร้อย." />';
+  } else {
+    // echo "is empty :" . $sql;
+    echo '<meta http-equiv="refresh" content="0; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_GET["pid"] . '&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ Proceeding ไม่สำเร็จ." />';
+  }
+  die();
+}*/
+
+if (isset($_GET['p']) && $_GET['p'] == "setting" && isset($_GET['act']) && $_GET['act'] == "department_append" && isset($_POST['fst']) && $_POST['fst'] == "department_append" && isset($_POST['department_name'])) {
+  $sql = "INSERT INTO `department`(`department_name`, `department_editor`, `department_lastupdate`) VALUES ('" . addslashes($_POST['department_name']) . "','Admin',CURRENT_TIMESTAMP)";
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/setting.php?p=department&alert=success&title=สำเร็จ&msg=เพิ่มข้อมูลหลักสูตร/สาขาวิชาสำเร็จ." />';
+  die();
 }
 
-echo "condition fails";
+if (isset($_GET['p']) && $_GET['p'] == "setting" && isset($_GET['act']) && $_GET['act'] == "department_update" && isset($_POST['fst']) && $_POST['fst'] == "department_update" && isset($_POST['department_name']) && isset($_POST['department_id'])) {
+  $sql = "UPDATE `department` SET `department_name`='" . addslashes($_POST['department_name']) . "',`department_editor`='Admin',`department_lastupdate`=CURRENT_TIMESTAMP WHERE `department_id` = " . $_POST['department_id'];
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/setting.php?p=department&alert=success&title=สำเร็จ&msg=อัพเดทข้อมูลหลักสูตร/สาขาวิชาสำเร็จ." />';
+  die();
+}
+
+if (isset($_GET['p']) && $_GET['p'] == "setting" && isset($_GET['act']) && $_GET['act'] == "department_remove" && isset($_GET['d_id'])) {
+  $sql = "DELETE FROM `department` WHERE  `department_id` = " . $_GET['d_id'];
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/setting.php?p=department&alert=success&title=สำเร็จ&msg=ลบข้อมูลหลักสูตร/สาขาวิชาสำเร็จ." />';
+  die();
+}
+
+
+// * Journals insert
+if (isset($_POST["fst"]) && $_POST["fst"] == "journal_append") {
+  $api_url = $fnc->api_url_personal . $_POST["jour_owner_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+
+
+  if (!isset($_POST["department_name"])) {
+    $_POST["department_name"] = '';
+  }
+  if (!isset($_POST["jour_volume_issue"])) {
+    $_POST["jour_volume_issue"] = '';
+  }
+  if (!isset($_POST["jour_page"])) {
+    $_POST["jour_page"] = '';
+  }
+  if (!isset($_POST["jour_link"])) {
+    $_POST["jour_link"] = '';
+  }
+  $fiscal_year = $fnc->get_fiscal_year($_POST["jour_date_avaliable"]);
+  $sql = "INSERT INTO `journal` (`jour_owner_citizenid`, `jour_owner_prename`, `jour_owner_firstname`, `jour_owner_lastname`, `department_name`, 
+  `jour_study`, `jour_ratio`, `jour_tier`, `jour_journal`, `jour_value`, `jour_volume_issue`, `jour_page`, `jour_link`, `jour_date_avaliable`, 
+  `jour_fiscalyear`, `jour_detail`, `jour_create_datetime`, `jour_status`, `jour_editor`, `jour_lastupdate`) 
+  VALUES ('" . $_POST["jour_owner_citizenid"] . "', '" . addslashes($owner["titlePosition"]) . "', '" . addslashes($owner["firstName"]) . "', '" . addslashes($owner["lastName"]) . "', '" . addslashes($_POST["department_name"]) . "', 
+  '" . addslashes($_POST["jour_study"]) . "', '" . $_POST["jour_ratio"] . "', '" . $_POST["jour_tier"] . "', '" . $_POST["jour_journal"] . "', '" . $_POST["jour_value"] . "', '" . $_POST["jour_volume_issue"] . "', '" . $_POST["jour_page"] . "', '" . $_POST["jour_link"] . "', '" . $_POST["jour_date_avaliable"] . "', 
+  '" . $fiscal_year . "', '" . addslashes($_POST["jour_detail"]) . "', current_timestamp(), 'enable', 'admin', current_timestamp())";
+
+  // $sql = "INSERT INTO Journal (pro_owner_citizenid, pro_owner_prename, pro_owner_firstname, pro_owner_lastname, department_name, 
+  // pro_ratio, pro_study, pro_tier, pro_date_begin, pro_date_end, pro_fiscalyear, 
+  // pro_conf, pro_conf_owner, pro_volume_issue, pro_page, pro_link, pro_detail, pro_location, pro_status, pro_editor) VALUES 
+  // ('" . $_POST["jour_owner_citizenid"] . "', '" . $owner["titlePosition"] . "', '" . $owner["firstName"] . "', '" . $owner["lastName"] . "', '" . $_POST["department_name"] . "',
+  //  '" . $_POST["jour_ratio"] . "', '" . addslashes($_POST["jour_study"]) . "', '" . $_POST["jour_tier"] . "', '" . $_POST["jour_date_begin"] . "', '" . $_POST["jour_date_end"] . "', '" . $fiscal_year . "', 
+  //  '" . addslashes($_POST["jour_conf"]) . "', '" . addslashes($_POST["jour_conf_owner"]) . "', '" . addslashes($_POST["jour_volume_issue"]) . "', '" . addslashes($_POST["jour_page"]) . "', '" . addslashes($_POST["jour_link"]) . "', '" . addslashes($_POST["jour_detail"]) . "', '" . addslashes($_POST["jour_location"]) . "', 'enable', 'Admin')";
+
+  //  die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/journal.php?p=journal&alert=success&title=สำเร็จ&msg=บันทึกข้อมูล Journal เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "journal_update") {
+  $api_url = $fnc->api_url_personal . $_POST["jour_owner_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+
+  if (isset($_POST["department_name"])) {
+    $department_name = ",`department_name`='" . $_POST["department_name"] . "'";
+  }
+  $fiscal_year = $fnc->get_fiscal_year($_POST["jour_date_begin"]);
+  $sql = "UPDATE `journal` SET `jour_owner_citizenid`='" . $_POST["jour_owner_citizenid"] . "',`jour_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`jour_owner_firstname`='" . addslashes($owner["firstName"]) . "',`jour_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
+`jour_study`='" . addslashes($_POST["jour_study"]) . "',`jour_ratio`='" . $_POST["jour_ratio"] . "',`jour_tier`='" . $_POST["jour_tier"] . "',`jour_journal`='" . addslashes($_POST["jour_journal"]) . "',`jour_value`='" . addslashes($_POST["jour_value"]) . "',
+`jour_volume_issue`='" . addslashes($_POST["jour_volume_issue"]) . "',`jour_page`='" . addslashes($_POST["jour_page"]) . "',`jour_link`='" . addslashes($_POST["jour_link"]) . "',`jour_date_avaliable`='" . addslashes($_POST["jour_date_avaliable"]) . "',`jour_fiscalyear`='" . $fiscal_year . "',
+`jour_detail`='" . addslashes($_POST["jour_detail"]) . "',`jour_notes`='" . addslashes($_POST["jour_notes"]) . "',`jour_editor`='Admin',`jour_lastupdate`=CURRENT_TIMESTAMP() WHERE jour_id = " . $_POST["jour_id"];
+
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/journal.php?p=journal&act=viewinfo&fid=' . $_POST["jour_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Journal เรียบร้อย." />';
+  die();
+}
+
+if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "deletefile" && isset($_GET["id"]) && isset($_GET["fid"])) {
+  $att_file = $fnc->get_db_row("SELECT * FROM `attachment` WHERE `att_id` = " . $_GET["fid"]);
+  if (!empty($att_file)) {
+    // echo "no empty";
+    unlink($att_file["att_filepath"] . $att_file["att_filename"]);
+    $sql = "DELETE FROM `attachment` WHERE `att_id` =" . $_GET["fid"];
+    // die($sql);
+    $fnc->sql_execute($sql);
+    // echo "SELECT count(att_id) as cnt FROM `attachment` WHERE `att_status` = 'enable' AND `att_ref_table` = '" . $_GET["p"] . "' AND `att_ref_id` = " . $_GET["id"];
+    $cnt = $fnc->get_db_col("SELECT count(att_id) as cnt FROM `attachment` WHERE `att_status` = 'enable' AND `att_ref_table` = '" . $_GET["p"] . "' AND `att_ref_id` = " . $_GET["id"]);
+
+    switch ($_GET["p"]) {
+      case "proceeding":
+        if (!$cnt) {
+          $fnc->sql_execute("UPDATE `proceeding` SET `pro_attach`=NULL,`pro_lastupdate`=CURRENT_TIMESTAMP WHERE `pro_id` =" . $_GET["id"]);
+        }
+        $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=' . $_GET["id"];
+        break;
+      case "journal":
+        if (!$cnt) {
+          $fnc->sql_execute("UPDATE `journal` SET `jour_attach`=NULL,`jour_lastupdate`=CURRENT_TIMESTAMP WHERE `jour_id` =" . $_GET["id"]);
+        }
+        $link_back = 'journal.php?p=journal&act=coWorker&jid=' . $_GET["id"];
+        break;
+    }
+
+    // echo "admin/" . $link_back . "&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ " . $_GET['p'] . " เรียบร้อย.";
+    echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ ' . $_GET['p'] . ' เรียบร้อย." />';
+  } else {
+    die("ERROR is empty :" . $sql);
+    echo '<meta http-equiv="refresh" content="3; URL=admin/' . $link_back . '&alert=warning&title=ผิดพลาด&msg=ลบไฟล์แนบของ ' . $_GET['p'] . ' ไม่สำเร็จ." />';
+  }
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "journalCoWorkerIntAppend") {
+  $api_url = $fnc->api_url_personal . $_POST["cow_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+
+  $sql = "INSERT INTO co_worker(cow_ref_table, cow_ref_id, cow_citizenid, cow_prename, cow_firstname, cow_lastname, 	department_name, cow_ratio, cow_status, cow_editor) VALUES 
+  ('" . $_POST["ref_table"] . "','" . $_POST["ref_id"] . "','" . $_POST["cow_citizenid"] . "','" . $owner["titlePosition"] . "','" . $owner["firstName"] . "','" . $owner["lastName"] . "','" . addslashes($_POST["department_name"]) . "','" . $_POST["cow_ratio"] . "','enable','Admin')";
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/journal.php?p=journal&act=coWorker&jid=' . $_POST["ref_id"] . '&alert=success&title=สำเร็จ&msg=เพิ่มผู้ร่วมงานใน Journal เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "journalCoWorkerExtAppend") {
+  $sql = "INSERT INTO co_worker(cow_ref_table, cow_ref_id, cow_citizenid, cow_prename, cow_firstname, cow_lastname, cow_ratio, cow_status, cow_editor) VALUES 
+  ('" . $_POST["ref_table"] . "','" . $_POST["ref_id"] . "',NULL,'" . $_POST["cow_prename"] . "','" . $_POST["cow_firstname"] . "','" . $_POST["cow_lastname"] . "','" . $_POST["cow_ratio"] . "','enable','Admin')";
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/journal.php?p=journal&act=coWorker&jid=' . $_POST["ref_id"] . '&alert=success&title=สำเร็จ&msg=เพิ่มผู้ร่วมงานใน Journal เรียบร้อย." />';
+  die();
+}
+
+if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "datadelete" && isset($_GET["id"])) {
+  // $sql = "UPDATE proceeding SET pro_status='delete',pro_editor='admin',pro_lastupdate=CURRENT_TIMESTAMP() WHERE pro_id = " . $_GET["pid"];
+  // * delete data
+  switch ($_GET["p"]) {
+    case "proceeding";
+    $sql = "DELETE FROM `proceeding` WHERE `pro_id` = " . $_GET["id"];
+    break;
+    case "journal";
+    $sql = "DELETE FROM `journal` WHERE `jour_id` = " . $_GET["id"];
+    break;
+  }
+  // die($sql);
+  $fnc->sql_execute($sql);
+  // * delete co-worker
+  $sql = "DELETE FROM `co_worker` WHERE `cow_ref_table` like '" . $_GET["p"] . "' and `cow_ref_id` = " . $_GET["id"];
+  // die($sql);
+  $fnc->sql_execute($sql);
+  // * delete attachment file
+  $sql = "SELECT * FROM `attachment` WHERE `att_ref_table` = '" . $_GET["p"] . "' AND `att_ref_id` = " . $_GET["id"];
+  $attachments = $fnc->get_db_array($sql);
+  if (!empty($attachments)) {
+    foreach ($attachments as $row) {
+      if (!empty($row["att_filename"])) {
+        unlink($row["att_filepath"] . $row["att_filename"]);
+      }
+    }
+    $sql = "DELETE FROM `attachment` WHERE `att_ref_table` = '" . $_GET["p"] . "' AND `att_ref_id` = " . $_GET["id"];
+    // die($sql);
+    $fnc->sql_execute($sql);
+  }
+
+  echo '<meta http-equiv="refresh" content="0; URL=admin/' . $_GET["p"] . '.php?p=' . $_GET["p"] . '&alert=success&title=สำเร็จ&msg=ลบข้อมูล ' . $_GET["p"] . ' เรียบร้อย." />';
+  die();
+}
+
+
+
+echo "condition fails / "; // . $_POST["fst"];
