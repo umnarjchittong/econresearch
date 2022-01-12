@@ -2,13 +2,13 @@
 <?php
 
 // * journal function
-class journal_fnc extends general_fnc
+class journal_fnc
 {
 
     public function gen_append_form()
     {
         $fnc = new web;
-    ?>
+?>
         <div class="card p-0 p-md-3 box_shadow">
             <div class="card-header bg-light bg-gradient">
                 <h5 class="card-title mt-2 h3 text-primary">Journal: New</h5>
@@ -84,16 +84,11 @@ class journal_fnc extends general_fnc
                                 <div class="col-12 mb-3 form-floating">
                                     <select class="form-select" name="department_name" id="department_name" aria-describedby="department_nameHelp" required>
                                         <?php
-                                        $sql = "SELECT * FROM `department` ORDER BY `department_order`, `department_name`";
-                                        $data_array = $fnc->get_db_array($sql);
                                         echo '<option value=""';
                                         echo ' selected';
                                         echo '>ไม่ระบุ</option>';
-                                        foreach ($data_array as $opt) {
+                                        foreach ($dept as $opt) {
                                             echo '<option value="' . $opt["department_name"] . '"';
-                                            if ($dept['department_name'] == $opt['department_name']) {
-                                                // echo ' selected';
-                                            }
                                             echo '>' . $opt["department_name"] . '</option>';
                                         }
                                         ?>
@@ -150,10 +145,10 @@ class journal_fnc extends general_fnc
     <?php
     }
 
-    public function gen_update_form($jour_id)
+    public function gen_update_form($id)
     {
         $fnc = new web;
-        $sql = "SELECT * FROM `journal` WHERE `jour_id` = " . $jour_id;
+        $sql = "SELECT * FROM `journal` WHERE `jour_id` = " . $id;
         $row = $fnc->get_db_row($sql);
         $fnc->debug_console("data row: ", $row);
     ?>
@@ -164,7 +159,7 @@ class journal_fnc extends general_fnc
                     <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ปรับปรุงข้อมูล - การนำเสนอผลงานวิจัย/ผลงานทางวิชาการ</h6>
                 </div>
 
-                <?php $this->gen_journal_action_menu(); ?>
+                <?php $this->gen_data_action_menu(); ?>
             </div>
 
 
@@ -277,9 +272,9 @@ class journal_fnc extends general_fnc
                                     $MJU_API = new MJU_API();
                                     $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
                                     $econ_member = $MJU_API->GetAPI_array($api_url);
-                                    $fnc->debug_console("econ member", $econ_member[0]);
-                                    $econ_member = $this->econ_member_remove_exists($jour_id, $econ_member, "owner");
-                                    $fnc->debug_console("econ member", $econ_member[0]);
+                                    // $fnc->debug_console("econ member", $econ_member[0]);
+                                    // $econ_member = $fnc->econ_member_remove_exists("journal", $id, $econ_member);
+                                    // $fnc->debug_console("econ member", $econ_member[0]);
                                     if (!empty($econ_member)) {
                                         foreach ($econ_member as $member) {
                                             echo '<option value="' . $member["citizenId"] . '"';
@@ -310,10 +305,10 @@ class journal_fnc extends general_fnc
 
                 <div class="card-footer text-end">
                     <input type="hidden" name="fst" value="journal_update">
-                    <input type="hidden" name="jour_id" value="<?= $jour_id ?>">
+                    <input type="hidden" name="jour_id" value="<?= $id ?>">
                     <div class="row px-3 gx-3 mt-3">
                         <div class="col-6 col-md-3 offset-md-6">
-                            <button type="button" class="btn btn-outline-secondary w-100 py-2 text-uppercase" onclick="window.open('../admin/?p=journal&act=viewinfo&jid=<?= $jour_id ?>','_top');">close</button>
+                            <button type="button" class="btn btn-outline-secondary w-100 py-2 text-uppercase" onclick="window.open('../admin/?p=journal&act=viewinfo&jid=<?= $id ?>','_top');">close</button>
                         </div>
                         <div class="col-6 col-md-3">
                             <button type="submit" class="btn btn-outline-primary w-100 py-2 ms-3 text-uppercase">Update</button>
@@ -416,6 +411,12 @@ class journal_fnc extends general_fnc
                 <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3">
                     <form action="?" method="get">
                         <?php
+                        if (isset($_GET['p']) && $_GET['p'] != '') {
+                            echo '<input type="hidden" name="p" value="' . $_GET['p'] . '">';
+                        }
+                        if (isset($_GET['act']) && $_GET['act'] != '') {
+                            echo '<input type="hidden" name="act" value="' . $_GET['act'] . '">';
+                        }
                         if (isset($_GET['find']) && $_GET['find'] == 'memberId') {
                             if (isset($_GET['find']) && $_GET['find'] != '') {
                                 echo '<input type="hidden" name="find" value="' . $_GET['find'] . '">';
@@ -490,10 +491,10 @@ class journal_fnc extends general_fnc
                         if (isset($_GET["find"]) && $_GET["find"] != "" && isset($_GET["k"]) && $_GET["k"] != "") {
                             switch ($_GET["find"]) {
                                 case "memberId":
-                                    $sql .= " AND (jou.jour_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
+                                    $sql .= " AND (jou.jour_owner_citizenid LIKE '" . $_GET["k"] . "' OR  (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'journal'))";
                                     break;
                                 case "search":
-                                    $sql .= " AND (jou.jour_owner_lastname LIKE '%" . $_GET["k"] . "%' Or jou.jour_owner_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or jou.jour_study LIKE '%" . $_GET["k"] . "%')";
+                                    $sql .= " AND (jou.jour_owner_lastname LIKE '%" . $_GET["k"] . "%' Or jou.jour_owner_firstname LIKE '%" . $_GET["k"] . "%' Or ((cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or jou.jour_study LIKE '%" . $_GET["k"] . "%') AND cowo.cow_ref_table LIKE 'journal'))";
                                     break;
                             }
                         }
@@ -534,10 +535,11 @@ class journal_fnc extends general_fnc
     <?php
     }
 
-    public function gen_journal_owner($jour_id, $row)
+    public function gen_data_owner($id, $row)
     {
         $fnc = new web;
         $sum_ratio = 0;
+        // print_r($row);
     ?>
 
         <!-- * เจ้าของผลงาน / ผู้ร่วมงาน -->
@@ -562,7 +564,7 @@ class journal_fnc extends general_fnc
                         <td><?= '<a href="?p=journal&find=memberId&k=' . $row["jour_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["jour_owner_prename"]) . $row["jour_owner_firstname"] . ' ' . $row["jour_owner_lastname"] . '</a>' ?></td>
                         <!-- <td class="text-start"><a href="?p=journal&act=report&cat=department&d=<? //= $row["department_name"] 
                                                                                                     ?>" target="_top" class="link-primary fw-bold"><? //= $row["department_name"] 
-                                                                                                                                                                                    ?></a></td> -->
+                                                                                                                                                    ?></a></td> -->
                         <td class="text-start"><a href="?p=journal&d=<?= $row["department_name"] ?>" target="_top" class="link-primary fw-bold"><?= $row["department_name"] ?></a></td>
                         <td class="text-center"><?= $row["jour_ratio"] ?></td>
                         <?php
@@ -574,7 +576,7 @@ class journal_fnc extends general_fnc
                     </tr>
                     <?php
                     $sum_ratio += $row["jour_ratio"];
-                    $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'journal' AND `cow_ref_id` = " . $jour_id;
+                    $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'journal' AND `cow_ref_id` = " . $id;
                     $fnc->debug_console("co worker sql: " . $sql);
                     $co_worker = $fnc->get_db_array($sql);
                     if (!empty($co_worker[0])) {
@@ -593,12 +595,12 @@ class journal_fnc extends general_fnc
                                 ?>
                                 <!-- <td class="text-start"><a href="?p=journal&act=report&cat=department&d=<? //= $cow["department_name"] 
                                                                                                             ?>" target="_top" class="link-primary fw-bold"><? //= $cow["department_name"] 
-                                                                                                                                                                                            ?></a></td> -->
+                                                                                                                                                            ?></a></td> -->
                                 <td class="text-start"><a href="?p=journal&d=<?= $cow["department_name"] ?>" target="_top" class="link-primary fw-bold"><?= $cow["department_name"] ?></a></td>
                                 <td class="text-center"><?= $cow["cow_ratio"] ?></td>
                                 <?php
                                 if (isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                                    $confirm_parameter = "'journal'," . $jour_id . "," . $cow["cow_id"];
+                                    $confirm_parameter = "'journal'," . $id . "," . $cow["cow_id"];
                                     echo '<td class="text-center"><a href="#" target="_top" onclick="coworker_delete_confirmation(' . $confirm_parameter . ');" class="text-danger fw-bold" style="font-size: 1.1em;"><i class="bi bi-person-dash-fill"></i></a></td>';
                                 }
                                 ?>
@@ -630,11 +632,11 @@ class journal_fnc extends general_fnc
     <?php
     }
 
-    public function gen_journal_detail($jour_id)
+    public function gen_data_detail($id)
     {
         $fnc = new web;
 
-        $sql = "SELECT * FROM journal WHERE jour_id = " . $jour_id;
+        $sql = "SELECT * FROM journal WHERE jour_id = " . $id;
         $row = $fnc->get_db_row($sql);
 
         $label_cls = "col-12 col-md-4 col-lg-3 col-form-label fw-bold text-primary text-md-end";
@@ -648,81 +650,81 @@ class journal_fnc extends general_fnc
 
         <?php if (isset($_GET["act"]) && $_GET["act"] == "viewinfo") { ?>
 
-        <?php if (!empty($row["jour_journal"])) { ?>
+            <?php if (!empty($row["jour_journal"])) { ?>
+                <div class="row mb-3">
+                    <label class="<?= $label_cls ?>">ชื่อวารสาร / ฐานข้อมูล</label>
+                    <label class="<?= $data_cls ?>"><?= $row["jour_journal"] ?></label>
+                </div>
+            <?php } ?>
+
+            <?php if (!empty($row["jour_value"])) { ?>
+                <div class="row mb-3">
+                    <label class="<?= $label_cls ?>">ค่าน้ำหนัก</label>
+                    <label class="<?= $data_cls ?>"><?= $row["jour_value"] ?></label>
+                </div>
+            <?php } ?>
+
+            <?php if (!empty($row["jour_volume_issue"])) { ?>
+                <div class="row mb-3">
+                    <label class="<?= $label_cls ?>">ปีที่ Volume (ฉบับที่ Issue)</label>
+                    <label class="<?= $data_cls ?>"><?= $row["jour_volume_issue"] ?></label>
+                </div>
+            <?php } ?>
+
+            <?php if (!empty($row["jour_page"])) { ?>
+                <div class="row mb-3">
+                    <label class="<?= $label_cls ?>">หน้าที่ตีพิมพ์</label>
+                    <label class="<?= $data_cls ?>"><?= $row["jour_page"] ?></label>
+                </div>
+            <?php } ?>
+
+            <?php if (!empty($row["jour_link"])) { ?>
+                <div class="row mb-3">
+                    <label class="<?= $label_cls ?>">ลิงก์ออนไลน์</label>
+                    <label class="<?= $data_cls ?>"><?= $row["jour_link"] ?></label>
+                </div>
+            <?php } ?>
+
+            <?php
+            if (!empty($row["jour_tier"]) && $row["jour_tier"] == "ระดับนานาชาติ") {
+                $jour_tier = '../images/tier_icon_global_64.png';
+            } else {
+                $jour_tier = '../images/tier_icon_local_64.png';
+            }
+            $jour_tier = '<img src="' . $jour_tier . '" class="mb-1 me-2" width="16em">';
+            ?>
             <div class="row mb-3">
-                <label class="<?= $label_cls ?>">ชื่อวารสาร / ฐานข้อมูล</label>
-                <label class="<?= $data_cls ?>"><?= $row["jour_journal"] ?></label>
+                <label class="<?= $label_cls ?>">ระดับ</label>
+                <label class="<?= $data_cls ?>"><?= $jour_tier . $row["jour_tier"] ?></label>
             </div>
-        <?php } ?>
 
-        <?php if (!empty($row["jour_value"])) { ?>
             <div class="row mb-3">
-                <label class="<?= $label_cls ?>">ค่าน้ำหนัก</label>
-                <label class="<?= $data_cls ?>"><?= $row["jour_value"] ?></label>
+                <label class="<?= $label_cls ?>">วันที่เผยแพร่</label>
+                <label class="<?= $data_cls ?>"><?php
+                                                $fnc->gen_date_full_thai($row["jour_date_avaliable"]);
+                                                ?></label>
             </div>
-        <?php } ?>
 
-        <?php if (!empty($row["jour_volume_issue"])) { ?>
-            <div class="row mb-3">
-                <label class="<?= $label_cls ?>">ปีที่ Volume (ฉบับที่ Issue)</label>
-                <label class="<?= $data_cls ?>"><?= $row["jour_volume_issue"] ?></label>
-            </div>
-        <?php } ?>
+            <?php if (!empty($row["department_name"])) { ?>
+                <div class="row mb-3">
+                    <label class="<?= $label_cls ?>">หลักสูตร/สาขาวิชา</label>
+                    <label class="<?= $data_cls ?>"><?= $row["department_name"] ?></label>
+                    <?php
+                    $sql = "Select co_worker.department_name From co_worker Inner Join journal On co_worker.cow_ref_id = journal.jour_id Where journal.jour_id = " . $id . " And co_worker.cow_ref_table = '" . $_GET["p"] . "' And co_worker.cow_status = 'enable' And co_worker.department_name != '' Group By co_worker.department_name Order By co_worker.department_name";
+                    $departments = $fnc->get_db_array($sql);
+                    foreach ($departments as $dept) {
+                        echo '<label class="col-11 offset-1 col-md-9 offset-md-3 col-form-label">' . $dept["department_name"] . '</label>';
+                    }
+                    ?>
+                </div>
+            <?php } ?>
 
-        <?php if (!empty($row["jour_page"])) { ?>
-            <div class="row mb-3">
-                <label class="<?= $label_cls ?>">หน้าที่ตีพิมพ์</label>
-                <label class="<?= $data_cls ?>"><?= $row["jour_page"] ?></label>
-            </div>
-        <?php } ?>
-
-        <?php if (!empty($row["jour_link"])) { ?>
-            <div class="row mb-3">
-                <label class="<?= $label_cls ?>">ลิงก์ออนไลน์</label>
-                <label class="<?= $data_cls ?>"><?= $row["jour_link"] ?></label>
-            </div>
-        <?php } ?>
-
-        <?php
-        if (!empty($row["jour_tier"]) && $row["jour_tier"] == "ระดับนานาชาติ") {
-            $pro_tier = '../images/tier_icon_global_64.png';
-        } else {
-            $pro_tier = '../images/tier_icon_local_64.png';
-        }
-        $pro_tier = '<img src="' . $pro_tier . '" class="mb-1 me-2" width="16em">';
-        ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">ระดับ</label>
-            <label class="<?= $data_cls ?>"><?= $pro_tier . $row["jour_tier"] ?></label>
-        </div>
-
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">วันที่เผยแพร่</label>
-            <label class="<?= $data_cls ?>"><?php
-                                            $fnc->gen_date_full_thai($row["jour_date_avaliable"]);
-                                            ?></label>
-        </div>
-
-        <?php if (!empty($row["department_name"])) { ?>
-            <div class="row mb-3">
-                <label class="<?= $label_cls ?>">อยู่ในหลักสูตร/สาขาวิชา</label>
-                <label class="<?= $data_cls ?>"><?= $row["department_name"] ?></label>
-                <?php
-                $sql = "Select co_worker.department_name From co_worker Inner Join journal On co_worker.cow_ref_id = journal.jour_id Where journal.jour_id = 10 And co_worker.cow_status = 'enable'";
-                $departments = $fnc->get_db_array($sql);
-                foreach ($departments as $row) {
-                    echo '<label class="col-11 offset-1 col-md-9 offset-md-3 col-form-label">' . $row["department_name"] . '</label>';
-                }
-                ?>
-            </div>
-        <?php } ?>
-
-        <?php if (!empty($row["jour_detail"])) { ?>
-            <div class="row mb-3">
-                <label class="<?= $label_cls ?>">รายละเอียด</label>
-                <label class="<?= $data_cls ?>"><?= $row["jour_detail"] ?></label>
-            </div>
-        <?php } ?>
+            <?php if (!empty($row["jour_detail"])) { ?>
+                <div class="row mb-3">
+                    <label class="<?= $label_cls ?>">รายละเอียด</label>
+                    <label class="<?= $data_cls ?>"><?= $row["jour_detail"] ?></label>
+                </div>
+            <?php } ?>
 
         <?php } ?>
 
@@ -739,7 +741,7 @@ class journal_fnc extends general_fnc
                         The current link item
                     </a> -->
                             <?php
-                            $sql = "SELECT * FROM `attachment` WHERE `att_status` = 'enable' AND `att_ref_table` = 'journal' AND `att_ref_id` = " . $jour_id . " ORDER BY att_filename";
+                            $sql = "SELECT * FROM `attachment` WHERE `att_status` = 'enable' AND `att_ref_table` = 'journal' AND `att_ref_id` = " . $id . " ORDER BY att_filename";
                             $attachment_file = $fnc->get_db_array($sql);
                             if (!empty($attachment_file)) {
                                 foreach ($attachment_file as $att) {
@@ -750,10 +752,10 @@ class journal_fnc extends general_fnc
                                     echo '<a href="../' . $att["att_filepath"] . $att["att_filename"] . '" target="_blank" class="text-primary fw-bold">' . $att["att_filename"] . '</a>';
                                     echo '</div>';
                                     if (isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                                        $confirm_parameter = "'journal'," . $jour_id . "," . $att["att_id"];
+                                        $confirm_parameter = "'journal'," . $id . "," . $att["att_id"];
                                         echo '<div class="col text-end">';
                                         echo '<a onclick="attachment_delete_confirmation(' . $confirm_parameter . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
-                                        // echo '<a onclick="proceeding_attachment_delete_confirmation(' . $jour_id . ',' . $att["att_id"] . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
+                                        // echo '<a onclick="proceeding_attachment_delete_confirmation(' . $id . ',' . $att["att_id"] . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
                                         echo '</div>';
                                     }
                                     echo '</div>';
@@ -781,7 +783,7 @@ class journal_fnc extends general_fnc
                         </div>
                         <input type="hidden" name="fst" value="uploadAttachments">
                         <input type="hidden" name="ref_table" value="journal">
-                        <input type="hidden" name="ref_id" value="<?= $jour_id ?>">
+                        <input type="hidden" name="ref_id" value="<?= $id ?>">
                     </div>
                 </div>
             </form>
@@ -795,12 +797,12 @@ class journal_fnc extends general_fnc
             </div>
         <?php } ?>
 
-    <?php $this->gen_journal_owner($jour_id, $row);
+    <?php $this->gen_data_owner($id, $row);
 
         return $row;
     }
 
-    public function gen_journal_action_menu()
+    public function gen_data_action_menu()
     {
     ?>
         <div class="col-auto align-self-top text-end fw-bold text-primary" style="font-size:0.75em;">
@@ -811,7 +813,7 @@ class journal_fnc extends general_fnc
     <?php
     }
 
-    public function gen_journal_info($jour_id)
+    public function gen_data_info($id)
     {
         $fnc = new web;
     ?>
@@ -823,24 +825,25 @@ class journal_fnc extends general_fnc
                     <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">การตีพิมพ์ผลงานวิจัย/บทความทางวิชาการ</h6>
                 </div>
 
-                <?php $this->gen_journal_action_menu(); ?>
+                <?php $this->gen_data_action_menu(); ?>
             </div>
 
 
             <div class="card-body mt-3">
 
-                <?php $row = $this->gen_journal_detail($jour_id); ?>
+                <?php $row = $this->gen_data_detail($id); ?>
 
             </div>
 
             <div class="card-footer text-end">
                 <div class="col mt-3">
                     <button type="button" class="btn btn-outline-secondary px-4 py-2 text-uppercase" onclick="window.open('?p=journal');">close</button>
-                    <?php if ($row["pro_status"] == 'delete') { ?>
-                        <button type="button" class="btn btn-outline-success px-4 py-2 text-uppercase" onclick="window.open('../db_mgt.php?p=journal&act=restore&pid=<?= $jour_id ?>','_top');">restore</button>
-                    <?php } else { 
-                        $confirm_parameter = "'journal'," . $jour_id; ?>
-                        <!-- <button type="button" class="btn btn-outline-danger px-4 py-2 text-uppercase" onclick="data_delete_confirmation(<?//= 'journal,' . $jour_id ?>);">delete</button> -->
+                    <?php if ($row["jour_status"] == 'delete') { ?>
+                        <button type="button" class="btn btn-outline-success px-4 py-2 text-uppercase" onclick="window.open('../db_mgt.php?p=journal&act=restore&pid=<?= $id ?>','_top');">restore</button>
+                    <?php } else {
+                        $confirm_parameter = "'journal'," . $id; ?>
+                        <!-- <button type="button" class="btn btn-outline-danger px-4 py-2 text-uppercase" onclick="data_delete_confirmation(<? //= 'journal,' . $id 
+                                                                                                                                                ?>);">delete</button> -->
                         <button type="button" class="btn btn-outline-danger px-4 py-2 text-uppercase" onclick="data_delete_confirmation(<?= $confirm_parameter ?>);">delete</button>
                         <!-- <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button> -->
                     <?php } ?>
@@ -854,7 +857,7 @@ class journal_fnc extends general_fnc
     <?php
     }
 
-    public function gen_journal_coworker($jour_id)
+    public function gen_journal_coworker($id)
     {
         $fnc = new web;
     ?>
@@ -866,13 +869,13 @@ class journal_fnc extends general_fnc
                     <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">การตีพิมพ์ผลงานวิจัย/บทความทางวิชาการ - ผู้ร่วมงาน</h6>
                 </div>
 
-                <?php $this->gen_journal_action_menu(); ?>
+                <?php $this->gen_data_action_menu(); ?>
             </div>
 
 
             <div class="card-body mt-3">
 
-                <?php $this->gen_journal_detail($jour_id); ?>
+                <?php $this->gen_data_detail($id); ?>
 
             </div>
 
@@ -880,7 +883,7 @@ class journal_fnc extends general_fnc
             $MJU_API = new MJU_API;
             $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
             // $econ_member = $MJU_API->GetAPI_array($api_url);                                    
-            $econ_member = $this->econ_member_remove_exists($jour_id, $MJU_API->GetAPI_array($api_url), "coworking");
+            $econ_member = $fnc->econ_member_remove_exists("journal", $id, $MJU_API->GetAPI_array($api_url));
             $fnc->debug_console("econ member", $econ_member[0]);
             ?>
             <div class="card-body row">
@@ -947,7 +950,7 @@ class journal_fnc extends general_fnc
                         <div class="card col-">
                             <div class="card-body p-4">
                                 <div class="col-12 mb-3">
-                                    <label for="pro_owner_citizenid" class="form-label text-capitalize">Register a new co-worker <span class="lbl_required">*</span></label>
+                                    <label for="jour_owner_citizenid" class="form-label text-capitalize">Register a new co-worker <span class="lbl_required">*</span></label>
                                     <div class="form-floating mb-3">
                                         <input type="text" class="form-control form-control-sm" name="cow_prename" id="floatingPrename">
                                         <label for="floatingPrename">คำนำหน้า/ตำแหน่งวิชาการ</label>
@@ -993,7 +996,7 @@ class journal_fnc extends general_fnc
     <?php
     }
 
-    public function gen_journal_attachment($jour_id)
+    public function gen_journal_attachment($id)
     {
         $fnc = new web;
     ?>
@@ -1005,13 +1008,13 @@ class journal_fnc extends general_fnc
                     <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">การตีพิมพ์ผลงานวิจัย/บทความทางวิชาการ - ไฟล์แนบ</h6>
                 </div>
 
-                <?php $this->gen_journal_action_menu(); ?>
+                <?php $this->gen_data_action_menu(); ?>
             </div>
 
 
             <div class="card-body mt-3">
 
-                <?php $this->gen_journal_detail($jour_id); ?>
+                <?php $this->gen_data_detail($id); ?>
 
             </div>
 
@@ -1019,15 +1022,15 @@ class journal_fnc extends general_fnc
                 <div class="col-md-8 mx-auto">
                     <form action="../db_mgt.php" method="post" autocomplete="off" enctype="multipart/form-data">
                         <div class="col-12 mb-3">
-                            <label for="pro_attach" class="form-label">ไฟล์แนบ (เลือกได้มากกว่า 1 ไฟล์)B</label>
+                            <label for="file_attach" class="form-label">ไฟล์แนบ (เลือกได้มากกว่า 1 ไฟล์)B</label>
                             <div class="input-group">
-                                <input type="file" class="form-control" name="pro_attach[]" id="pro_attach" aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".pdf, .jpg, .jpeg, .png" multiple>
+                                <input type="file" class="form-control" name="file_attach[]" id="file_attach" aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".pdf, .jpg, .jpeg, .png" multiple>
                                 <button class="btn btn-outline-primary text-uppercase" type="submit" id="inputGroupFileAddon04">upload</button>
                             </div>
                         </div>
                         <input type="hidden" name="fst" value="uploadAttachments">
                         <input type="hidden" name="ref_table" value="journal">
-                        <input type="hidden" name="ref_id" value="<?= $jour_id ?>">
+                        <input type="hidden" name="ref_id" value="<?= $id ?>">
                     </form>
                 </div>
 
@@ -1135,7 +1138,7 @@ class journal_fnc extends general_fnc
                             </select>
                         </div>
                         <?php
-                        $sql_year = "Select pro_fiscalyear As fyear From journal Where journal.pro_status = 'enable' Group By pro_fiscalyear Order By pro_fiscalyear Desc";
+                        $sql_year = "Select jour_fiscalyear As fyear From journal Where journal.jour_status = 'enable' Group By jour_fiscalyear Order By jour_fiscalyear Desc";
                         $fyear = $fnc->get_db_array($sql_year);
                         $fnc->debug_console("fiscal year = ", $fyear);
                         if (!empty($fyear)) {
@@ -1240,18 +1243,18 @@ class journal_fnc extends general_fnc
                         </thead>
                         <tbody style="font-size: 0.85em;">
                             <?php
-                            $sql = "Select pro.* From journal pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                            $sql .= "pro.pro_status LIKE 'enable'";
+                            $sql = "Select jour.* From journal jour Left Join co_worker cowo On cowo.cow_ref_id = jour.jour_id Where ";
+                            $sql .= "jour.jour_status LIKE 'enable'";
                             if (isset($_GET["k"]) && $_GET["k"] != "") {
-                                $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
+                                $sql .= " AND (jour.jour_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
                             }
                             if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                                $sql_year = " AND pro.pro_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND pro.pro_fiscalyear < '" . ($_GET["fyear"]) . "'";
+                                $sql_year = " AND jour.jour_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND jour.jour_fiscalyear < '" . ($_GET["fyear"]) . "'";
                             } else {
                                 $sql_year = "";
                             }
-                            $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
-                            $sql_order = " ORDER BY pro.pro_date_begin Asc"; // order
+                            $sql_group = " Group By jour.jour_date_begin, jour.jour_id";
+                            $sql_order = " ORDER BY jour.jour_date_avaliable Asc"; // order
                             $sql .= $sql_year . $sql_group . $sql_order;
                             $fnc->debug_console('sql table owner: \n' . $sql);
                             $data_array = $fnc->get_db_array($sql);
@@ -1328,7 +1331,7 @@ class journal_fnc extends general_fnc
                             </select>
                         </div>
                         <?php
-                        $sql_year = "Select pro_fiscalyear As fyear From journal Where journal.pro_status = 'enable' Group By pro_fiscalyear Order By pro_fiscalyear Desc";
+                        $sql_year = "Select jour_fiscalyear As fyear From journal Where journal.jour_status = 'enable' Group By jour_fiscalyear Order By jour_fiscalyear Desc";
                         $fyear = $fnc->get_db_array($sql_year);
                         $fnc->debug_console("b year = ", $fyear);
                         if (!empty($fyear)) {
@@ -1387,9 +1390,9 @@ class journal_fnc extends general_fnc
                     </thead>
                     <tbody style="font-size: 0.85em;">
                         <?php
-                        // $sql = "Select pro.* From journal pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
+                        // $sql = "Select pro.* From journal pro Left Join co_worker cowo On cowo.cow_ref_id = pro.jour_id Where ";
                         $sql = "Select jou.* From journal jou Left Join co_worker cowo On cowo.cow_ref_id = jou.jour_id Where ";
-                        // $sql .= "pro.pro_status LIKE 'enable'";
+                        // $sql .= "pro.jour_status LIKE 'enable'";
                         $sql .= "jou.jour_status LIKE 'enable'";
                         if (isset($_GET["d"]) && $_GET["d"] != "") {
                             $sql .= " AND (jou.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
@@ -1579,7 +1582,7 @@ class journal_fnc extends general_fnc
                 if (!empty($row['jour_link'])) {
                     $apa .= ' ' . $row['jour_link'];
                 }
-                echo $apa;                
+                echo $apa;
             }
         } else {
             echo "NONE";
@@ -1587,4 +1590,3 @@ class journal_fnc extends general_fnc
         echo '</div>';
     }
 }
-

@@ -4,10 +4,10 @@ require('../vendor/autoload.php');
 require('../core.php');
 $fnc = new web();
 $MJU_API = new MJU_API();
-require('core_fnc_proceeding.php');
-$proceeding_fnc = new proceeding_fnc();
 // require('core_fnc.php');
 // $core_fnc = new general_fnc();
+require('core_fnc_project.php');
+$project_fnc = new project_fnc();
 
 ?>
 <html lang="en">
@@ -30,12 +30,12 @@ $proceeding_fnc = new proceeding_fnc();
 
 <body style="background-color: #DFD9EA;">
 
-    <?php include('main_menu.php'); ?>
+<?php include('main_menu.php'); ?>
 
     <?php
     // * sub-menu
     if (isset($_GET['act']) && $_GET['act'] == "report") {
-        $proceeding_fnc->proceeding_report_submenu();
+        $project_fnc->data_report_submenu();
     } else {
         echo '<div style="margin-top:3em;">&nbsp;</div>';
     }
@@ -47,35 +47,40 @@ $proceeding_fnc = new proceeding_fnc();
             <?php
             if (isset($_GET['p']) && $_GET['p'] != '') {
                 switch ($_GET['p']) {
-                    case "proceeding":
+                    case "project":
                         if (isset($_GET['act']) && $_GET['act'] == "append") {
-                            $proceeding_fnc->gen_append_form();
+                            $project_fnc->gen_append_form();
                         } elseif (isset($_GET['pid']) && $_GET['act'] == "update") {
-                            $proceeding_fnc->gen_update_form($_GET['pid']);
+                            $project_fnc->gen_update_form($_GET['pid']);
                         } elseif (isset($_GET['pid']) && $_GET['act'] == "viewinfo") {
-                            $proceeding_fnc->gen_proceeding_info($_GET['pid']);
+                            $project_fnc->gen_data_info($_GET['pid']);
                         } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
-                            $proceeding_fnc->gen_proceeding_table('delete');
+                            $project_fnc->gen_data_table('delete');
                         } elseif (isset($_GET['cat']) && $_GET['cat'] != '') {
                             switch ($_GET['cat']) {
                                 case "personal":
-                                    $proceeding_fnc->gen_report_personal();
+                                    $project_fnc->gen_report_personal();
                                     break;
                                 case "department":
-                                    $proceeding_fnc->gen_report_department();
+                                    $project_fnc->gen_report_department();
                                     break;
                                 case "apasample":
-                                    $proceeding_fnc->gen_report_apa();
+                                    $project_fnc->gen_report_apa();
                                     break;
                             }
                         } elseif (isset($_GET['pid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                            $proceeding_fnc->gen_proceeding_coworker($_GET['pid']);
+                            $project_fnc->gen_data_coworker($_GET['pid']);
                         } elseif (isset($_GET['pid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
-                            $proceeding_fnc->gen_proceeding_attachment($_GET['pid']);
+                            $project_fnc->gen_data_attachment($_GET['pid']);
                         } else {
-                            $proceeding_fnc->gen_proceeding_table();
+                            $project_fnc->gen_data_table();
                         }
                         break;
+                        case "activity":
+                            if (isset($_GET['pid'])) {
+                            $project_fnc->gen_data_activity($_GET['pid']);
+                            }
+                            break;
                 }
             } else {
                 echo "none parameters";

@@ -42,12 +42,17 @@
                             <li><a class="dropdown-item" href="journal.php?p=journal&act=report">reports</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Project</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">SDG</a>
-                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle<?php if (isset($_GET['p']) && $_GET['p'] == 'project') {
+                                                                echo ' active';
+                                                            } ?>" aria-current="page" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Project</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="project.php?p=project" target="_top">Data Manager</a></li>
+                            <li><a class="dropdown-item" href="project.php?p=project&act=append" target="_top">Create New</a></li>
+                            <!-- <li><a class="dropdown-item" href="?p=project&act=viewdeleted" target="_top">Deleted Data</a></li> -->
+                            <li><a class="dropdown-item" href="project.php?p=project&act=report">reports</a></li>
+                        </ul>
+                    </li>                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" aria-current="page" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">admin</a>
                         <ul class="dropdown-menu">

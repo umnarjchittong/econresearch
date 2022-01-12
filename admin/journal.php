@@ -4,8 +4,9 @@ require('../vendor/autoload.php');
 require('../core.php');
 $fnc = new web();
 $MJU_API = new MJU_API();
-require('core_fnc.php');
-// $journal_fnc = new general_fnc();
+// require('core_fnc.php');
+// $core_fnc = new general_fnc();
+require('core_fnc_journal.php');
 $journal_fnc = new journal_fnc();
 
 ?>
@@ -52,7 +53,7 @@ $journal_fnc = new journal_fnc();
                         } elseif (isset($_GET['jid']) && $_GET['act'] == "update") {
                             $journal_fnc->gen_update_form($_GET['jid']);
                         } elseif (isset($_GET['jid']) && $_GET['act'] == "viewinfo") {
-                            $journal_fnc->gen_journal_info($_GET['jid']);
+                            $journal_fnc->gen_data_info($_GET['jid']);
                         } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
                             $journal_fnc->gen_journal_table('delete');
                         } elseif (isset($_GET['cat']) && $_GET['cat'] != '') {

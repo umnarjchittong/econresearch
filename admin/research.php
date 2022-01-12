@@ -4,9 +4,9 @@ require('../vendor/autoload.php');
 require('../core.php');
 $fnc = new web();
 $MJU_API = new MJU_API();
-require('core_fnc.php');
-// $research_fnc = new general_fnc();
-require('core_fnc.php');
+// require('core_fnc.php');
+// $core_fnc = new general_fnc();
+require('core_fnc_research.php');
 $research_fnc = new research_fnc();
 
 ?>
@@ -29,15 +29,16 @@ $research_fnc = new research_fnc();
 </head>
 
 <body style="background-color: #DFD9EA;">
-
-<?php include('main_menu.php'); ?>
+    <div class="d-print-none">
+        <?php include('main_menu.php'); ?>
+    </div>
 
     <?php
     // * sub-menu
     if (isset($_GET['act']) && $_GET['act'] == "report") {
-        $research_fnc->journal_report_submenu();
+        $research_fnc->data_report_submenu();
     } else {
-        echo '<div style="margin-top:3em;">&nbsp;</div>';
+        echo '<div class="d-print-none" style="margin-top:3em;">&nbsp;</div>';
     }
     ?>
 
@@ -45,45 +46,55 @@ $research_fnc = new research_fnc();
         <div class="container mx-auto py-3">
 
             <?php
-            if (isset($_GET['p']) && $_GET['p'] != '') {
+            if (isset($_GET['p']) && $_GET['p'] != '' && $_GET['act'] != 'report') {
                 switch ($_GET['p']) {
-                    case "journal":
+                    case "research":
                         if (isset($_GET['act']) && $_GET['act'] == "append") {
                             $research_fnc->gen_append_form();
-                        } elseif (isset($_GET['jid']) && $_GET['act'] == "update") {
-                            $research_fnc->gen_update_form($_GET['jid']);
-                        } elseif (isset($_GET['jid']) && $_GET['act'] == "viewinfo") {
-                            $research_fnc->gen_journal_info($_GET['jid']);
+                        } elseif (isset($_GET['rid']) && $_GET['act'] == "update") {
+                            $research_fnc->gen_update_form($_GET['rid']);
+                        } elseif (isset($_GET['rid']) && $_GET['act'] == "viewinfo") {
+                            $research_fnc->gen_data_info($_GET['rid']);
                         } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
-                            $research_fnc->gen_journal_table('delete');
-                        } elseif (isset($_GET['cat']) && $_GET['cat'] != '') {
-                            switch ($_GET['cat']) {
-                                case "personal":
-                                    $research_fnc->gen_report_personal();
-                                    break;
-                                case "department":
-                                    $research_fnc->gen_report_department();
-                                    break;
-                                case "apasample":
-                                    $research_fnc->gen_report_apa();
-                                    break;
-                            }
-                        } elseif (isset($_GET['jid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                            $research_fnc->gen_journal_coworker($_GET['jid']);
-                        } elseif (isset($_GET['jid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
-                            $research_fnc->gen_journal_attachment($_GET['jid']);
+                            $research_fnc->gen_data_table('delete');
+                        } elseif (isset($_GET['rid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
+                            $research_fnc->gen_data_coworker($_GET['rid']);
+                        } elseif (isset($_GET['rid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
+                            $research_fnc->gen_data_attachment($_GET['rid']);
                         } else {
-                            $research_fnc->gen_journal_table();
+                            $research_fnc->gen_data_table();
                         }
                         break;
                 }
             } else {
-                echo "none parameters";
+                // echo "none parameters";
             }
             ?>
 
         </div>
     </main>
+
+    <?php
+    if (isset($_GET['act']) && $_GET['act'] == 'report') {
+        if (isset($_GET['cat']) && $_GET['cat'] != '') {
+            switch ($_GET['cat']) {
+                case "personal":
+                    $research_fnc->gen_report_personal();
+                    break;
+                    // case "personal-old":
+                    //     $research_fnc->gen_report_personal2();
+                    //     break;
+                case "department":
+                    $research_fnc->gen_report_department();
+                    break;
+                case "apasample":
+                    $research_fnc->gen_report_apa();
+                    break;
+            }
+        }
+    }
+
+    ?>
 
 
     <!-- Bootstrap JavaScript Libraries -->
