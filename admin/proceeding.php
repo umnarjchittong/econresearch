@@ -30,61 +30,63 @@ $proceeding_fnc = new proceeding_fnc();
 
 <body style="background-color: #DFD9EA;">
 
-    <?php include('main_menu.php'); ?>
+    <div class="d-print-none">
+        <?php include('main_menu.php'); ?>
+    </div>
 
     <?php
     // * sub-menu
     if (isset($_GET['act']) && $_GET['act'] == "report") {
-        $proceeding_fnc->proceeding_report_submenu();
+        $proceeding_fnc->data_report_submenu();
     } else {
-        echo '<div style="margin-top:3em;">&nbsp;</div>';
+        echo '<div class="d-print-none" style="margin-top:2em; height: 1.5em;"></div>';
     }
     ?>
 
-    <main class="mb-3">
-        <div class="container mx-auto py-3">
+    <?php
+    if (isset($_GET['p']) && $_GET['p'] == 'proceeding' && $_GET['act'] != 'report') {
+        echo '<main class="mb-3">
+                <div class="container mx-auto py-3">';
+        if (isset($_GET['act']) && $_GET['act'] == "append") {
+            $proceeding_fnc->gen_append_form();
+        } elseif (isset($_GET['pid']) && $_GET['act'] == "update") {
+            $proceeding_fnc->gen_update_form($_GET['pid']);
+        } elseif (isset($_GET['pid']) && $_GET['act'] == "viewinfo") {
+            $proceeding_fnc->gen_proceeding_info($_GET['pid']);
+        } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
+            $proceeding_fnc->gen_proceeding_table('delete');
+        } elseif (isset($_GET['pid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
+            $proceeding_fnc->gen_proceeding_coworker($_GET['pid']);
+        } elseif (isset($_GET['pid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
+            $proceeding_fnc->gen_proceeding_attachment($_GET['pid']);
+        } else {
+            $proceeding_fnc->gen_proceeding_table();
+        }
+        echo '</div>
+                </main>';
+    } else {
+        // echo "none parameters";
+    }
+    ?>
 
-            <?php
-            if (isset($_GET['p']) && $_GET['p'] != '') {
-                switch ($_GET['p']) {
-                    case "proceeding":
-                        if (isset($_GET['act']) && $_GET['act'] == "append") {
-                            $proceeding_fnc->gen_append_form();
-                        } elseif (isset($_GET['pid']) && $_GET['act'] == "update") {
-                            $proceeding_fnc->gen_update_form($_GET['pid']);
-                        } elseif (isset($_GET['pid']) && $_GET['act'] == "viewinfo") {
-                            $proceeding_fnc->gen_proceeding_info($_GET['pid']);
-                        } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
-                            $proceeding_fnc->gen_proceeding_table('delete');
-                        } elseif (isset($_GET['cat']) && $_GET['cat'] != '') {
-                            switch ($_GET['cat']) {
-                                case "personal":
-                                    $proceeding_fnc->gen_report_personal();
-                                    break;
-                                case "department":
-                                    $proceeding_fnc->gen_report_department();
-                                    break;
-                                case "apasample":
-                                    $proceeding_fnc->gen_report_apa();
-                                    break;
-                            }
-                        } elseif (isset($_GET['pid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                            $proceeding_fnc->gen_proceeding_coworker($_GET['pid']);
-                        } elseif (isset($_GET['pid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
-                            $proceeding_fnc->gen_proceeding_attachment($_GET['pid']);
-                        } else {
-                            $proceeding_fnc->gen_proceeding_table();
-                        }
-                        break;
-                }
-            } else {
-                echo "none parameters";
+    <?php
+    if (isset($_GET['act']) && $_GET['act'] == 'report') {
+        if (isset($_GET['cat']) && $_GET['cat'] != '') {
+            switch ($_GET['cat']) {
+                case "personal":
+                    $proceeding_fnc->gen_report_personal();
+                    break;
+                case "department":
+                    $proceeding_fnc->gen_report_department();
+                    break;
+                case "apasample":
+                    $proceeding_fnc->gen_report_apa();
+                    break;
             }
-            ?>
+        }
+    }
 
-        </div>
-    </main>
-
+    ?>
 
     <!-- Bootstrap JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>

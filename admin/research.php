@@ -9,6 +9,12 @@ $MJU_API = new MJU_API();
 require('core_fnc_research.php');
 $research_fnc = new research_fnc();
 
+if (empty($_SESSION["admin"])) {
+    die('<meta http-equiv="refresh" content="0;url=../sign/">');
+} else {
+    $fnc->debug_console("Admin: \\n", $_SESSION["admin"]);
+}
+
 ?>
 <html lang="en">
 
@@ -29,6 +35,7 @@ $research_fnc = new research_fnc();
 </head>
 
 <body style="background-color: #DFD9EA;">
+
     <div class="d-print-none">
         <?php include('main_menu.php'); ?>
     </div>
@@ -38,41 +45,35 @@ $research_fnc = new research_fnc();
     if (isset($_GET['act']) && $_GET['act'] == "report") {
         $research_fnc->data_report_submenu();
     } else {
-        echo '<div class="d-print-none" style="margin-top:3em;">&nbsp;</div>';
+        echo '<div class="d-print-none" style="margin-top:2em; height: 1.5em;"></div>';
     }
     ?>
 
-    <main class="mb-3">
-        <div class="container mx-auto py-3">
-
-            <?php
-            if (isset($_GET['p']) && $_GET['p'] != '' && $_GET['act'] != 'report') {
-                switch ($_GET['p']) {
-                    case "research":
-                        if (isset($_GET['act']) && $_GET['act'] == "append") {
-                            $research_fnc->gen_append_form();
-                        } elseif (isset($_GET['rid']) && $_GET['act'] == "update") {
-                            $research_fnc->gen_update_form($_GET['rid']);
-                        } elseif (isset($_GET['rid']) && $_GET['act'] == "viewinfo") {
-                            $research_fnc->gen_data_info($_GET['rid']);
-                        } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
-                            $research_fnc->gen_data_table('delete');
-                        } elseif (isset($_GET['rid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                            $research_fnc->gen_data_coworker($_GET['rid']);
-                        } elseif (isset($_GET['rid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
-                            $research_fnc->gen_data_attachment($_GET['rid']);
-                        } else {
-                            $research_fnc->gen_data_table();
-                        }
-                        break;
-                }
-            } else {
-                // echo "none parameters";
-            }
-            ?>
-
-        </div>
-    </main>
+    <?php
+    if (isset($_GET['p']) && $_GET['p'] == 'research' && $_GET['act'] != 'report') {
+        echo '<main class="mb-3">
+                <div class="container mx-auto py-3">';
+        if (isset($_GET['act']) && $_GET['act'] == "append") {
+            $research_fnc->gen_append_form();
+        } elseif (isset($_GET['rid']) && $_GET['act'] == "update") {
+            $research_fnc->gen_update_form($_GET['rid']);
+        } elseif (isset($_GET['rid']) && $_GET['act'] == "viewinfo") {
+            $research_fnc->gen_data_info($_GET['rid']);
+        } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
+            $research_fnc->gen_data_table('delete');
+        } elseif (isset($_GET['rid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
+            $research_fnc->gen_data_coworker($_GET['rid']);
+        } elseif (isset($_GET['rid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
+            $research_fnc->gen_data_attachment($_GET['rid']);
+        } else {
+            $research_fnc->gen_data_table();
+        }
+        echo '</div>
+                </main>';
+    } else {
+        // echo "none parameters";
+    }
+    ?>
 
     <?php
     if (isset($_GET['act']) && $_GET['act'] == 'report') {
@@ -81,9 +82,6 @@ $research_fnc = new research_fnc();
                 case "personal":
                     $research_fnc->gen_report_personal();
                     break;
-                    // case "personal-old":
-                    //     $research_fnc->gen_report_personal2();
-                    //     break;
                 case "department":
                     $research_fnc->gen_report_department();
                     break;

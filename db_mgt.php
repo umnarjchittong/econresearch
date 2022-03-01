@@ -30,7 +30,15 @@ $MJU_API = new MJU_API();
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST["ref_table"]) && isset($_POST["ref_id"])) {
   // echo "uploading...";
-  $target_dir = "uploads/" . $_POST["ref_table"] . "/" . $_POST["ref_id"] . "/";
+  if (isset($_POST['ref_pid']) && $_POST['ref_pid'] != "") {
+    $target_dir = "uploads/" . $_POST["ref_table"] . "/" . "Project-" . $_POST['ref_pid'] . "/";
+    if (!file_exists($target_dir)) {
+    mkdir($target_dir);
+    }
+    $target_dir = "uploads/" . $_POST["ref_table"] . "/" . "Project-" . $_POST['ref_pid'] . "/" . "Activity-" . $_POST["ref_id"] . "/";
+  } else {
+    $target_dir = "uploads/" . $_POST["ref_table"] . "/" . $_POST["ref_table"] . "-" . $_POST["ref_id"] . "/";
+  }
   if (!file_exists($target_dir)) {
     mkdir($target_dir);
   }
@@ -55,8 +63,8 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST
         // die($sql);
         $fnc->sql_execute($sql);
       } else {
-        echo "Sorry, there was an error uploading your file. Please contact admin.<br>";
-        echo '<meta http-equiv="refresh" content="3; URL=admin/proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"] . '&alert=warning&title=ผิดพลาด&msg=เพิ่มเอกสารแนบใน Proceeding ไม่สำเร็จ." />';
+        echo "E Sorry, there was an error uploading your file. Please contact admin.<br>" . $target_dir;
+        echo '<meta http-equiv="refresh" content="5; URL=admin/' . $_POST["ref_table"] . '.php?p=' . $_POST["ref_table"] . '&act=coWorker&' . strtolower(substr($_POST["ref_table"], 0, 1)) . 'id=' . $_POST["ref_id"] . '&alert=warning&title=ผิดพลาด&msg=เพิ่มเอกสารแนบใน ' . $_POST["ref_table"] . ' ไม่สำเร็จ." />';
         die();
       }
       // rename($target_file, $target_dir . $target_newfilename);
@@ -76,16 +84,29 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST
       switch ($_POST["ref_table"]) {
         case "proceeding":
           $fnc->sql_execute("UPDATE `proceeding` SET `pro_attach`='true',`pro_lastupdate`=CURRENT_TIMESTAMP() WHERE `pro_id` =" . $_POST["ref_id"]);
-          $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=';
+          $link_back = 'proceeding.php?p=proceeding&act=coWorker&' . strtolower(substr($_POST["ref_table"], 0, 1)) . 'id=' . $_POST["ref_id"];
           break;
         case "journal":
           $fnc->sql_execute("UPDATE `journal` SET `jour_attach`='true',`jour_lastupdate`=CURRENT_TIMESTAMP() WHERE `jour_id` =" . $_POST["ref_id"]);
-          $link_back = 'journal.php?p=journal&act=coWorker&jid=';
+          $link_back = 'journal.php?p=journal&act=coWorker&' . strtolower(substr($_POST["ref_table"], 0, 1)) . 'id=' . $_POST["ref_id"];
+          break;
+        case "research":
+          $fnc->sql_execute("UPDATE `research` SET `res_attach`='true',`res_lastupdate`=CURRENT_TIMESTAMP() WHERE `res_id` =" . $_POST["ref_id"]);
+          $link_back = 'research.php?p=research&act=coWorker&' . strtolower(substr($_POST["ref_table"], 0, 1)) . 'id=' . $_POST["ref_id"];
+          break;
+        case "project":
+          $fnc->sql_execute("UPDATE `project` SET `proj_attach`='true',`proj_lastupdate`=CURRENT_TIMESTAMP() WHERE `proj_id` =" . $_POST["ref_id"]);
+          $link_back = 'project.php?p=project&act=coWorker&' . strtolower(substr($_POST["ref_table"], 0, 1)) . 'id=' . $_POST["ref_id"];
+          break;
+        case "activity":
+          $fnc->sql_execute("UPDATE `project_activity` SET `pa_attach`='true',`pa_lastupdate`=CURRENT_TIMESTAMP() WHERE `pa_id` =" . $_POST["ref_id"]);
+          $link_back = 'project.php?p=activity&act=info&pid=' . $_POST['ref_pid'] . '&paid=' . $_POST['ref_id'];
           break;
       }
-      echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . $_POST["ref_id"] . '&alert=success&title=สำเร็จ&msg=เพิ่มเอกสารแนบใน ' . $_POST["ref_table"] . ' เรียบร้อย." />';
+      // echo "passed.";
+      echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=เพิ่มเอกสารแนบใน ' . $_POST["ref_table"] . ' เรียบร้อย." />';
     } else {
-      echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . $_POST["ref_id"] . '&alert=warning&title=ผิดพลาด&msg=เพิ่มเอกสารแนบใน ' . $_POST["ref_table"] . ' ไม่สำเร็จ." />';
+      echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=warning&title=ผิดพลาด&msg=เพิ่มเอกสารแนบใน ' . $_POST["ref_table"] . ' ไม่สำเร็จ." />';
     }
   } else {
     // echo "<br>no file upload.";
@@ -221,19 +242,20 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "coWorkerRemove"
   $sql = "DELETE FROM `co_worker` WHERE `cow_id` =" . $_GET["cowid"];
   // die($sql);
   $fnc->sql_execute($sql);
-  switch ($_GET["p"]) {
-    case "proceeding":
-      $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=' . $_GET["id"];
-      break;
-    case "journal":
-      $link_back = 'journal.php?p=journal&act=coWorker&jid=' . $_GET["id"];
-      break;
-  }
+  // switch ($_GET["p"]) {
+  //   case "proceeding":
+  //     // $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=' . $_GET["id"];
+  //     break;
+  //   case "journal":
+  //     // $link_back = 'journal.php?p=journal&act=coWorker&jid=' . $_GET["id"];
+  //     break;
+  // }
+  $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"], 0, 1)) . 'id=' . $_GET["id"];
   echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=นำรายชื่อผู้ร่วมงานออกเรียบร้อยแล้ว." />';
   die();
 }
 
-if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST["ref_table"]) && isset($_POST["ref_id"])) {
+if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST["ref_table"]) && $_POST["ref_table"] == "proceeding" && isset($_POST["ref_id"])) {
   $target_dir = "uploads/" . $_POST["ref_table"] . "/" . $_POST["ref_id"] . "/";
   if (!file_exists($target_dir)) {
     mkdir($target_dir);
@@ -386,15 +408,15 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "journal_update") {
   if (isset($_POST["department_name"])) {
     $department_name = ",`department_name`='" . $_POST["department_name"] . "'";
   }
-  $fiscal_year = $fnc->get_fiscal_year($_POST["jour_date_begin"]);
+  $fiscal_year = $fnc->get_fiscal_year($_POST["jour_date_avaliable"]);
   $sql = "UPDATE `journal` SET `jour_owner_citizenid`='" . $_POST["jour_owner_citizenid"] . "',`jour_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`jour_owner_firstname`='" . addslashes($owner["firstName"]) . "',`jour_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
 `jour_study`='" . addslashes($_POST["jour_study"]) . "',`jour_ratio`='" . $_POST["jour_ratio"] . "',`jour_tier`='" . $_POST["jour_tier"] . "',`jour_journal`='" . addslashes($_POST["jour_journal"]) . "',`jour_value`='" . addslashes($_POST["jour_value"]) . "',
 `jour_volume_issue`='" . addslashes($_POST["jour_volume_issue"]) . "',`jour_page`='" . addslashes($_POST["jour_page"]) . "',`jour_link`='" . addslashes($_POST["jour_link"]) . "',`jour_date_avaliable`='" . addslashes($_POST["jour_date_avaliable"]) . "',`jour_fiscalyear`='" . $fiscal_year . "',
-`jour_detail`='" . addslashes($_POST["jour_detail"]) . "',`jour_notes`='" . addslashes($_POST["jour_notes"]) . "',`jour_editor`='Admin',`jour_lastupdate`=CURRENT_TIMESTAMP() WHERE jour_id = " . $_POST["jour_id"];
+`jour_detail`='" . addslashes($_POST["jour_detail"]) . "',`jour_editor`='Admin',`jour_lastupdate`=CURRENT_TIMESTAMP() WHERE jour_id = " . $_POST["jour_id"];
 
   // die($sql);
   $fnc->sql_execute($sql);
-  echo '<meta http-equiv="refresh" content="0; URL=admin/journal.php?p=journal&act=viewinfo&fid=' . $_POST["jour_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Journal เรียบร้อย." />';
+  echo '<meta http-equiv="refresh" content="0; URL=admin/journal.php?p=journal&act=viewinfo&jid=' . $_POST["jour_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Journal เรียบร้อย." />';
   die();
 }
 
@@ -414,21 +436,34 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "deletefile" && 
         if (!$cnt) {
           $fnc->sql_execute("UPDATE `proceeding` SET `pro_attach`=NULL,`pro_lastupdate`=CURRENT_TIMESTAMP WHERE `pro_id` =" . $_GET["id"]);
         }
-        $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=' . $_GET["id"];
+        // $link_back = 'proceeding.php?p=proceeding&act=coWorker&' . strtolower(substr($_GET["p"],0,1)) . 'id=' . $_GET["id"];
         break;
       case "journal":
         if (!$cnt) {
           $fnc->sql_execute("UPDATE `journal` SET `jour_attach`=NULL,`jour_lastupdate`=CURRENT_TIMESTAMP WHERE `jour_id` =" . $_GET["id"]);
         }
-        $link_back = 'journal.php?p=journal&act=coWorker&jid=' . $_GET["id"];
+        // $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"],0,1)) . 'id=' . $_GET["id"];
+        break;
+      case "research":
+        if (!$cnt) {
+          $fnc->sql_execute("UPDATE `research` SET `res_attach`=NULL,`res_lastupdate`=CURRENT_TIMESTAMP WHERE `res_id` =" . $_GET["id"]);
+        }
+        // $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"],0,1)) . 'id=' . $_GET["id"];
+        break;
+      case "project":
+        if (!$cnt) {
+          $fnc->sql_execute("UPDATE `project` SET `proj_attach`=NULL,`proj_lastupdate`=CURRENT_TIMESTAMP WHERE `proj_id` =" . $_GET["id"]);
+        }
+        // $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"],0,1)) . 'id=' . $_GET["id"];
         break;
     }
+    $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"], 0, 1)) . 'id=' . $_GET["id"];
 
     // echo "admin/" . $link_back . "&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ " . $_GET['p'] . " เรียบร้อย.";
-    echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ ' . $_GET['p'] . ' เรียบร้อย." />';
+    echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ ' . ucfirst($_GET['p']) . ' เรียบร้อย." />';
   } else {
     die("ERROR is empty :" . $sql);
-    echo '<meta http-equiv="refresh" content="3; URL=admin/' . $link_back . '&alert=warning&title=ผิดพลาด&msg=ลบไฟล์แนบของ ' . $_GET['p'] . ' ไม่สำเร็จ." />';
+    echo '<meta http-equiv="refresh" content="3; URL=admin/' . $link_back . '&alert=warning&title=ผิดพลาด&msg=ลบไฟล์แนบของ ' . ucfirst($_GET['p']) . ' ไม่สำเร็จ." />';
   }
   die();
 }
@@ -462,11 +497,17 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "datadelete" && 
   // * delete data
   switch ($_GET["p"]) {
     case "proceeding";
-    $sql = "DELETE FROM `proceeding` WHERE `pro_id` = " . $_GET["id"];
-    break;
+      $sql = "DELETE FROM `proceeding` WHERE `pro_id` = " . $_GET["id"];
+      break;
     case "journal";
-    $sql = "DELETE FROM `journal` WHERE `jour_id` = " . $_GET["id"];
-    break;
+      $sql = "DELETE FROM `journal` WHERE `jour_id` = " . $_GET["id"];
+      break;
+    case "research";
+      $sql = "DELETE FROM `research` WHERE `res_id` = " . $_GET["id"];
+      break;
+    case "project";
+      $sql = "DELETE FROM `project` WHERE `proj_id` = " . $_GET["id"];
+      break;
   }
   // die($sql);
   $fnc->sql_execute($sql);
@@ -487,11 +528,193 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "datadelete" && 
     // die($sql);
     $fnc->sql_execute($sql);
   }
-
-  echo '<meta http-equiv="refresh" content="0; URL=admin/' . $_GET["p"] . '.php?p=' . $_GET["p"] . '&alert=success&title=สำเร็จ&msg=ลบข้อมูล ' . $_GET["p"] . ' เรียบร้อย." />';
+  // die();
+  echo '<meta http-equiv="refresh" content="0; URL=admin/' . $_GET["p"] . '.php?p=' . $_GET["p"] . '&alert=success&title=สำเร็จ&msg=ลบข้อมูล ' . ucfirst($_GET["p"]) . ' เรียบร้อย." />';
   die();
 }
 
+// * Research insert
+if (isset($_POST["fst"]) && $_POST["fst"] == "research_append") {
+  $api_url = $fnc->api_url_personal . $_POST["res_owner_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
 
+  if (!isset($_POST["department_name"])) {
+    $_POST["department_name"] = '';
+  }
+  $fiscal_year = $fnc->get_fiscal_year($_POST["res_period_begin"]);
+  $sql = "INSERT INTO `research` (`res_owner_citizenid`, `res_owner_prename`, `res_owner_firstname`, `res_owner_lastname`, `department_name`, 
+`res_name`, `res_ratio`, `res_period_begin`, `res_period_finish`, `res_fiscalyear`, 
+`res_budget_source`, `res_budget`, `res_budget_province`, `res_tier`, `res_detail`, `res_create_datetime`, `res_status`, `res_editor`, `res_lastupdate`) 
+ VALUES ('" . $_POST["res_owner_citizenid"] . "', '" . addslashes($owner["titlePosition"]) . "', '" . addslashes($owner["firstName"]) . "', '" . addslashes($owner["lastName"]) . "', '" . addslashes($_POST["department_name"]) . "', 
+ '" . addslashes($_POST["res_name"]) . "', '" . addslashes($_POST["res_ratio"]) . "', '" . $_POST["res_period_begin"] . "', '" . $_POST["res_period_finish"] . "', '" . $fiscal_year . "', 
+ '" . addslashes($_POST["res_budget_source"]) . "', " . $_POST["res_budget"] . ", '" . addslashes($_POST["res_budget_province"]) . "', '" . addslashes($_POST["res_tier"]) . "', '" . addslashes($_POST["res_detail"]) . "', current_timestamp(), 'enable', 'Admin', current_timestamp())";
+
+  //  die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/research.php?p=research&alert=success&title=สำเร็จ&msg=บันทึกข้อมูล Research เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "research_update") {
+  $api_url = $fnc->api_url_personal . $_POST["res_owner_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+  if (empty($_POST["res_researchID"])) {
+    $_POST["res_researchID"] = 'NULL';
+  }
+  if (empty($_POST["res_researchCode"])) {
+    $_POST["res_researchCode"] = 'NULL';
+  }
+  if (isset($_POST["department_name"])) {
+    $department_name = ",`department_name`='" . $_POST["department_name"] . "'";
+  }
+  $fiscal_year = $fnc->get_fiscal_year($_POST["res_period_begin"]);
+  $sql = "UPDATE `research` SET `res_researchID`=" . $_POST["res_researchID"] . ",`res_researchCode`='" . $_POST["res_researchCode"] . "',`res_owner_citizenid`='" . $_POST["res_owner_citizenid"] . "',`res_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`res_owner_firstname`='" . addslashes($owner["firstName"]) . "',`res_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
+`res_name`='" . addslashes($_POST["res_name"]) . "',`res_ratio`='" . $_POST["res_ratio"] . "',`res_period_begin`='" . $_POST["res_period_begin"] . "',`res_period_finish`='" . $_POST["res_period_finish"] . "',`res_fiscalyear`='" . $fiscal_year . "',
+`res_budget_source`='" . addslashes($_POST["res_budget_source"]) . "',`res_budget`=" . $_POST["res_budget"] . ",`res_budget_province`='" . addslashes($_POST["res_budget_province"]) . "',`res_tier`='" . addslashes($_POST["res_tier"]) . "',
+`res_detail`='" . addslashes($_POST["res_detail"]) . "',`res_editor`='Admin',`res_lastupdate`=CURRENT_TIMESTAMP() WHERE `res_id` = " . $_POST["res_id"];
+
+  //   $sql = "UPDATE `research` SET `jour_owner_citizenid`='" . $_POST["jour_owner_citizenid"] . "',`jour_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`jour_owner_firstname`='" . addslashes($owner["firstName"]) . "',`jour_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
+  // `jour_study`='" . addslashes($_POST["jour_study"]) . "',`jour_ratio`='" . $_POST["jour_ratio"] . "',`jour_tier`='" . $_POST["jour_tier"] . "',`jour_research`='" . addslashes($_POST["jour_research"]) . "',`jour_value`='" . addslashes($_POST["jour_value"]) . "',
+  // `jour_volume_issue`='" . addslashes($_POST["jour_volume_issue"]) . "',`jour_page`='" . addslashes($_POST["jour_page"]) . "',`jour_link`='" . addslashes($_POST["jour_link"]) . "',`jour_date_avaliable`='" . addslashes($_POST["jour_date_avaliable"]) . "',`jour_fiscalyear`='" . $fiscal_year . "',
+  // `jour_detail`='" . addslashes($_POST["jour_detail"]) . "',`jour_notes`='" . addslashes($_POST["jour_notes"]) . "',`jour_editor`='Admin',`jour_lastupdate`=CURRENT_TIMESTAMP() WHERE jour_id = " . $_POST["jour_id"];
+
+  // die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/research.php?p=research&act=viewinfo&rid=' . $_POST["res_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Research เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "CoWorkerIntAppend") {
+  $api_url = $fnc->api_url_personal . $_POST["cow_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+
+  $sql = "INSERT INTO co_worker(cow_ref_table, cow_ref_id, cow_citizenid, cow_prename, cow_firstname, cow_lastname, 	department_name, cow_ratio, cow_status, cow_editor) VALUES 
+  ('" . $_POST["ref_table"] . "','" . $_POST["ref_id"] . "','" . $_POST["cow_citizenid"] . "','" . $owner["titlePosition"] . "','" . $owner["firstName"] . "','" . $owner["lastName"] . "','" . addslashes($_POST["department_name"]) . "','" . $_POST["cow_ratio"] . "','enable','Admin')";
+  // die($sql);
+  switch ($_POST["ref_table"]) {
+    case "proceeding":
+      $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"];
+      break;
+    case "journal":
+      $link_back = 'journal.php?p=journal&act=coWorker&jid=' . $_POST["ref_id"];
+      break;
+    case "research":
+      $link_back = 'research.php?p=research&act=coWorker&rid=' . $_POST["ref_id"];
+      break;
+    case "project":
+      $link_back = 'project.php?p=project&act=coWorker&pid=' . $_POST["ref_id"];
+      break;
+  }
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=เพิ่มผู้ร่วมงานใน ' . ucfirst($_POST["ref_table"]) . ' เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "CoWorkerExtAppend") {
+  $sql = "INSERT INTO co_worker(cow_ref_table, cow_ref_id, cow_citizenid, cow_prename, cow_firstname, cow_lastname, cow_ratio, cow_status, cow_editor) VALUES 
+  ('" . $_POST["ref_table"] . "','" . $_POST["ref_id"] . "',NULL,'" . $_POST["cow_prename"] . "','" . $_POST["cow_firstname"] . "','" . $_POST["cow_lastname"] . "','" . $_POST["cow_ratio"] . "','enable','Admin')";
+  // die($sql);
+  switch ($_POST["ref_table"]) {
+    case "proceeding":
+      $link_back = 'proceeding.php?p=proceeding&act=coWorker&pid=' . $_POST["ref_id"];
+      break;
+    case "journal":
+      $link_back = 'journal.php?p=journal&act=coWorker&jid=' . $_POST["ref_id"];
+      break;
+    case "research":
+      $link_back = 'research.php?p=research&act=coWorker&rid=' . $_POST["ref_id"];
+      break;
+    case "project":
+      $link_back = 'project.php?p=project&act=coWorker&pid=' . $_POST["ref_id"];
+      break;
+  }
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=เพิ่มผู้ร่วมงานใน ' . ucfirst($_POST["ref_table"]) . ' เรียบร้อย." />';
+  die();
+}
+
+// * Academic Service Project insert
+if (isset($_POST["fst"]) && $_POST["fst"] == "project_append") {
+  $api_url = $fnc->api_url_personal . $_POST["proj_owner_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+
+  if (!isset($_POST["department_name"])) {
+    $_POST["department_name"] = '';
+  }
+  $fiscal_year = $fnc->get_fiscal_year($_POST["proj_period_begin"]);
+  $sql = "INSERT INTO `project`(`proj_owner_citizenid`, `proj_owner_prename`, `proj_owner_firstname`, `proj_owner_lastname`, `department_name`, 
+  `proj_name`, `proj_budget`, `proj_budget_source`, `proj_period_begin`, `proj_period_finish`, `proj_fiscalyear`, 
+  `proj_target`, `proj_detail`, `proj_create_datetime`, `proj_status`, `proj_editor`, `proj_lastupdate`) 
+  VALUES ('" . $_POST["proj_owner_citizenid"] . "', '" . addslashes($owner["titlePosition"]) . "', '" . addslashes($owner["firstName"]) . "', '" . addslashes($owner["lastName"]) . "', '" . addslashes($_POST["department_name"]) . "', 
+  '" . addslashes($_POST["proj_name"]) . "', '" . addslashes($_POST["proj_budget"]) . "', '" . addslashes($_POST["proj_budget_source"]) . "', '" . $_POST["proj_period_begin"] . "', '" . $_POST["proj_period_finish"] . "', '" . $fiscal_year . "', 
+  '" . addslashes($_POST["proj_target"]) . "', '" . addslashes($_POST["proj_detail"]) . "', current_timestamp(), 'enable', 'Admin', current_timestamp())";
+
+  //  die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/project.php?p=project&alert=success&title=สำเร็จ&msg=บันทึกข้อมูล project เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "project_update") {
+  $api_url = $fnc->api_url_personal . $_POST["proj_owner_citizenid"];
+  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  // echo "<pre>";
+  // print_r($owner);
+  // echo "</pre>";
+  if (empty($_POST["proj_projectID"])) {
+    $_POST["proj_projectID"] = NULL;
+  }
+  if (isset($_POST["department_name"])) {
+    $department_name = ",`department_name`='" . $_POST["department_name"] . "'";
+  }
+  $fiscal_year = $fnc->get_fiscal_year($_POST["proj_period_begin"]);
+  $sql = "UPDATE `project` SET `proj_owner_citizenid`='" . $_POST["proj_owner_citizenid"] . "',`proj_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`proj_owner_firstname`='" . addslashes($owner["firstName"]) . "',`proj_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
+`proj_name`='" . addslashes($_POST["proj_name"]) . "',`proj_budget`=" . $_POST["proj_budget"] . ",`proj_budget_source`='" . addslashes($_POST["proj_budget_source"]) . "',`proj_period_begin`='" . $_POST["proj_period_begin"] . "',`proj_period_finish`='" . $_POST["proj_period_finish"] . "',`proj_fiscalyear`='" . $fiscal_year . "',
+`proj_target`='" . addslashes($_POST["proj_target"]) . "',`proj_detail`='" . addslashes($_POST["proj_detail"]) . "',`proj_editor`='Admin',`proj_lastupdate`=CURRENT_TIMESTAMP() WHERE `proj_id` = " . $_POST["proj_id"];
+
+  //   $sql = "UPDATE `project` SET `proj_projectID`=" . $_POST["proj_projectID"] . ",`proj_owner_citizenid`='" . $_POST["proj_owner_citizenid"] . "',`proj_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`proj_owner_firstname`='" . addslashes($owner["firstName"]) . "',`proj_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
+  // `proj_name`='" . addslashes($_POST["proj_name"]) . "',`proj_budget`=" . $_POST["proj_budget"] . ",`proj_budget_source`='" . addslashes($_POST["proj_budget_source"]) . "',`proj_period_begin`='" . $_POST["proj_period_begin"] . "',`proj_period_finish`='" . $_POST["proj_period_finish"] . "',`proj_fiscalyear`='" . $fiscal_year . "',
+  // `proj_budget_province`='" . addslashes($_POST["proj_budget_province"]) . "',`proj_tier`='" . addslashes($_POST["proj_tier"]) . "',
+  // `proj_detail`='" . addslashes($_POST["proj_detail"]) . "',`proj_editor`='Admin',`proj_lastupdate`=CURRENT_TIMESTAMP() WHERE `proj_id` = " . $_POST["proj_id"];
+
+  // die($sql);
+  $fnc->sql_execute($sql);
+  die('<meta http-equiv="refresh" content="0; URL=admin/project.php?p=project&act=viewinfo&rid=' . $_POST["proj_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Academic Service Project เรียบร้อย." />');
+  // die();
+}
+
+// * Activity insert
+if (isset($_POST["fst"]) && $_POST["fst"] == "activity_append") {
+  $sql = "INSERT INTO `project_activity`(`proj_id`, `pa_period_begin`, `pa_period_finish`, `pa_location`, `pa_participant`, `pa_participant_number`, `pa_detail`, `pa_create_datetime`, `pa_status`, `pa_editor`, `pa_lastupdate`) 
+VALUES ('" . $_POST["pid"] . "','" . $_POST["pa_period_begin"] . "','" . $_POST["pa_period_finish"] . "','" . addslashes($_POST["pa_location"]) . "','" . addslashes($_POST["pa_participant"]) . "','" . $_POST["pa_participant_number"] . "','" . addslashes($_POST["pa_detail"]) . "',CURRENT_TIMESTAMP(),'enable','admin',CURRENT_TIMESTAMP())";
+
+  //  die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/project.php?p=activity&act=view&pid=' . $_POST["pid"] . '&alert=success&title=สำเร็จ&msg=บันทึกข้อมูล project เรียบร้อย." />';
+  die();
+}
+
+if (isset($_POST["fst"]) && $_POST["fst"] == "activity_update") {
+  $sql = "UPDATE `project` SET `proj_owner_citizenid`='" . $_POST["proj_owner_citizenid"] . "',`proj_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`proj_owner_firstname`='" . addslashes($owner["firstName"]) . "',`proj_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
+`proj_name`='" . addslashes($_POST["proj_name"]) . "',`proj_budget`=" . $_POST["proj_budget"] . ",`proj_budget_source`='" . addslashes($_POST["proj_budget_source"]) . "',`proj_period_begin`='" . $_POST["proj_period_begin"] . "',`proj_period_finish`='" . $_POST["proj_period_finish"] . "',`proj_fiscalyear`='" . $fiscal_year . "',
+`proj_target`='" . addslashes($_POST["proj_target"]) . "',`proj_detail`='" . addslashes($_POST["proj_detail"]) . "',`proj_editor`='Admin',`proj_lastupdate`=CURRENT_TIMESTAMP() WHERE `proj_id` = " . $_POST["proj_id"];
+
+  die($sql);
+  $fnc->sql_execute($sql);
+  echo '<meta http-equiv="refresh" content="0; URL=admin/project.php?p=project&act=viewinfo&rid=' . $_POST["proj_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Academic Service Project เรียบร้อย." />';
+  die();
+}
 
 echo "condition fails / "; // . $_POST["fst"];

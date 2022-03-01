@@ -755,7 +755,7 @@ class journal_fnc
                                         $confirm_parameter = "'journal'," . $id . "," . $att["att_id"];
                                         echo '<div class="col text-end">';
                                         echo '<a onclick="attachment_delete_confirmation(' . $confirm_parameter . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
-                                        // echo '<a onclick="proceeding_attachment_delete_confirmation(' . $id . ',' . $att["att_id"] . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
+                                        // echo '<a onclick="jourjnal_attachment_delete_confirmation(' . $id . ',' . $att["att_id"] . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
                                         echo '</div>';
                                     }
                                     echo '</div>';
@@ -1044,11 +1044,11 @@ class journal_fnc
     <?php
     }
 
-    public function journal_report_submenu()
+    public function data_report_submenu()
     {
         $fnc = new web;
     ?>
-        <div class="text-white-50 mb-3 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
+        <div class="text-white-50 mb-0 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
             <div class="container px-0 px-md-5">
                 <ul class="nav justify-content-end">
                     <li class="nav-item">
@@ -1078,7 +1078,320 @@ class journal_fnc
     <?php
     }
 
+    public function gen_table_report($disp_year)
+    {
+        global $fnc;
+    ?>
+        <table class="table table-bordered table-inverse table-responsive">
+            <thead class="thead-inverse bg-light">
+                <tr class="text-center fw-bold align-middle">
+                    <th style="width:5em;">ลำดับที่</th>
+                    <th>ชื่อ-สกุล</th>
+                    <?php ?>
+                    <th>สัดส่วน</th>
+                    <?php ?>
+                    <th>การตีพิมพ์</th>
+                    <th style="width:4em;">ระดับ</th>
+                    <th>ชื่อวารสาร/ฐานข้อมูล</th>
+                    <th style="width:6em;">ค่าน้ำหนัก</th>
+                    <th style="width:7em;">วันที่เผยแพร่</th>
+                    <th>หมายเหตุ</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 0.85em;">
+                <?php
+                $sql = "SELECT jour_id FROM v_journal_report2 WHERE jour_status = 'enable'";
+                if (isset($_GET["k"]) && $_GET["k"] != "") {
+                    // $sql .= " AND (jour_owner_citizenid LIKE '" . $_GET["k"] . "' OR cow_citizenid LIKE '" . $_GET["k"] . "')";
+                    $sql .= " AND (citizenid LIKE '" . $_GET["k"] . "')";
+                }
+                if (isset($_GET["d"]) && $_GET["d"] != "") {
+                    // $sql .= " And (jour_department_name = '" . $_GET["d"] . "' OR cow_department_name = '" . $_GET["d"] . "')";
+                    $sql .= " AND (department_name = '" . $_GET["d"] . "')";
+                }
+                if ($disp_year != "" && $disp_year != "5yrs") {
+                    $sql_year = " AND jour_fiscalyear = '" . ($disp_year) . "'";
+                } else {
+                    $sql_year = "";
+                }
+                if ($disp_year == "5yrs") {
+                    $sql_year = " AND jour_fiscalyear >= '" . ($fnc->get_fiscal_year() - 5) . "' AND jour_fiscalyear <= '" . ($fnc->get_fiscal_year()) . "'";
+                }
+                $sql_group = " GROUP BY jour_id, jour_date_avaliable";
+                $sql_order = " ORDER BY jour_date_avaliable Desc"; // order
+                $sql .= $sql_year . $sql_group . $sql_order;
+                $fnc->debug_console('sql journal table owner: \n' . $sql);
+                $data_array = $fnc->get_db_array($sql);
+                $fnc->debug_console("data array:", $data_array[0]);
+                if (!empty($data_array)) {
+                    $this->gen_table_tr_report($data_array);
+                } else {
+                    echo '<tr style="page-break-before:auto">';
+                    echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="6">no data founded</td>';
+                    echo '</tr>';
+                } ?>
+
+            </tbody>
+        </table>
+        <?php
+    }
+
+    public function gen_table_tr_report($data_array)
+    {
+        $fnc = new web;
+
+        if (isset($_GET["act"]) && $_GET["act"] == "report") {
+            $linkable = false;
+        } else {
+            $linkable = true;
+        }
+
+        // $fnc->debug_console("data list sample: ", $data_array[0]);
+        $x = 1;
+        foreach ($data_array as $jour) {
+            $sql = "SELECT * FROM journal WHERE jour_id = " . $jour["jour_id"];
+            $row = $fnc->get_db_row($sql);
+            if (!empty($row)) {
+        ?>
+                <!-- <tr style="page-break-before: always;"> -->
+                <tr>
+                    <td scope="row" class="text-center"><?= $x ?></td>
+                    <td nowrap>
+                        <?php
+                        echo '<p class="m-0 border-bottom border-secondary">';
+                        if ($linkable) {
+                            echo '<a href="?p=jourjnal&find=memberId&k=' . $row["jour_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["jour_owner_prename"]) . $row["jour_owner_firstname"] . ' ' . $row["jour_owner_lastname"] . '</a>';
+                        } else {
+                            echo $fnc->gen_titlePosition_short($row["jour_owner_prename"]) . $row["jour_owner_firstname"] . ' ' . $row["jour_owner_lastname"];
+                        }
+                        echo '</p>';
+                        echo '<strong class="text-danger">Dept:</strong>' . $row["department_name"];
+                        ?>
+                        <?php
+                        $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'journal' AND `cow_ref_id` = " . $row["jour_id"];
+                        // $fnc->debug_console("co worker sql: " . $sql);
+                        $co_worker = $fnc->get_db_array($sql);
+                        if (!empty($co_worker)) {
+                            foreach ($co_worker as $cow) {
+                                echo '<p class="m-0 border-bottom border-secondary ms-2">';
+                                if (!empty($cow["cow_citizenid"]) && $linkable) {
+                                    echo '<a href="?p=jourjnal&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                                } else {
+                                    echo '<span class="">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
+                                }
+                                echo '</p>';
+                                echo '<strong class="text-danger ms-2">Dept:</strong>' . $cow["department_name"];
+                            }
+                        }
+                        ?>
+                    </td>
+                    <?php ?>
+                    <td class="text-center">
+                        <?= '<p class="border-bottom border-secondary">' . $row["jour_ratio"] . '</p>'; ?>
+                        <?php
+                        $sql = "SELECT cow_ratio FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'journal' AND `cow_ref_id` = " . $row["jour_id"];
+                        // $fnc->debug_console("co worker sql: " . $sql);
+                        $co_worker = $fnc->get_db_array($sql);
+                        if (!empty($co_worker)) {
+                            foreach ($co_worker as $cow) {
+                                echo '<p class="border-bottom border-secondary">' . $cow["cow_ratio"] . '</p>';
+                            }
+                        }
+                        ?>
+                    </td>
+                    <?php ?>
+                    <td class="text-start"><?php
+                                            if ($linkable) {
+                                                echo '<a href="?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["jour_id"] . '" target="_top" class="fw-bold">' . $row["jour_study"] . '</a>';
+                                            } else {
+                                                echo $row["jour_study"];
+                                            }
+                                            ?></td>
+                    <td class="text-center"><?php
+                                            if (!empty($row["jour_tier"])) {
+                                                echo $row["jour_tier"];
+                                            }
+                                            ?>
+                    </td>
+                    <td><?php
+                        echo $row["jour_journal"];
+                        ?>
+                    </td>
+                    <td class="text-center"><?php
+                                            echo $row["jour_value"];
+                                            ?>
+                    </td>
+                    <td class="text-center"><?php
+                                            if (!empty($row["jour_date_avaliable"])) {
+                                                if ($row["jour_tier"] == "ระดับนานาชาติ") {
+                                                    $fnc->gen_date_semi_en($row["jour_date_avaliable"]);
+                                                } else {
+                                                    $fnc->gen_date_semi_th($row["jour_date_avaliable"]);
+                                                }
+                                            }
+                                            ?>
+                    </td>
+                    <td><?php
+                        if (!empty($row["jour_detail"])) {
+                            echo $row["jour_detail"];
+                        }
+                        ?>
+                    </td>
+                </tr>
+        <?php
+            }
+            $x++;
+        }
+    }
+
     public function gen_report_personal()
+    {
+        $fnc = new web;
+        if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+            $disp_year = $fnc->get_fiscal_year();
+        } else {
+            $disp_year = $_GET['fyear'];
+        }
+        $fnc->debug_console("display year:\\n" . $disp_year);
+        ?>
+
+        <div class="card p-0 p-md-0 border border-white">
+            <div class="card-header bg-light bg-gradient row d-print-none">
+                <div class="col-12 col-md-12 col-lg-9 d-print-none">
+                    <?php
+                    // if ($data_status == 'delete') {
+                    //     echo '<h5 class="card-title mt-2 h3 text-primary">journal Deleted</h5>';
+                    // } else {
+                    echo '<h5 class="card-title mt-2 h5 text-primary">Journal Report</h5>';
+                    // }
+                    ?>
+                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานสรุปผลงานการตีพิมพ์ผลงานการวิจัย/บทความทางวิชาการ</h6>
+                </div>
+
+                <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3 d-print-none">
+                    <form action="?" method="get">
+                        <?php
+                        if (isset($_GET['find']) && $_GET['find'] == 'memberId') {
+                            if (isset($_GET['find']) && $_GET['find'] != '') {
+                                echo '<input type="hidden" name="find" value="' . $_GET['find'] . '">';
+                            }
+                            if (isset($_GET['k']) && $_GET['k'] != '') {
+                                echo '<input type="hidden" name="k" value="' . $_GET['k'] . '">';
+                            }
+                        } else {
+                        ?>
+                        <?php
+
+                        } ?>
+                        <div class="input-group mb-0">
+                            <input type="hidden" name="p" value="journal">
+                            <input type="hidden" name="act" value="report">
+                            <input type="hidden" name="cat" value="personal">
+                            <?php
+                            // $sql = "SELECT * FROM v_journal_userlist WHERE citizenid != '' GROUP BY prename, citizenid ORDER BY firstname";
+                            $sql = "SELECT citizenid, prename, firstname, lastname FROM v_journal_report2 WHERE citizenid != '' AND jour_status = 'enable' GROUP BY citizenid, prename, firstname, lastname ORDER BY firstname";
+                            $econ_member = $fnc->get_db_array($sql);
+                            $fnc->debug_console("econ member", $econ_member[0]);
+                            ?>
+                            <select class="form-select form-select-sm" name="k" id="k" onchange="this.form.submit();">
+                                <?php
+                                echo '<option value=""';
+                                if (!isset($_GET["k"]) || $_GET["k"] == "") {
+                                    echo ' selected';
+                                }
+                                echo '>' . 'แสดงข้อมูลบุคลากรทุกคน' . '</option>';
+                                foreach ($econ_member as $member) {
+                                    echo '<option value="' . $member["citizenid"] . '"';
+                                    if (isset($_GET["k"]) && $_GET["k"] == $member["citizenid"]) {
+                                        echo ' selected';
+                                        $cur_personal = ' ' . $fnc->gen_titlePosition_short($member["prename"]) . ' ' . $member["firstname"] . '&nbsp;&nbsp;' . $member["lastname"];
+                                    }
+                                    echo '>' . $member["firstname"] . '&nbsp;&nbsp;' . $member["lastname"] . ' (' . $fnc->gen_titlePosition_short($member["prename"]) . ')' . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <?php
+                        $sql_year = "SELECT jour_fiscalyear As fyear FROM journal WHERE jour_status = 'enable' Group By jour_fiscalyear Order By jour_fiscalyear Desc";
+                        // $fyear = $fnc->get_db_array($sql_year);
+                        $fyear = $fnc->get_db_array($sql_year);
+                        $fnc->debug_console("fiscal year = ", $fyear);
+                        if ($disp_year > $fyear[0]["fyear"] && $disp_year != "5yrs") {
+                            $disp_year = $fyear[0]["fyear"];
+                            $fnc->debug_console("display year update to:\\n" . $disp_year);
+                        }
+                        if (!empty($fyear)) {
+                        ?>
+                            <select class="form-select form-select-sm" name="fyear" onchange="this.form.submit();">
+                                <?php
+                                echo '<option value="5yrs"';
+                                if ($disp_year == "5yrs") {
+                                    echo ' selected';
+                                };
+                                echo '>ย้อนหลัง 5 ปีงปม.</option>';
+                                // for ($y = 2565; $y >= 2560; $y--) {
+                                foreach ($fyear as $y) {
+                                    echo '<option value="' . $y['fyear'] . '"';
+                                    if ($disp_year == $y['fyear']) {
+                                        echo ' selected';
+                                    };
+                                    echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
+                                }
+                                ?>
+                            </select>
+                            <?php
+                            if (isset($_GET['p']) && $_GET['p'] != '') {
+                                echo '<input type="hidden" name="p" value="' . $_GET['p'] . '">';
+                            }
+                            ?>
+                        <?php } ?>
+                    </form>
+                </div>
+
+            </div>
+
+            <div class="card-body mt-0" style="font-size: 0.8em;">
+                <?php
+                if (isset($_GET['k']) && $_GET['k'] != '') {
+                    $k = 'ของ' . $cur_personal;
+                } else {
+                    $k = '';
+                }
+                if ($disp_year != '') {
+                    $y = ' ปี งปม. ' . $disp_year;
+                } else {
+                    $y = ' ทั้งหมด';
+                }
+                // ***
+                // echo '<h5 class="card-title mt-2 h5 text-primary">journal ' . $k . $y . '</h5>';
+                echo '<div class="text-center">
+                <p class="h4 mb-1" style="font-size: 0.9rem;">สรุุปผลงานการตีพิมพ์ผลงานการวิจัย/บทความทางวิชาการ';
+                if (isset($_GET["k"]) && $_GET["k"] != '') {
+                    echo 'ของ' . $cur_personal;
+                }
+                echo '</p>';
+                if ($disp_year == "5yrs") {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . ($fnc->get_fiscal_year() - 5) . ' - ' . $fnc->get_fiscal_year() . '</p>';
+                } else {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $disp_year . ' (ตุลาคม ' . ($disp_year - 1) . ' - กันยายน ' . $disp_year . ')</p>';
+                }
+                echo '<p class="h4 mb-3" style="font-size: 0.9rem;">คณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้</p>
+                </div>';
+
+                $this->gen_table_report($disp_year);
+                ?>
+            </div>
+
+            <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
+                last update: <?= date('M d, Y'); ?>
+            </div>
+
+            </form>
+        </div>
+    <?php
+    }
+
+    public function gen_report_personal_old()
     {
         $fnc = new web;
     ?>
@@ -1288,19 +1601,24 @@ class journal_fnc
     public function gen_report_department()
     {
         $fnc = new web;
+        if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+            $disp_year = $fnc->get_fiscal_year();
+        } else {
+            $disp_year = $_GET['fyear'];
+        }
+        $fnc->debug_console("display year:\\n" . $disp_year);
     ?>
-
-        <div class="card p-0 p-md-3 box_shadow">
-            <div class="card-header bg-light bg-gradient row">
-                <div class="col-12 col-md-8 col-lg-9">
+        <div class="card p-0 p-md-0 border border-white">
+            <div class="card-header bg-light bg-gradient row d-print-none">
+                <div class="col-12 col-md-12 col-lg-9 d-print-none">
                     <?php
                     // if ($data_status == 'delete') {
                     //     echo '<h5 class="card-title mt-2 h3 text-primary">journal Deleted</h5>';
                     // } else {
-                    echo '<h5 class="card-title mt-2 h5 text-primary">journal Report by Department</h5>';
+                    echo '<h5 class="card-title mt-2 h5 text-primary">Journal Report by Department</h5>';
                     // }
                     ?>
-                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานการตีพิมพ์ผลงานวิจัย/บทความทางวิชาการของหลักสูตร</h6>
+                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานสรุปการตีพิมพ์ผลงานวิจัย/บทความทางวิชาการของหลักสูตร</h6>
                 </div>
 
                 <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3 d-print-none">
@@ -1331,22 +1649,27 @@ class journal_fnc
                             </select>
                         </div>
                         <?php
-                        $sql_year = "Select jour_fiscalyear As fyear From journal Where journal.jour_status = 'enable' Group By jour_fiscalyear Order By jour_fiscalyear Desc";
+                        $sql_year = "SELECT jour_fiscalyear As fyear FROM journal WHERE jour_status = 'enable' Group By jour_fiscalyear Order By jour_fiscalyear Desc";
                         $fyear = $fnc->get_db_array($sql_year);
                         $fnc->debug_console("b year = ", $fyear);
+                        $fnc->debug_console("b year sql = ", $sql_year);
+                        if ($disp_year > $fyear[0]["fyear"] && $disp_year != "5yrs") {
+                            $disp_year = $fyear[0]["fyear"];
+                            $fnc->debug_console("display year update to:\\n" . $disp_year);
+                        }
                         if (!empty($fyear)) {
                         ?>
-                            <select class="form-select form-select-sm" name="fyear" aria-label="Default select example" onchange="this.form.submit();">
+                            <select class="form-select form-select-sm" name="fyear" onchange="this.form.submit();">
                                 <?php
-                                echo '<option value=""';
-                                if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+                                echo '<option value="5yrs"';
+                                if ($disp_year == "5yrs") {
                                     echo ' selected';
                                 };
-                                echo '>แสดงทั้งหมด</option>';
+                                echo '>ย้อนหลัง 5 ปีงปม.</option>';
                                 // for ($y = 2565; $y >= 2560; $y--) {
                                 foreach ($fyear as $y) {
                                     echo '<option value="' . $y['fyear'] . '"';
-                                    if (isset($_GET['fyear']) && $_GET['fyear'] != "" && $_GET['fyear'] == $y['fyear']) {
+                                    if ($disp_year == $y['fyear']) {
                                         echo ' selected';
                                     };
                                     echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
@@ -1364,7 +1687,7 @@ class journal_fnc
 
             </div>
 
-            <div class="card-body mt-3">
+            <div class="card-body mt-0" style="font-size: 0.8em;">
                 <?php
                 if (isset($_GET['d']) && $_GET['d'] != '') {
                     $d = 'ของ' . $cur_department;
@@ -1376,102 +1699,28 @@ class journal_fnc
                 } else {
                     $y = ' ทั้งหมด';
                 }
-                echo '<h5 class="card-title mt-2 h5 text-primary">journal ' . $d . $y . '</h5>';
+                // ***
+                // echo '<h5 class="card-title mt-2 h5 text-primary">research ' . $d . $y . '</h5>';
+                echo '<div class="text-center">
+                <p class="h4 mb-1" style="font-size: 0.9rem;">สรุปผลงานการตีพิมพ์ผลงานการวิจัย/บทความทางวิชาการ';
+                if (isset($_GET["d"]) && $_GET["d"] != '') {
+                    echo ' ของ' . $_GET["d"];
+                }
+                echo '</p>';
+                if ($disp_year == "5yrs") {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . ($fnc->get_fiscal_year() - 5) . ' - ' . $fnc->get_fiscal_year() . '</p>';
+                } else {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $disp_year . ' (ตุลาคม ' . ($disp_year - 1) . ' - กันยายน ' . $disp_year . ')</p>';
+                }
+                echo '<p class="h4 mb-3" style="font-size: 0.9rem;">คณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้</p>
+                </div>';
+
+                $this->gen_table_report($disp_year);
                 ?>
-                <table class="table table-striped table-bordered table-inverse table-responsive">
-                    <thead class="thead-inverse|thead-default">
-                        <tr class="text-center fw-bold">
-                            <th style="width:3em;">#</th>
-                            <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                            <th>ชื่อเรื่อง</th>
-                            <th>ชื่อการประชุม</th>
-                            <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 0.85em;">
-                        <?php
-                        // $sql = "Select pro.* From journal pro Left Join co_worker cowo On cowo.cow_ref_id = pro.jour_id Where ";
-                        $sql = "Select jou.* From journal jou Left Join co_worker cowo On cowo.cow_ref_id = jou.jour_id Where ";
-                        // $sql .= "pro.jour_status LIKE 'enable'";
-                        $sql .= "jou.jour_status LIKE 'enable'";
-                        if (isset($_GET["d"]) && $_GET["d"] != "") {
-                            $sql .= " AND (jou.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
-                        }
-                        if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                            $sql_year = " AND (jou.jour_fiscalyear) LIKE '" . ($_GET["fyear"]) . "'";
-                        } else {
-                            $sql_year = "";
-                        }
-                        $sql_group = " Group By jou.jour_date_avaliable, jou.jour_id";
-                        $sql_order = " ORDER BY jou.jour_date_avaliable Desc"; // order
-                        $sql .= $sql_year . $sql_group . $sql_order;
-                        $fnc->debug_console('sql table owner: \n' . $sql);
-                        $data_array = $fnc->get_db_array($sql);
-                        if (!empty($data_array)) {
-                            $this->gen_journal_tr($data_array);
-                        } else {
-                            echo '<tr style="page-break-before:auto">';
-                            echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="5">no data founded</td>';
-                            echo '</tr>';
-                        } ?>
-
-                    </tbody>
-                </table>
-
             </div>
-
-            <?php if (isset($_GET['fyear']) && $_GET['fyear'] != '') { ?>
-                <div class="card-body mt-3">
-                    <?php
-                    $y = 'ย้อนหลัง 5 ปี งปม.';
-                    echo '<h5 class="card-title mt-2 h5 text-primary">journal ' . $d . ' ' . $y . '</h5>';
-                    ?>
-                    <table class="table table-striped table-bordered table-inverse table-responsive">
-                        <thead class="thead-inverse|thead-default">
-                            <tr class="text-center fw-bold">
-                                <th style="width:3em;">#</th>
-                                <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                                <th>ชื่อเรื่อง</th>
-                                <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                            </tr>
-                        </thead>
-                        <tbody style="font-size: 0.85em;">
-                            <?php
-                            $sql = "Select jou.* From journal jou Left Join co_worker cowo On cowo.cow_ref_id = jou.jour_id Where ";
-                            $sql .= "jou.jour_status LIKE 'enable'";
-                            if (isset($_GET["d"]) && $_GET["d"] != "") {
-                                $sql .= " AND (jou.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
-                            }
-                            if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                                $sql_year = " AND jou.jour_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND jou.jour_fiscalyear < '" . ($_GET["fyear"]) . "'";
-                            } else {
-                                $sql_year = "";
-                            }
-                            $sql_group = " Group By jou.jour_date_avaliable, jou.jour_id";
-                            $sql_order = " ORDER BY jou.jour_date_avaliable Desc"; // order
-                            $sql .= $sql_year . $sql_group . $sql_order;
-                            $fnc->debug_console('sql table owner: \n' . $sql);
-                            $data_array = $fnc->get_db_array($sql);
-                            if (!empty($data_array)) {
-                                $this->gen_journal_tr($data_array);
-                            } else {
-                                echo '<tr style="page-break-before:auto">';
-                                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                                echo '</tr>';
-                            } ?>
-
-                        </tbody>
-                    </table>
-
-                </div>
-            <?php } ?>
 
             <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
                 last update: <?= date('M d, Y'); ?>
-                <!-- <div class="col mt-3">
-                <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button>
-
-            </div> -->
             </div>
 
             </form>

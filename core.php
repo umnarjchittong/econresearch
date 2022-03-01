@@ -1,6 +1,6 @@
 <?php
 session_start();
-$_SESSION['coding_indent'] = 0;
+$_SESSION['coding_indent'] = 1;
 
 // ini_set('display_errors', 1);
 date_default_timezone_set('Asia/Bangkok');
@@ -250,6 +250,58 @@ class CommonFnc extends Constants
     echo substr((date("Y", strtotime($current_date)) + 543), 2);
   }
 
+  public function gen_date_range_semi_th($start_date, $end_date = "")
+  {
+    // echo date("M j, Y", strtotime($start_date));
+    if (empty($end_date) || $end_date <= 0) {
+      echo date("j", strtotime($start_date)) . " " . $this->month_name[date("n", strtotime($start_date))] . " " . (date("Y", strtotime($start_date)) + 543);
+    } else {
+      if (date("Y", strtotime($start_date)) == date("Y", strtotime($end_date))) {
+        if (date("n", strtotime($start_date)) == date("n", strtotime($end_date))) {
+          if (date("j", strtotime($start_date)) == date("j", strtotime($end_date))) {
+            echo date("j ", strtotime($start_date)) . $this->month_name[date("n", strtotime($start_date))] . " " . (date("Y", strtotime($start_date)) + 543);
+          } else {
+            echo date("j", strtotime($start_date)) . date("-j", strtotime($end_date)) . " " . $this->month_name[date("n", strtotime($start_date))] . " " . (date("Y", strtotime($start_date)) + 543);
+          }
+        } else {
+          echo date("j", strtotime($start_date)) . " " . $this->month_name[date("n", strtotime($start_date))] . "-" . date("j", strtotime($end_date)) . " " . $this->month_name[date("n", strtotime($start_date))] . " " . (date("Y", strtotime($start_date)) + 543);
+        }
+      } else {
+        echo date("j", strtotime($start_date)) . " " . $this->month_name[date("n", strtotime($start_date))] . " " . (date("Y", strtotime($start_date)) + 543) . "-" . date("j", strtotime($end_date)) . " " . $this->month_name[date("n", strtotime($end_date))] . " " . (date("Y", strtotime($end_date)) + 543);
+      }
+    }
+  }
+
+  public function gen_date_semi_en($current_date = NULL)
+  {
+    if (!isset($current_date)) {
+      $current_date = date("Y-m-d");
+    }
+    echo date("M j, Y", strtotime($current_date));
+  }
+
+  public function gen_date_range_semi_en($start_date, $end_date = "")
+  {
+    // echo date("M j, Y", strtotime($start_date));
+    if (empty($end_date) || $end_date <= 0) {
+      echo date("M j, Y", strtotime($start_date));
+    } else {
+      if (date("Y", strtotime($start_date)) == date("Y", strtotime($end_date))) {
+        if (date("n", strtotime($start_date)) == date("n", strtotime($end_date))) {
+          if (date("j", strtotime($start_date)) == date("j", strtotime($end_date))) {
+            echo date("M j, Y", strtotime($start_date));
+          } else {
+            echo date("M j", strtotime($start_date)) . date("-j,", strtotime($end_date)) . date(" Y", strtotime($start_date));
+          }
+        } else {
+          echo date("M j", strtotime($start_date)) . date("-M j,", strtotime($end_date)) . date(" Y", strtotime($start_date));
+        }
+      } else {
+        echo date("M j, Y", strtotime($start_date)) . date("-M j, Y", strtotime($end_date));
+      }
+    }
+  }
+
   public function get_date_full_thai($current_date = NULL)
   {
     if (!isset($current_date)) {
@@ -481,7 +533,7 @@ class database extends CommonFnc
     if (isset($sql)) {
       $result = $this->get_result($sql);
       if (!empty($result)) {;
-      // if ($result->num_rows > 0) {;
+        // if ($result->num_rows > 0) {;
         return $result->fetch_assoc();
       }
       return NULL;
@@ -494,7 +546,8 @@ class database extends CommonFnc
   {
     if (isset($sql)) {
       $result = $this->get_result($sql);
-      if ($result->num_rows > 0) {;
+      // if ($result->num_rows > 0) {;
+      if (!empty($result)) {
         return $result->fetch_all(MYSQLI_ASSOC);
       }
       return NULL;
@@ -522,7 +575,8 @@ class database extends CommonFnc
   {
     if (isset($sql)) {
       $result = $this->get_result($sql);
-      if ($result->num_rows > 0) {
+      // if ($result->num_rows > 0) {
+      if (!empty($result)) {
         if ($type == 'key') {
           return $result->fetch_all(MYSQLI_ASSOC);
         } else {
@@ -539,7 +593,8 @@ class database extends CommonFnc
   {
     if (isset($sql)) {
       $result = $this->get_result($sql);
-      if ($result->num_rows > 0) {
+      // if ($result->num_rows > 0) {
+      if (!empty($result)) {
         return $result->fetch_all(MYSQLI_NUM);
       }
       return NULL;
@@ -559,7 +614,8 @@ class database extends CommonFnc
     if (isset($sql)) {
       //echo $this->debug("", "fnc get_db_col sql: " . $sql);
       $result = $this->get_result($sql);
-      if ($result->num_rows > 0) {
+      // if ($result->num_rows > 0) {
+      if (!empty($result)) {
         $row = $result->fetch_array();
         return $row[0];
       }
@@ -708,8 +764,68 @@ class Thailand_Province extends CommonFnc
 class Web extends database
 {
 
+  public function array_remove_data($search_citizenId, $array_data)
+  {
+    // $i = 0;
+    // echo "find : " . $search_citizenId . "<br>";
+    // foreach ($array_data as $econ_member) {
+    // echo "<pre>";
+    // print_r($array_data);
+    // echo "</pre>";
+    for ($i = 0; $i < count($array_data); $i++) {
+      // echo "sample array data : " . $array_data[$i]["citizenId"] . " = " . $search_citizenId . "<br>";
+      // echo "found: " . $array_data[$i]["citizenId"] . "<br>";
+      if ($array_data[$i]["citizenId"] == $search_citizenId) {
+        unset($array_data[$i]);
+        // echo "remove id completed.<br>";
+        return $array_data;
+        die();
+      }
+    }
+    return $array_data;
+  }
 
-
+  public function econ_member_remove_exists($page, $id, $econ_member, $show = "")
+  {
+    $fnc = new web;
+    switch ($page) {
+      case "proceeding":
+        $sql_owner = "Select pro_owner_citizenid as citizen_id From " . $page . " Where pro_id = " . $id;
+        $owner_data = $fnc->get_db_row($sql_owner);
+        $sql_coworker = "Select cow_citizenid as citizen_id From co_worker Where cow_ref_table = '" . $page . "' And cow_ref_id = " . $id;
+        $coworker_data = $fnc->get_db_array($sql_coworker);
+        break;
+      case "journal":
+        $sql_owner = "Select jour_owner_citizenid as citizen_id From " . $page . " Where jour_id = " . $id;
+        $owner_data = $fnc->get_db_row($sql_owner);
+        $sql_coworker = "Select cow_citizenid as citizen_id From co_worker Where cow_ref_table = '" . $page . "' And cow_ref_id = " . $id;
+        $coworker_data = $fnc->get_db_array($sql_coworker);
+        break;
+      case "research":
+        $sql_owner = "Select res_owner_citizenid as citizen_id From " . $page . " Where res_id = " . $id;
+        $owner_data = $fnc->get_db_row($sql_owner);
+        $sql_coworker = "Select cow_citizenid as citizen_id From co_worker Where cow_ref_table = '" . $page . "' And cow_ref_id = " . $id;
+        $coworker_data = $fnc->get_db_array($sql_coworker);
+        break;
+      case "project":
+        $sql_owner = "Select proj_owner_citizenid as citizen_id From " . $page . " Where proj_id = " . $id;
+        $owner_data = $fnc->get_db_row($sql_owner);
+        $sql_coworker = "Select cow_citizenid as citizen_id From co_worker Where cow_ref_table = '" . $page . "' And cow_ref_id = " . $id;
+        $coworker_data = $fnc->get_db_array($sql_coworker);
+        break;
+    }
+    if (empty($show) || $show != "owner") {
+      $econ_member = $this->array_remove_data($owner_data["citizen_id"], $econ_member);
+    }
+    if (!empty($coworker_data)) {
+      foreach ($coworker_data as $cow) {
+        if (!empty($cow["citizen_id"])) {
+          $econ_member = $this->array_remove_data($cow["citizen_id"], $econ_member);
+        }
+      }
+    }
+    return $econ_member;
+  }
 }
 
 class MJU_API extends CommonFnc

@@ -1,7 +1,7 @@
 <!doctype html>
 <?php
 
-// * reseach function
+// * research function
 class research_fnc
 {
 
@@ -50,7 +50,7 @@ class research_fnc
                             </div>
                         </div>
                     </div>
-
+                    dก
                     <div class="row mb-3">
                         <div class="col-12 col-md-6 mb-3">
                             <label for="res_period_begin" class="form-label">แหล่งงบประมาณ <span class="lbl_required">*</span></label>
@@ -209,13 +209,13 @@ class research_fnc
                                     <input class="form-check-input" type="radio" name="res_tier" id="res_tier_1" value="ภายใน" <?php if ($row["res_tier"] == 'ภายใน') {
                                                                                                                                     echo ' checked';
                                                                                                                                 } ?>>
-                                    <label class="form-check-label" for="res_tier_1">ชาติ</label>
+                                    <label class="form-check-label" for="res_tier_1">ภายในสถาบัน</label>
                                 </div>
                                 <div class="form-check form-check-inline ms-2 ms-md-3">
                                     <input class="form-check-input" type="radio" name="res_tier" id="res_tier_2" value="ภายนอก" <?php if ($row["res_tier"] == 'ภายนอก') {
                                                                                                                                     echo ' checked';
                                                                                                                                 } ?>>
-                                    <label class="form-check-label" for="res_tier_2">นานาชาติ</label>
+                                    <label class="form-check-label" for="res_tier_2">ภายนอกสถาบัน</label>
                                 </div>
                             </div>
 
@@ -225,9 +225,16 @@ class research_fnc
                             </div>
 
                             <div class="col mb-3 form-floating">
-                                <input type="text" class="form-control" name="res_researchID" id="res_researchID" aria-describedby="res_researchIDHelp" value="<?= $row["res_researchID"] ?>">
-                                <label for="res_researchID" class="form-label">รหัสงานวิจัยจากระบบ ERP <span class="lbl_required">*</span></label>
+                                <input type="text" class="form-control" name="res_researchCode" id="res_researchCode" aria-describedby="res_researchCodeHelp" value="<?= $row["res_researchCode"] ?>">
+                                <label for="res_researchCode" class="form-label">รหัสงานวิจัย</label>
                             </div>
+
+                            <?php if (isset($_SESSION["admin"]) && $_SESSION["admin"]["auth_lv"] >= 7) { ?>
+                                <div class="col mb-3 form-floating">
+                                    <input type="text" class="form-control" name="res_researchID" id="res_researchID" aria-describedby="res_researchIDHelp" value="<?= $row["res_researchID"] ?>">
+                                    <label for="res_researchID" class="form-label">รหัส rid <span class="lbl_required">* สำหรับเจ้าหน้าที่</span></label>
+                                </div>
+                            <?php } ?>
 
                         </div>
 
@@ -316,13 +323,76 @@ class research_fnc
 
             </form>
         </div>
-        <?php
+    <?php
     }
 
+    public function gen_table_report($disp_year)
+    {
+        global $fnc;
+    ?>
+        <table class="table table-bordered table-inverse table-responsive">
+            <thead class="thead-inverse bg-light">
+                <tr class="text-center fw-bold align-middle">
+                    <th rowspan="2" style="width:3em;">ลำดับ<br>ที่</th>
+                    <th rowspan="2">รหัส<br>โครงการวิจัย</th>
+                    <th rowspan="2">ชื่องานวิจัย</th>
+                    <th colspan="2">นักวิจัย</th>
+                    <th colspan="2">งบประมาณ</th>
+                    <th rowspan="2" style="width:6em;">ระยะเวลา</th>
+                    <th rowspan="2">แหล่งทุน</th>
+                    <th rowspan="2">หมายเหตุ</th>
+                </tr>
+                <tr class="text-center fw-bold">
+                    <th>ชื่อ</th>
+                    <th>สัดส่วน</th>
+                    <th>ประเภท</th>
+                    <th>จำนวน</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 0.85em;">
+                <?php
+                // $sql = "SELECT * FROM v_research_report2 WHERE ((res_owner_citizenid = '3501400119821' ) OR( cow_citizenid = '3501400119821' ) ) AND res_fiscalyear >= '2560' AND res_fiscalyear <= '2565' GROUP BY res_id ORDER BY res_period_begin DESC";
+                $sql = "SELECT res_id FROM v_research_report2 WHERE";
+                $sql .= " res_status = 'enable'";
+                if (isset($_GET["k"]) && $_GET["k"] != "") {
+                    // $sql .= " AND (res_owner_citizenid = '" . $_GET["k"] . "' OR cow_citizenid = '" . $_GET["k"] . "')";
+                    $sql .= " AND (citizenid = '" . $_GET["k"] . "')";
+                }
+                if (isset($_GET["d"]) && $_GET["d"] != "") {
+                    // $sql .= " AND (res_department_name = '" . $_GET["d"] . "' Or cow_department_name = '" . $_GET["d"] . "')";
+                    $sql .= " AND (department_name = '" . $_GET["d"] . "')";
+                    // $sql .= " And vrr.department_name = '" . $_GET["d"] . "'";
+                }
+                if ($disp_year != "" && $disp_year != "5yrs") {
+                    $sql_year = " AND res_fiscalyear = '" . ($disp_year) . "'";
+                } else {
+                    $sql_year = "";
+                }
+                if ($disp_year == "5yrs") {
+                    $sql_year = " AND res_fiscalyear >= '" . ($fnc->get_fiscal_year() - 5) . "' AND res_fiscalyear <= '" . ($fnc->get_fiscal_year()) . "'";
+                }
+                $sql_group = " GROUP BY res_id";
+                $sql_order = " ORDER BY res_period_begin DESC"; // order
+                $sql .= $sql_year . $sql_group . $sql_order;
+                $fnc->debug_console('sql research table owner: \n' . $sql);
+                $data_array = $fnc->get_db_array($sql);
+                if (!empty($data_array)) {
+                    $this->gen_table_tr_report($data_array);
+                } else {
+                    echo '<tr style="page-break-before:auto">';
+                    echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="10">no data founded</td>';
+                    echo '</tr>';
+                } ?>
+
+            </tbody>
+        </table>
+        <?php
+    }
 
     public function gen_table_tr_report($data_array)
     {
         $fnc = new web;
+        $fnc->debug_console("data array:", $data_array);
 
         if (isset($_GET["act"]) && $_GET["act"] == "report") {
             $linkable = false;
@@ -330,56 +400,62 @@ class research_fnc
             $linkable = true;
         }
 
-        $fnc->debug_console("data list: ", $data_array);
+        $fnc->debug_console("data list sample: ", $data_array[0]);
         $x = 1;
-        foreach ($data_array as $row) {
+        foreach ($data_array as $res) {
+            $sql = "SELECT * FROM research WHERE res_id = " . $res["res_id"];
+            $row = $fnc->get_db_row($sql);
+            if (!empty($row)) {
         ?>
             <!-- <tr style="page-break-before: always;"> -->
             <tr>
                 <td scope="row" class="text-center"><?= $x ?></td>
-                <td class="text-center"><?= $row["res_researchID"] ?></td>
+                <td class="text-center"><?php
+                                        if (!empty($row["res_researchCode"])) {
+                                            echo $row["res_researchCode"];
+                                        }
+                                        ?>
+                </td>
                 <td class="text-start"><?php
-                                        if ($linkable) {
-                                            echo '<a href="?p=' . $_GET['p'] . '&act=viewinfo&rid=' . $row["res_id"] . '" target="_top" class="fw-bold">' . $row["res_name"] . '</a>';
-                                        } else {
+                                        if (!empty($row["res_name"])) {
                                             echo $row["res_name"];
                                         }
-                                        ?></td>
+                                        ?>
+                </td>
                 <td nowrap>
                     <?php
                     echo '<p class="m-0 border-bottom border-secondary">';
                     if ($linkable) {
-                        echo '<a href="?p=research&find=memberId&k=' . $row["res_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["res_owner_prename"]) . $row["res_owner_firstname"] . ' ' . $row["res_owner_lastname"] . '</a>';
+                        echo '<a href="?p=research&find=memberId&k=' . $row["res_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["res_owner_prename"]) . $row["res_owner_firstname"] . '&nbsp;&nbsp;' . $row["res_owner_lastname"] . '</a>';
                     } else {
-                        echo $fnc->gen_titlePosition_short($row["res_owner_prename"]) . $row["res_owner_firstname"] . ' ' . $row["res_owner_lastname"];
+                        echo $fnc->gen_titlePosition_short($row["res_owner_prename"]) . $row["res_owner_firstname"] . '&nbsp;&nbsp;' . $row["res_owner_lastname"];
                     }
                     echo '</p>';
+                    echo '<strong class="text-danger">Dept:</strong>' . $row["department_name"];
                     $ratio_data = array($row["res_ratio"]);
                     ?>
                     <?php
                     $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'research' AND `cow_ref_id` = " . $row["res_id"];
-                    $fnc->debug_console("co worker sql: " . $sql);
+                    // $fnc->debug_console("co worker sql: " . $sql);
                     $co_worker = $fnc->get_db_array($sql);
                     if (!empty($co_worker)) {
-                        // $fnc->debug_console("co worker data: " . " res_ id " . $row["res_id"] . " cnt " . count($co_worker) . " - " , $co_worker);
                         foreach ($co_worker as $cow) {
                             echo '<p class="m-0 border-bottom border-secondary ms-2">';
                             if (!empty($cow["cow_citizenid"]) && $linkable) {
-                                echo '<a href="?p=research&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                                echo '<a href="?p=research&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . '&nbsp;&nbsp;' . $cow["cow_lastname"] . '</a>';
                             } else {
-                                echo '<span class="">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
+                                echo '<span class="">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . '&nbsp;&nbsp;' . $cow["cow_lastname"] . '</span>';
                             }
                             array_push($ratio_data, $cow["cow_ratio"]);
                             echo '</p>';
+                            echo '<strong class="text-danger ms-2">Dept:</strong>' . $cow["department_name"];
                         }
                     }
                     ?>
                 </td>
-                <td class="text-center"><?php
-                                        // foreach ($ratio_data as $ratio) {
-                                        for ($i = 0; $i < count($ratio_data); $i++) {
-                                            // if ($i > 0) { echo "<br>"; }
-                                            echo '<p class="m-0 border-bottom border-secondary">' . $ratio_data[$i] . '</p>';
+                <td class="text-end"><?php
+                                        foreach ($ratio_data as $ratio) {
+                                            echo '<p class="m-0 border-bottom border-secondary text-center">' . $ratio . '</p><br>';
                                         }
                                         ?>
                 </td>
@@ -389,34 +465,35 @@ class research_fnc
                                         }
                                         ?>
                 </td>
-                <td class="text-end"><?php
-                                        if (!empty($row["res_budget"])) {
-                                            echo number_format($row["res_budget"], 0);
-                                        }
-                                        ?>
+                <td class="text-end" nowarp><?php
+                                            if (!empty($row["res_budget"])) {
+                                                echo number_format($row["res_budget"], 0);
+                                            }
+                                            ?>
                 </td>
                 <td class="text-center">
                     <?php
                     if (!empty($row["res_period_begin"])) {
-                        $fnc->gen_date_semi_th(($row["res_period_begin"]));
-                    }
-                    if (!empty($row["res_period_finish"])) {
-                        echo '<br>- ';
-                        $fnc->gen_date_semi_th(($row["res_period_finish"]));
+                        $fnc->gen_date_range_semi_th($row["res_period_begin"], $row["res_period_finish"]);
                     }
                     ?></td>
-                <td><?php
-                    if ($linkable) {
-                        // echo '<a href="?p=' . $_GET['p'] . '&act=viewinfo&rid=' . $row["res_id"] . '" target="_top" class="fw-bold">' . $row["res_conf"] . '</a>';
-                        echo $row["res_budget_source"];
-                    } else {
+                <td>
+                    <?php
+                    if (!empty($row["res_budget_source"])) {
                         echo $row["res_budget_source"];
                     }
                     ?>
                 </td>
-                <td><?= $row["res_detail"] ?></td>
+                <td>
+                    <?php
+                    if (!empty($row["res_detail"])) {
+                        echo $row["res_detail"];
+                    }
+                    ?>
+                </td>
             </tr>
         <?php
+            }
             $x++;
         }
     }
@@ -466,6 +543,9 @@ class research_fnc
                         echo '<a href="?p=' . $_GET['p'] . '&act=viewinfo&rid=' . $row["res_id"] . '" target="_top" class="fw-bold">' . $row["res_name"] . '</a>';
                     } else {
                         echo $row["res_name"];
+                    }
+                    if (!empty($row["res_researchID"])) {
+                        echo '<a href="https://erp.mju.ac.th/researchDetail.aspx?rid=' . $row["res_researchID"] . '" target="_blank" class="ms-3 link-danger"><i class="bi bi-info-circle me-1"></i>ERP</a>';
                     }
                     ?>
                 </td>
@@ -588,7 +668,7 @@ class research_fnc
                                     $sql .= " AND (res_owner_citizenid LIKE '" . $_GET["k"] . "' OR (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))"; //  (cowo.cow_citizenid LIKE '3501400517681' AND cowo.cow_ref_table LIKE 'research')
                                     break;
                                 case "search":
-                                    $sql .= " AND (res_owner_firstname LIKE '%" . $_GET["k"] . "%' Or res_owner_lastname LIKE '%" . $_GET["k"] . "%' Or ((cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or res_name LIKE '%" . $_GET["k"] . "%') AND cowo.cow_ref_table LIKE 'research'))";
+                                    $sql .= " AND (res_researchCode LIKE '%" . $_GET["k"] . "%' Or res_owner_firstname LIKE '%" . $_GET["k"] . "%' Or res_owner_lastname LIKE '%" . $_GET["k"] . "%' Or ((cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or res_name LIKE '%" . $_GET["k"] . "%') AND cowo.cow_ref_table LIKE 'research'))";
                                     break;
                             }
                         }
@@ -830,7 +910,7 @@ class research_fnc
                                         $confirm_parameter = "'research'," . $id . "," . $att["att_id"];
                                         echo '<div class="col text-end">';
                                         echo '<a onclick="attachment_delete_confirmation(' . $confirm_parameter . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
-                                        // echo '<a onclick="proceeding_attachment_delete_confirmation(' . $id . ',' . $att["att_id"] . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
+                                        // echo '<a onclick="research_attachment_delete_confirmation(' . $id . ',' . $att["att_id"] . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
                                         echo '</div>';
                                     }
                                     echo '</div>';
@@ -956,7 +1036,7 @@ class research_fnc
             $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
             // $econ_member = $MJU_API->GetAPI_array($api_url);                                    
             $econ_member = $fnc->econ_member_remove_exists("research", $id, $MJU_API->GetAPI_array($api_url));
-            // $econ_member = $fnc->econ_member_remove_exists("proceeding", $id, $MJU_API->GetAPI_array($api_url));
+            // $econ_member = $fnc->econ_member_remove_exists("research", $id, $MJU_API->GetAPI_array($api_url));
             $fnc->debug_console("econ member", $econ_member[0]);
             ?>
             <div class="card-body row">
@@ -1116,35 +1196,35 @@ class research_fnc
     {
         $fnc = new web;
     ?>
-        <div class="text-white-50 mb-3 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
+        <div class="text-white-50 mb-0 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
             <div class="container px-0 px-md-5">
                 <ul class="nav justify-content-end">
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'personal') {
-                                                echo ' active link-light" aria-current="page';
+                                                echo ' active link-primary" aria-current="page';
                                             } else {
-                                                echo ' link-primary';
+                                                echo ' link-light';
                                             } ?>" href="?p=research&act=report&cat=personal">รายบุคคล</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item d-none">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'personal') {
-                                                echo ' active link-light" aria-current="page';
+                                                echo ' active link-primary" aria-current="page';
                                             } else {
-                                                echo ' link-primary';
+                                                echo ' link-light';
                                             } ?>" href="?p=research&act=report&cat=personal-old">รายบุคคล-ตัวอย่าง</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'department') {
-                                                echo ' active link-light" aria-current="page';
+                                                echo ' active link-primary" aria-current="page';
                                             } else {
-                                                echo ' link-primary';
+                                                echo ' link-light';
                                             } ?>" href="?p=research&act=report&cat=department">รายหลักสูตร</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'apasample') {
-                                                echo ' active link-light" aria-current="page';
+                                                echo ' active link-primary" aria-current="page';
                                             } else {
-                                                echo ' link-primary';
+                                                echo ' link-light';
                                             } ?>" href="?p=research&act=report&cat=apasample">APA's Ref</a>
                     </li>
                 </ul>
@@ -1156,6 +1236,12 @@ class research_fnc
     public function gen_report_personal()
     {
         $fnc = new web;
+        if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+            $disp_year = $fnc->get_fiscal_year();
+        } else {
+            $disp_year = $_GET['fyear'];
+        }
+        $fnc->debug_console("display year:\\n" . $disp_year);
     ?>
 
         <div class="card p-0 p-md-0 border border-white">
@@ -1191,48 +1277,8 @@ class research_fnc
                             <input type="hidden" name="act" value="report">
                             <input type="hidden" name="cat" value="personal">
                             <?php
-                            // $MJU_API = new MJU_API;
-                            // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
-                            // $econ_member = $MJU_API->GetAPI_array($api_url);
-                            $sql = "(Select
-                                res.res_owner_citizenid As citizenId,
-                                res.res_owner_prename As titlePosition,
-                                res.res_owner_firstname As firstName,
-                                res.res_owner_lastname As lastName
-                            From
-                                research res
-                            Where
-                                res.res_status = 'enable'
-                            Group By
-                                res.res_owner_citizenid,
-                                res.res_owner_prename,
-                                res.res_owner_firstname,
-                                res.res_owner_lastname
-                            Order By
-                                firstName,
-                                lastName)
-                            UNION
-                            (Select
-                                cowo.cow_citizenid As citizenId,
-                                cowo.cow_prename As titlePosition,
-                                cowo.cow_firstname As firstName,
-                                cowo.cow_lastname As lastName
-                            From
-                                research res Inner Join
-                                co_worker cowo On cowo.cow_ref_id = res.res_id
-                            Where
-                                res.res_status = 'enable' And
-                                cowo.cow_ref_table = 'research' And
-                                cowo.cow_citizenid != '' And
-                                cowo.cow_status = 'enable'
-                            Group By
-                                cowo.cow_citizenid,
-                                cowo.cow_prename,
-                                cowo.cow_firstname,
-                                cowo.cow_lastname
-                            Order By
-                                firstName,
-                                lastName);";
+                            // $sql = "SELECT citizenid As citizenId, prename As prename, firstname As firstname, lastname As lastname FROM v_research_userlist GROUP BY citizenid, firstname, lastname ORDER BY firstname, lastname";
+                            $sql = "SELECT citizenid, prename, firstname, lastname FROM v_research_report2 WHERE citizenid != '' AND res_status = 'enable' GROUP BY citizenid, prename, firstname, lastname ORDER BY firstname";
                             $econ_member = $fnc->get_db_array($sql);
                             $fnc->debug_console("econ member", $econ_member[0]);
                             ?>
@@ -1245,33 +1291,38 @@ class research_fnc
                                 }
                                 echo '>' . 'แสดงข้อมูลบุคลากรทุกคน' . '</option>';
                                 foreach ($econ_member as $member) {
-                                    echo '<option value="' . $member["citizenId"] . '"';
-                                    if (isset($_GET["k"]) && $_GET["k"] == $member["citizenId"]) {
+                                    echo '<option value="' . $member["citizenid"] . '"';
+                                    if (isset($_GET["k"]) && $_GET["k"] == $member["citizenid"]) {
                                         echo ' selected';
-                                        $cur_personal = ' ' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ' ' . $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"];
+                                        $cur_personal = ' ' . $fnc->gen_titlePosition_short($member["prename"]) . ' ' . $member["firstname"] . '&nbsp;&nbsp;' . $member["lastname"];
                                     }
-                                    echo '>' . $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"] . ' (' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ')' . '</option>';
+                                    echo '>' . $member["firstname"] . '&nbsp;&nbsp;' . $member["lastname"] . ' (' . $fnc->gen_titlePosition_short($member["prename"]) . ')' . '</option>';
                                 }
                                 ?>
                             </select>
                         </div>
                         <?php
                         $sql_year = "Select res_fiscalyear As fyear From research Where research.res_status = 'enable' Group By res_fiscalyear Order By res_fiscalyear Desc";
+                        // $fyear = $fnc->get_db_array($sql_year);
                         $fyear = $fnc->get_db_array($sql_year);
                         $fnc->debug_console("fiscal year = ", $fyear);
+                        if ($disp_year > $fyear[0]["fyear"] && $disp_year != "5yrs") {
+                            $disp_year = $fyear[0]["fyear"];
+                            $fnc->debug_console("display year update to:\\n" . $disp_year);
+                        }
                         if (!empty($fyear)) {
                         ?>
                             <select class="form-select form-select-sm" name="fyear" onchange="this.form.submit();">
                                 <?php
-                                echo '<option value=""';
-                                if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+                                echo '<option value="5yrs"';
+                                if ($disp_year == "5yrs") {
                                     echo ' selected';
                                 };
-                                echo '>แสดงทุกปี งปม.</option>';
+                                echo '>ย้อนหลัง 5 ปีงปม.</option>';
                                 // for ($y = 2565; $y >= 2560; $y--) {
                                 foreach ($fyear as $y) {
                                     echo '<option value="' . $y['fyear'] . '"';
-                                    if (isset($_GET['fyear']) && $_GET['fyear'] != "" && $_GET['fyear'] == $y['fyear']) {
+                                    if ($disp_year == $y['fyear']) {
                                         echo ' selected';
                                     };
                                     echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
@@ -1289,15 +1340,15 @@ class research_fnc
 
             </div>
 
-            <div class="card-body mt-3" style="font-size: 0.8em;">
+            <div class="card-body mt-0" style="font-size: 0.8em;">
                 <?php
                 if (isset($_GET['k']) && $_GET['k'] != '') {
                     $k = 'ของ' . $cur_personal;
                 } else {
                     $k = '';
                 }
-                if (isset($_GET['fyear']) && $_GET['fyear'] != '') {
-                    $y = ' ปี งปม. ' . $_GET['fyear'];
+                if ($disp_year != '') {
+                    $y = ' ปี งปม. ' . $disp_year;
                 } else {
                     $y = ' ทั้งหมด';
                 }
@@ -1309,124 +1360,20 @@ class research_fnc
                     echo 'ของ' . $cur_personal;
                 }
                 echo '</p>';
-                if (isset($_GET["fyear"]) && $_GET["fyear"] != '') {
-                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $_GET["fyear"] . ' (ตุลาคม ' . ($_GET["fyear"] - 1) . ' - กันยายน ' . $_GET["fyear"] . ')</p>';
+                if ($disp_year == "5yrs") {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $fnc->get_fiscal_year() . ' (ตุลาคม ' . ($fnc->get_fiscal_year() - 1) . ' - กันยายน ' . $fnc->get_fiscal_year() . ')</p>';
+                } else {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $disp_year . ' (ตุลาคม ' . ($disp_year - 1) . ' - กันยายน ' . $disp_year . ')</p>';
                 }
                 echo '<p class="h4 mb-3" style="font-size: 0.9rem;">คณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้</p>
                 </div>';
+
+                $this->gen_table_report($disp_year);
                 ?>
-                <table class="table table-bordered table-inverse table-responsive">
-                    <thead class="thead-inverse bg-light">
-                        <tr class="text-center fw-bold align-middle">
-                            <th rowspan="2" style="width:3em;">ลำดับ<br>ที่</th>
-                            <th rowspan="2">รหัส<br>โครงการวิจัย</th>
-                            <th rowspan="2">ชื่องานวิจัย</th>
-                            <th colspan="2">นักวิจัย</th>
-                            <th colspan="2">งบประมาณ</th>
-                            <th rowspan="2" style="width:6em;">ระยะเวลา</th>
-                            <th rowspan="2">แหล่งทุน</th>
-                            <th rowspan="2">รายละเอียด</th>
-                        </tr>
-                        <tr class="text-center fw-bold">
-                            <th>ชื่อ</th>
-                            <th>สัดส่วน</th>
-                            <th>ประเภท</th>
-                            <th>จำนวน</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 0.85em;">
-                        <?php
-                        // $sql = "elect res.* From research res Left Join co_worker cowo On cowo.cow_ref_id = res.res_id Where res.res_status Like 'enable' Group By res.res_period_begin, res.res_id Order By res.res_period_begin Desc";
-                        $sql = "Select res.* From research res Left Join co_worker cowo On cowo.cow_ref_id = res.res_id Where cowo.cow_ref_table = 'research'";
-                        $sql .= " AND res.res_status = 'enable' AND cowo.cow_status = 'enable'";
-                        if (isset($_GET["k"]) && $_GET["k"] != "") {
-                            $sql .= " AND (res.res_owner_citizenid = '" . $_GET["k"] . "' OR cowo.cow_citizenid = '" . $_GET["k"] . "')";
-                        }
-                        if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                            $sql_year = " AND res.res_fiscalyear = '" . ($_GET["fyear"]) . "'";
-                        } else {
-                            $sql_year = "";
-                        }
-                        $sql_group = " Group By res.res_period_begin, res.res_id";
-                        $sql_order = " ORDER BY res.res_period_begin Desc"; // order
-                        $sql .= $sql_year . $sql_group . $sql_order;
-                        $fnc->debug_console('sql research table owner: \n' . $sql);
-                        $data_array = $fnc->get_db_array($sql);
-                        if (!empty($data_array)) {
-                            $this->gen_table_tr_report($data_array);
-                        } else {
-                            echo '<tr style="page-break-before:auto">';
-                            echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                            echo '</tr>';
-                        } ?>
-
-                    </tbody>
-                </table>
-
             </div>
-
-            <?php if (isset($_GET['fyear']) && $_GET['fyear'] != "") { ?>
-                <div class="card-body mt-3" style="font-size: 0.8em;">
-                    <?php
-                    $y = 'ย้อนหลัง 5 ปี งปม.';
-                    echo '<h5 class="card-title mt-2 h5 text-primary">research ' . $k . ' ' . $y . '</h5>';
-                    ?>
-                    <table class="table table-bordered table-inverse table-responsive">
-                        <thead class="thead-inverse bg-light">
-                            <tr class="text-center fw-bold align-middle">
-                                <th rowspan="2" style="width:3em;">ลำดับ<br>ที่</th>
-                                <th rowspan="2">รหัส<br>โครงการวิจัย</th>
-                                <th rowspan="2">ชื่องานวิจัย</th>
-                                <th colspan="2">นักวิจัย</th>
-                                <th colspan="2">งบประมาณ</th>
-                                <th rowspan="2" style="width:6em;">ระยะเวลา</th>
-                                <th rowspan="2">แหล่งทุน</th>
-                                <th rowspan="2">รายละเอียด</th>
-                            </tr>
-                            <tr class="text-center fw-bold">
-                                <th>ชื่อ</th>
-                                <th>สัดส่วน</th>
-                                <th>ประเภท</th>
-                                <th>จำนวน</th>
-                            </tr>
-                        </thead>
-                        <tbody style="font-size: 0.85em;">
-                            <?php
-                            $sql = "Select res.* From research res Left Join co_worker cowo On cowo.cow_ref_id = res.res_id Where ";
-                            $sql .= "res.res_status LIKE 'enable'";
-                            if (isset($_GET["k"]) && $_GET["k"] != "") {
-                                $sql .= " AND (res.res_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
-                            }
-                            if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                                $sql_year = " AND res.res_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND res.res_fiscalyear < '" . ($_GET["fyear"]) . "'";
-                            } else {
-                                $sql_year = "";
-                            }
-                            $sql_group = " Group By res.res_period_begin, res.res_id";
-                            $sql_order = " ORDER BY res.res_period_begin Asc"; // order
-                            $sql .= $sql_year . $sql_group . $sql_order;
-                            $fnc->debug_console('sql table owner: \n' . $sql);
-                            $data_array = $fnc->get_db_array($sql);
-                            if (!empty($data_array)) {
-                                $this->gen_table_tr_report($data_array);
-                            } else {
-                                echo '<tr style="page-break-before:auto">';
-                                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                                echo '</tr>';
-                            } ?>
-
-                        </tbody>
-                    </table>
-
-                </div>
-            <?php } ?>
 
             <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
                 last update: <?= date('M d, Y'); ?>
-                <!-- <div class="col mt-3">
-                <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button>
-
-            </div> -->
             </div>
 
             </form>
@@ -1434,14 +1381,78 @@ class research_fnc
     <?php
     }
 
+    public function gen_table_report_department($disp_year)
+    {
+        global $fnc;
+    ?>
+        <table class="table table-bordered table-inverse table-responsive">
+            <thead class="thead-inverse bg-light">
+                <tr class="text-center fw-bold align-middle">
+                    <th rowspan="2" style="width:3em;">ลำดับ<br>ที่</th>
+                    <th rowspan="2">รหัส<br>โครงการวิจัย</th>
+                    <th rowspan="2">ชื่องานวิจัย</th>
+                    <th colspan="2">นักวิจัย</th>
+                    <th colspan="2">งบประมาณ</th>
+                    <th rowspan="2" style="width:6em;">ระยะเวลา</th>
+                    <th rowspan="2">แหล่งทุน</th>
+                    <th rowspan="2">รายละเอียด</th>
+                </tr>
+                <tr class="text-center fw-bold">
+                    <th>ชื่อ</th>
+                    <th>สัดส่วน</th>
+                    <th>ประเภท</th>
+                    <th>จำนวน</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 0.85em;">
+                <?php
+                // $sql = "Select res_.* From research res_ Left Join co_worker cowo On cowo.cow_ref_id = res_.res_id Where ";
+                $sql = "Select res.* From research res Left Join co_worker cowo On cowo.cow_ref_id = res.res_id Where ";
+                // $sql .= "res_.res_status LIKE 'enable'";
+                $sql .= "res.res_status LIKE 'enable'";
+                if (isset($_GET["d"]) && $_GET["d"] != "") {
+                    $sql .= " AND (res.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
+                }
+                if ($disp_year != "" && $disp_year != "5yrs") {
+                    $sql_year = " AND res.res_fiscalyear = '" . ($disp_year) . "'";
+                } else {
+                    $sql_year = "";
+                }
+                if ($disp_year == "5yrs") {
+                    $sql_year = " AND res.res_fiscalyear > '" . ($fnc->get_fiscal_year() - 5) . "' AND res.res_fiscalyear <= '" . ($fnc->get_fiscal_year()) . "'";
+                }
+                $sql_group = " Group By res.res_period_begin, res.res_id";
+                $sql_order = " ORDER BY res.res_period_begin Desc"; // order
+                $sql .= $sql_year . $sql_group . $sql_order;
+                $fnc->debug_console('sql table owner: \n' . $sql);
+                $data_array = $fnc->get_db_array($sql);
+                if (!empty($data_array)) {
+                    $this->gen_table_tr_report($data_array);
+                } else {
+                    echo '<tr style="page-break-before:auto">';
+                    echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="5">no data founded</td>';
+                    echo '</tr>';
+                } ?>
+
+            </tbody>
+        </table>
+    <?php
+    }
+
     public function gen_report_department()
     {
         $fnc = new web;
+        if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+            $disp_year = $fnc->get_fiscal_year();
+        } else {
+            $disp_year = $_GET['fyear'];
+        }
+        $fnc->debug_console("display year:\\n" . $disp_year);
     ?>
 
-        <div class="card p-0 p-md-3">
-            <div class="card-header bg-light bg-gradient row">
-                <div class="col-12 col-md-8 col-lg-9">
+        <div class="card p-0 p-md-0 border border-white">
+            <div class="card-header bg-light bg-gradient row d-print-none">
+                <div class="col-12 col-md-12 col-lg-9 d-print-none">
                     <?php
                     // if ($data_status == 'delete') {
                     //     echo '<h5 class="card-title mt-2 h3 text-primary">research Deleted</h5>';
@@ -1485,19 +1496,23 @@ class research_fnc
                         $fyear = $fnc->get_db_array($sql_year);
                         $fnc->debug_console("b year = ", $fyear);
                         $fnc->debug_console("b year sql = ", $sql_year);
+                        if ($disp_year > $fyear[0]["fyear"] && $disp_year != "5yrs") {
+                            $disp_year = $fyear[0]["fyear"];
+                            $fnc->debug_console("display year update to:\\n" . $disp_year);
+                        }
                         if (!empty($fyear)) {
                         ?>
                             <select class="form-select form-select-sm" name="fyear" onchange="this.form.submit();">
                                 <?php
-                                echo '<option value=""';
-                                if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+                                echo '<option value="5yrs"';
+                                if ($disp_year == "5yrs") {
                                     echo ' selected';
                                 };
-                                echo '>แสดงทั้งหมด</option>';
+                                echo '>ย้อนหลัง 5 ปีงปม.</option>';
                                 // for ($y = 2565; $y >= 2560; $y--) {
                                 foreach ($fyear as $y) {
                                     echo '<option value="' . $y['fyear'] . '"';
-                                    if (isset($_GET['fyear']) && $_GET['fyear'] != "" && $_GET['fyear'] == $y['fyear']) {
+                                    if ($disp_year == $y['fyear']) {
                                         echo ' selected';
                                     };
                                     echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
@@ -1515,7 +1530,7 @@ class research_fnc
 
             </div>
 
-            <div class="card-body mt-3">
+            <div class="card-body mt-0" style="font-size: 0.8em;">
                 <?php
                 if (isset($_GET['d']) && $_GET['d'] != '') {
                     $d = 'ของ' . $cur_department;
@@ -1527,132 +1542,28 @@ class research_fnc
                 } else {
                     $y = ' ทั้งหมด';
                 }
+                // ***
                 // echo '<h5 class="card-title mt-2 h5 text-primary">research ' . $d . $y . '</h5>';
                 echo '<div class="text-center">
                 <p class="h4 mb-1" style="font-size: 0.9rem;">สรุปจำนวนเงินสนับสนุนทุนวิจัยจากแหล่งทุนภายในและภายนอก';
                 if (isset($_GET["d"]) && $_GET["d"] != '') {
-                    echo 'ของ' . $_GET["d"];
+                    echo ' ของ' . $_GET["d"];
                 }
                 echo '</p>';
-                if (isset($_GET["fyear"]) && $_GET["fyear"] != '') {
-                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $_GET["fyear"] . ' (ตุลาคม ' . ($_GET["fyear"] - 1) . ' - กันยายน ' . $_GET["fyear"] . ')</p>';
+                if ($disp_year == "5yrs") {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $fnc->get_fiscal_year() . ' (ตุลาคม ' . ($fnc->get_fiscal_year() - 1) . ' - กันยายน ' . $fnc->get_fiscal_year() . ')</p>';
+                } else {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $disp_year . ' (ตุลาคม ' . ($disp_year - 1) . ' - กันยายน ' . $disp_year . ')</p>';
                 }
                 echo '<p class="h4 mb-3" style="font-size: 0.9rem;">คณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้</p>
                 </div>';
+
+                $this->gen_table_report($disp_year);
                 ?>
-                <table class="table table-bordered table-inverse table-responsive">
-                    <thead class="thead-inverse bg-light">
-                        <tr class="text-center fw-bold align-middle">
-                            <th rowspan="2" style="width:3em;">ลำดับ<br>ที่</th>
-                            <th rowspan="2">รหัส<br>โครงการวิจัย</th>
-                            <th rowspan="2">ชื่องานวิจัย</th>
-                            <th colspan="2">นักวิจัย</th>
-                            <th colspan="2">งบประมาณ</th>
-                            <th rowspan="2" style="width:6em;">ระยะเวลา</th>
-                            <th rowspan="2">แหล่งทุน</th>
-                            <th rowspan="2">รายละเอียด</th>
-                        </tr>
-                        <tr class="text-center fw-bold">
-                            <th>ชื่อ</th>
-                            <th>สัดส่วน</th>
-                            <th>ประเภท</th>
-                            <th>จำนวน</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 0.85em;">
-                        <?php
-                        // $sql = "Select res_.* From research res_ Left Join co_worker cowo On cowo.cow_ref_id = res_.res_id Where ";
-                        $sql = "Select res.* From research res Left Join co_worker cowo On cowo.cow_ref_id = res.res_id Where ";
-                        // $sql .= "res_.res_status LIKE 'enable'";
-                        $sql .= "res.res_status LIKE 'enable'";
-                        if (isset($_GET["d"]) && $_GET["d"] != "") {
-                            $sql .= " AND (res.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
-                        }
-                        if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                            $sql_year = " AND (res.res_fiscalyear) LIKE '" . ($_GET["fyear"]) . "'";
-                        } else {
-                            $sql_year = "";
-                        }
-                        $sql_group = " Group By res.res_period_begin, res.res_id";
-                        $sql_order = " ORDER BY res.res_period_begin Desc"; // order
-                        $sql .= $sql_year . $sql_group . $sql_order;
-                        $fnc->debug_console('sql table owner: \n' . $sql);
-                        $data_array = $fnc->get_db_array($sql);
-                        if (!empty($data_array)) {
-                            $this->gen_table_tr_report($data_array);
-                        } else {
-                            echo '<tr style="page-break-before:auto">';
-                            echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="5">no data founded</td>';
-                            echo '</tr>';
-                        } ?>
-
-                    </tbody>
-                </table>
-
             </div>
-
-            <?php if (isset($_GET['fyear']) && $_GET['fyear'] != '') { ?>
-                <div class="card-body mt-3">
-                    <?php
-                    $y = 'ย้อนหลัง 5 ปี งปม.';
-                    echo '<h5 class="card-title mt-2 h5 text-primary">research ' . $d . ' ' . $y . '</h5>';
-                    ?>
-                    <table class="table table-bordered table-inverse table-responsive">
-                        <thead class="thead-inverse bg-light">
-                            <tr class="text-center fw-bold align-middle">
-                                <th rowspan="2" style="width:3em;">ลำดับ<br>ที่</th>
-                                <th rowspan="2">รหัส<br>โครงการวิจัย</th>
-                                <th rowspan="2">ชื่องานวิจัย</th>
-                                <th colspan="2">นักวิจัย</th>
-                                <th colspan="2">งบประมาณ</th>
-                                <th rowspan="2" style="width:6em;">ระยะเวลา</th>
-                                <th rowspan="2">แหล่งทุน</th>
-                                <th rowspan="2">รายละเอียด</th>
-                            </tr>
-                            <tr class="text-center fw-bold">
-                                <th>ชื่อ</th>
-                                <th>สัดส่วน</th>
-                                <th>ประเภท</th>
-                                <th>จำนวน</th>
-                            </tr>
-                        </thead>
-                        <tbody style="font-size: 0.85em;">
-                            <?php
-                            $sql = "Select res.* From research res Left Join co_worker cowo On cowo.cow_ref_id = res.res_id Where ";
-                            $sql .= "res.res_status LIKE 'enable'";
-                            if (isset($_GET["d"]) && $_GET["d"] != "") {
-                                $sql .= " AND (res.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
-                            }
-                            if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                                $sql_year = " AND res.res_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND res.res_fiscalyear < '" . ($_GET["fyear"]) . "'";
-                            } else {
-                                $sql_year = "";
-                            }
-                            $sql_group = " Group By res.res_period_begin, res.res_id";
-                            $sql_order = " ORDER BY res.res_period_begin Desc"; // order
-                            $sql .= $sql_year . $sql_group . $sql_order;
-                            $fnc->debug_console('sql table owner: \n' . $sql);
-                            $data_array = $fnc->get_db_array($sql);
-                            if (!empty($data_array)) {
-                                $this->gen_table_tr_report($data_array);
-                            } else {
-                                echo '<tr style="page-break-before:auto">';
-                                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                                echo '</tr>';
-                            } ?>
-
-                        </tbody>
-                    </table>
-
-                </div>
-            <?php } ?>
 
             <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
                 last update: <?= date('M d, Y'); ?>
-                <!-- <div class="col mt-3">
-                <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button>
-
-            </div> -->
             </div>
 
             </form>

@@ -9,6 +9,15 @@
     background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1))
 }
 
+.activity_gradient {
+    /* fallback for old browsers */
+    background: #592464;
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: -webkit-linear-gradient(to right, rgba(89, 36, 100, 1), rgba(106, 17, 203, 1));
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: linear-gradient(to right, rgba(89, 36, 100, 1), rgba(106, 17, 203, 1));
+}
+
 main>.container {
     padding: 60px 15px 0;
 }

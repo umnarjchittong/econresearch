@@ -4,6 +4,12 @@ require('../vendor/autoload.php');
 require('../core.php');
 $fnc = new web;
 
+if (empty($_SESSION["admin"])) {
+    die('<meta http-equiv="refresh" content="0;url=../sign/">');
+} else {
+    $fnc->debug_console("Admin: \\n", $_SESSION["admin"]);
+}
+
 
 function gen_append_form()
 {

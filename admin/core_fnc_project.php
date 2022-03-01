@@ -7,7 +7,8 @@ class project_fnc
 
     public function gen_append_form()
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
 ?>
         <div class="card p-0 p-md-3 box_shadow">
             <div class="card-header bg-light bg-gradient">
@@ -129,7 +130,8 @@ class project_fnc
 
     public function gen_update_form($id)
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
         $sql = "SELECT * FROM `project` WHERE `proj_id` = " . $id;
         $row = $fnc->get_db_row($sql);
         $fnc->debug_console("data row: ", $row);
@@ -273,7 +275,8 @@ class project_fnc
 
     public function gen_table_tr($data_array)
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
 
         if (isset($_GET["act"]) && $_GET["act"] == "report") {
             $linkable = false;
@@ -337,7 +340,8 @@ class project_fnc
 
     public function gen_data_table($data_status = 'enable')
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
         ?>
         <div class="card p-0 p-md-3 box_shadow">
             <div class="card-header bg-light bg-gradient row">
@@ -479,7 +483,8 @@ class project_fnc
 
     public function gen_data_owner($id, $row)
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
         $sum_ratio = 0;
     ?>
 
@@ -553,7 +558,8 @@ class project_fnc
 
     public function gen_data_detail($id)
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
 
         $sql = "SELECT * FROM project WHERE proj_id = " . $id;
         $row = $fnc->get_db_row($sql);
@@ -698,10 +704,10 @@ class project_fnc
         return $row;
     }
 
-    public function gen_activity_detail($id)
+    // !! *******
+    public function gen_activity_detail($project, $id)
     {
-        $fnc = new web;
-
+        global $fnc;
         $sql = "SELECT * FROM project_activity WHERE pa_id = " . $id;
         $row = $fnc->get_db_row($sql);
 
@@ -818,66 +824,90 @@ class project_fnc
             if (!empty($attach_array)) {
         ?>
                 <div class="row">
+                    <div id="carouselImage" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            <?php
+                            $carousel_item_active = ' class="active" aria-current="true"';
+                            $i = 0;
+                            foreach ($attach_array as $att) {
+                                $i++;
+                            ?>
+                                <button type="button" data-bs-target="#carouselImage" data-bs-slide-to="<?= ($i - 1); ?>" <?php
+                                                                                                                            if (!empty($carousel_item_active)) {
+                                                                                                                                echo $carousel_item_active;
+                                                                                                                                $carousel_item_active = "";
+                                                                                                                            }
+                                                                                                                            ?> aria-label="<?= $project["proj_name"] . '-' . $row["pa_location"] . ' #' . $i; ?>"></button>
+                            <?php } ?>
+                        </div>
+                        <div class="carousel-inner">
+                            <?php
+                            $carousel_item_active = " active";
+                            foreach ($attach_array as $att) {
+                            ?>
+                                <div class="carousel-item<?php
+                                                            if (!empty($carousel_item_active)) {
+                                                                echo $carousel_item_active;
+                                                                $carousel_item_active = "";
+                                                            }
+                                                            ?>">
+                                    <img src="<?= '../' . $att['att_filepath'] . $att['att_filename']; ?>" class="d-block w-100" alt="<?= $project["proj_name"] . '-' . $row["pa_location"]; ?>">
+                                </div>
+                            <?php } ?>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselImage" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselImage" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <div class="row">
                     <?php
                     foreach ($attach_array as $att) {
                     ?>
                         <div class="col-lg-4 col-md-12 mb-4 mb-lg-0">
-                            <img src="<?= '../' . $att['att_filepath'] . $att['att_filename']; ?>" alt="..." class="w-100 box_shadow rounded mb-4 img-fluid img-thumbnail" data-toggle="modal" data-target="#lightbox">
+                            <!-- <a href="#" onclick="image_popup('<? //= '../' . $att['att_filepath'] . $att['att_filename']; 
+                                                                    ?>')"><img src="<? //= '../' . $att['att_filepath'] . $att['att_filename']; 
+                                                                                    ?>" alt="..." class="w-100 box_shadow rounded mb-4 img-fluid img-thumbnail" data-toggle="modal" data-target="#lightbox"></a> -->
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#PhotoModal" data-bs-title_text="<?= $project["proj_name"] . '-' . $row["pa_location"]; ?>" data-bs-src="<?= '../' . $att['att_filepath'] . $att['att_filename']; ?>"><img src="<?= '../' . $att['att_filepath'] . $att['att_filename']; ?>" alt="..." class="w-100 box_shadow rounded mb-4 img-fluid img-thumbnail"></a>
                         </div>
                     <?php } ?>
                 </div>
 
                 <!-- Modal -->
-                <div class="modal fade" id="lightbox" role="dialog" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
+
+                <div class="modal fade" id="PhotoModal" tabindex="-1" aria-labelledby="PhotoModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
                         <div class="modal-content">
-                            <button type="button" class="close text-right p-2" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            <div id="indicators" class="carousel slide" data-interval="false">
-                                <ol class="carousel-indicators">
-                                    <li data-target="#indicators" data-slide-to="0" class="active"></li>
-                                    <li data-target="#indicators" data-slide-to="1"></li>
-                                    <li data-target="#indicators" data-slide-to="2"></li>
-                                    <li data-target="#indicators" data-slide-to="3"></li>
-                                    <li data-target="#indicators" data-slide-to="4"></li>
-                                    <li data-target="#indicators" data-slide-to="5"></li>
-                                </ol>
-                                <div class="carousel-inner">
-
-                                    <div class="carousel-item active">
-
-                                        <img class="d-block w-100" src="https://source.unsplash.com/random/200" alt="First slide">
-                                    </div>
-                                    <div class="carousel-item">
-                                        <img class="d-block w-100" src="https://source.unsplash.com/random/201" alt="Second slide">
-                                    </div>
-                                    <div class="carousel-item">
-                                        <img class="d-block w-100" src="https://source.unsplash.com/random/202" alt="Third slide">
-                                    </div>
-                                    <div class="carousel-item">
-                                        <img class="d-block w-100" src="https://source.unsplash.com/random/203" alt="Fourth slide">
-                                    </div>
-                                    <div class="carousel-item">
-                                        <img class="d-block w-100" src="https://source.unsplash.com/random/204" alt="Fifth slide">
-                                    </div>
-                                    <div class="carousel-item">
-                                        <img class="d-block w-100" src="https://source.unsplash.com/random/205" alt="Sixth slide">
-                                    </div>
-                                </div>
-                                <a class="carousel-control-prev" href="#indicators" role="button" data-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="sr-only">Previous</span>
-                                </a>
-                                <a class="carousel-control-next" href="#indicators" role="button" data-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="sr-only">Next</span>
-                                </a>
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="PhotoModalLabel">New message</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-
+                            <div class="modal-body p-2">
+                                <div class="mb-3 text-center">
+                                    <img id="modalImage" src="images/tier_icon_local_64.png" class="img-fluid" alt="123">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <script>
+                    var PhotoModal = document.getElementById('PhotoModal')
+                    PhotoModal.addEventListener('show.bs.modal', function(event) {
+                        var button = event.relatedTarget
+                        var title_text = button.getAttribute('data-bs-title_text');
+                        var image_src = button.getAttribute('data-bs-src');
+                        var modalTitle = PhotoModal.querySelector('.modal-title');
+                        modalTitle.textContent = title_text;
+                        document.getElementById("modalImage").src = image_src;
+                    })
+                </script>
             <?php
             } ?>
         <?php
@@ -903,7 +933,8 @@ class project_fnc
 
     public function gen_data_info($id)
     {
-        $fnc = new web;
+        // $fnc = new web;
+        // global $fnc;
     ?>
 
         <div class="card p-0 p-md-3 box_shadow">
@@ -944,7 +975,8 @@ class project_fnc
 
     public function gen_data_coworker($id)
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
     ?>
 
         <div class="card p-0 p-md-3 box_shadow">
@@ -1079,7 +1111,7 @@ class project_fnc
 
     public function gen_data_activity($id)
     {
-        $fnc = new web;
+        global $fnc;
     ?>
 
         <div class="card p-0 p-md-3 box_shadow">
@@ -1095,7 +1127,7 @@ class project_fnc
 
             <div class="card-body mt-3">
 
-                <?php $this->gen_data_detail($id); ?>
+                <?php $project = $this->gen_data_detail($id); ?>
 
             </div>
 
@@ -1103,22 +1135,24 @@ class project_fnc
             // ! *********************************          
             ?>
 
-            <div class="text-end">
+            <!-- <div class="card-body px-5 mx-5 text-end">
 
                 <a href="?p=activity&act=new&pid=1">NEW</a>
 
-            </div>
+            </div> -->
 
             <?php if (isset($_GET['act']) && $_GET['act'] == "view") {
                 $sql = "SELECT * FROM `project_activity` WHERE `proj_id` = " . $_GET["pid"];
                 $data_array = $fnc->get_db_array($sql);
                 if (!empty($data_array)) {
             ?>
-                    <div class="card-body mt-3 px-5 mx-5">
-
+                    <div class="card-body mt-0 px-5 mx-5">
+                        <div class="text-end">
+                            <a href="?p=activity&act=new&pid=1" class="btn btn-sm btn-primary px-4">NEW</a>
+                        </div>
                         <div class="row gx-3">
                             <?php foreach ($data_array as $act) { ?>
-                                <div class="col-6 col-md-4 p-2 mx-auto text-center"><a href="?p=activity&act=info&pid=<?= $_GET['pid'] ?>&paid=<?= $act['pa_id'] ?>" class="btn w-100 text-white mx-2 box_shadow gradient-custom"><?php echo $act["pa_location"] .  "<br>";
+                                <div class="col-6 col-md-4 p-2 mx-auto text-center"><a href="?p=activity&act=info&pid=<?= $_GET['pid'] ?>&paid=<?= $act['pa_id'] ?>" class="btn w-100 text-white mx-2 box_shadow activity_gradient"><?php echo $act["pa_location"] .  "<br>";
                                                                                                                                                                                                                                     $fnc->gen_date_semi_th($act["pa_period_begin"]); ?></a></div>
                             <?php } ?>
                         </div>
@@ -1139,7 +1173,7 @@ class project_fnc
 
                     <div class="card-body mt-3">
 
-                        <?php $row = $this->gen_activity_detail($_GET['paid']); ?>
+                        <?php $activity = $this->gen_activity_detail($project, $_GET['paid']); ?>
 
                     </div>
 
@@ -1209,7 +1243,7 @@ class project_fnc
                             <input type="hidden" name="pid" value="<?= $_GET['pid'] ?>">
                             <div class="row px-3 gx-3 mt-3">
                                 <div class="col-6 col-md-3 offset-md-6">
-                                    <button type="button" class="btn btn-secondary w-100 py-2 text-uppercase" onclick="window.location='?p=project&act=activity&pid=<?= $_GET["pid"] ?>'">close</button>
+                                    <button type="button" class="btn btn-secondary w-100 py-2 text-uppercase" onclick="window.location='?p=activity&act=view&pid=<?= $_GET["pid"] ?>'">close</button>
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <button type="submit" class="btn btn-primary w-100 py-2 ms-3 text-uppercase">Create</button>
@@ -1231,7 +1265,8 @@ class project_fnc
 
     public function gen_data_attachment($id)
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
     ?>
 
         <div class="card p-0 p-md-3 box_shadow">
@@ -1279,9 +1314,10 @@ class project_fnc
 
     public function data_report_submenu()
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
     ?>
-        <div class="text-white-50 mb-3 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
+        <div class="text-white-50 mb-0 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
             <div class="container px-0 px-md-5">
                 <ul class="nav justify-content-end">
                     <li class="nav-item">
@@ -1311,9 +1347,430 @@ class project_fnc
     <?php
     }
 
+    public function gen_table_report($disp_year)
+    {
+        global $fnc;
+    ?>
+        <table class="table table-bordered table-inverse table-responsive">
+            <thead class="thead-inverse bg-light">
+                <tr class="text-center fw-bold align-middle">
+                    <th style="width:5em;">ลำดับที่</th>
+                    <th>โครงการบริการวิชาการ</th>
+                    <th>ชื่อ-สกุล</th>
+                    <th>งบประมาณ</th>
+                    <th>แหล่งทุน</th>
+                    <th>ระยะเวลา</th>
+                    <th>กลุ่มเป้าหมาย</th>
+                    <th>รายละเอียด</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 0.85em;">
+                <?php
+                $sql = "SELECT * FROM project WHERE proj_status = 'enable'"; // ORDER BY proj_period_begin DESC";
+                if (isset($_GET["k"]) && $_GET["k"] != "") {
+                    $sql .= " AND proj_owner_citizenid LIKE '" . $_GET["k"] . "' ";
+                }
+                if (isset($_GET["d"]) && $_GET["d"] != "") {
+                    $sql .= " And department_name = '" . $_GET["d"] . "'";
+                }
+                if ($disp_year != "" && $disp_year != "5yrs") {
+                    $sql_year = " AND proj_fiscalyear = '" . ($disp_year) . "'";
+                } else {
+                    $sql_year = "";
+                }
+                if ($disp_year == "5yrs") {
+                    $sql_year = " AND proj_fiscalyear >= '" . ($fnc->get_fiscal_year() - 5) . "' AND proj_fiscalyear <= '" . ($fnc->get_fiscal_year()) . "'";
+                }
+                $sql_group = "";
+                $sql_order = " ORDER BY proj_period_begin DESC"; // order
+                $sql .= $sql_year . $sql_group . $sql_order;
+                $fnc->debug_console('sql project table owner: \n' . $sql);
+                $data_array = $fnc->get_db_array($sql);
+                $fnc->debug_console("data array:", $data_array[0]);
+                if (!empty($data_array)) {
+                    $this->gen_table_tr_report($data_array);
+                } else {
+                    echo '<tr style="page-break-before:auto">';
+                    echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="8">no data founded</td>';
+                    echo '</tr>';
+                } ?>
+
+            </tbody>
+        </table>
+        <?php
+    }
+
+    public function gen_table_tr_report($data_array)
+    {
+        $fnc = new web;
+
+        if (isset($_GET["act"]) && $_GET["act"] == "report") {
+            $linkable = false;
+        } else {
+            $linkable = true;
+        }
+        $linkable = true;
+
+        // $fnc->debug_console("data list sample: ", $data_array[0]);
+        $x = 1;
+        foreach ($data_array as $row) {
+        ?>
+            <!-- <tr style="page-break-before: always;"> -->
+            <tr>
+                <td scope="row" class="text-center"><?= $x ?></td>
+                <td class="text-start"><?php
+                                        if ($linkable) {
+                                            echo '<a href="activity.php?p=activity&act=report&pid=' . $row["proj_id"] . '" target="_top" class="fw-bold">' . $row["proj_name"] . '</a>';
+                                        } else {
+                                            echo $row["proj_name"];
+                                        }
+                                        ?></td>
+                <td nowrap>
+                    <?php
+                    echo '<p class="m-0">';
+                    if ($linkable) {
+                        echo '<a href="?p=jourjnal&find=memberId&k=' . $row["proj_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["proj_owner_prename"]) . $row["proj_owner_firstname"] . ' ' . $row["proj_owner_lastname"] . '</a>';
+                    } else {
+                        echo $fnc->gen_titlePosition_short($row["proj_owner_prename"]) . $row["proj_owner_firstname"] . ' ' . $row["proj_owner_lastname"];
+                    }
+                    echo '</p>';
+                    echo '<strong class="text-danger ms-2">Dept:</strong>' . $row["department_name"];
+                    ?>
+                    <?php
+                    // $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'journal' AND `cow_ref_id` = " . $row["jour_id"];
+                    // // $fnc->debug_console("co worker sql: " . $sql);
+                    // $co_worker = $fnc->get_db_array($sql);
+                    // if (!empty($co_worker)) {
+                    //     foreach ($co_worker as $cow) {
+                    //         echo '<p class="m-0 border-bottom border-secondary ms-2">';
+                    //         if (!empty($cow["cow_citizenid"]) && $linkable) {
+                    //             echo '<a href="?p=jourjnal&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                    //         } else {
+                    //             echo '<span class="">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
+                    //         }
+                    //         echo '</p>';
+                    //         echo '<strong class="text-danger ms-2">Dept:</strong>' . $cow["department_name"];
+                    //     }
+                    // }
+                    ?>
+                </td>
+                <td class="text-end"><?php
+                                        if (!empty($row["proj_budget"])) {
+                                            echo number_format($row["proj_budget"], 0);
+                                        }
+                                        ?>
+                </td>
+                <td class="text-start"><?php
+                                        if (!empty($row["proj_budget_source"])) {
+                                            echo $row["proj_budget_source"];
+                                        }
+                                        ?>
+                </td>
+                <td class="text-center"><?php
+                                        if (!empty($row["proj_period_begin"])) {
+                                            $fnc->gen_date_range_semi_th($row["proj_period_begin"], $row["proj_period_finish"]);
+                                        }
+                                        ?>
+                </td>
+                <td class="text-start"><?php
+                                        if (!empty($row["proj_target"])) {
+                                            echo $row["proj_target"];
+                                        }
+                                        ?>
+                </td>
+                <td class="text-start"><?php
+                                        if (!empty($row["proj_detail"])) {
+                                            echo $row["proj_detail"];
+                                        }
+                                        ?>
+                </td>
+            </tr>
+        <?php
+            $x++;
+        }
+    }
+
     public function gen_report_personal()
     {
         $fnc = new web;
+        if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+            $disp_year = $fnc->get_fiscal_year();
+        } else {
+            $disp_year = $_GET['fyear'];
+        }
+        $fnc->debug_console("display year:\\n" . $disp_year);
+        ?>
+
+        <div class="card p-0 p-md-0 border border-white">
+            <div class="card-header bg-light bg-gradient row d-print-none">
+                <div class="col-12 col-md-12 col-lg-9 d-print-none">
+                    <?php
+                    // if ($data_status == 'delete') {
+                    //     echo '<h5 class="card-title mt-2 h3 text-primary">Project Deleted</h5>';
+                    // } else {
+                    echo '<h5 class="card-title mt-2 h5 text-primary">Project Report</h5>';
+                    // }
+                    ?>
+                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานสรุปผลงานบริการวิชาการ</h6>
+                </div>
+
+                <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3 d-print-none">
+                    <form action="?" method="get">
+                        <?php
+                        if (isset($_GET['find']) && $_GET['find'] == 'memberId') {
+                            if (isset($_GET['find']) && $_GET['find'] != '') {
+                                echo '<input type="hidden" name="find" value="' . $_GET['find'] . '">';
+                            }
+                            if (isset($_GET['k']) && $_GET['k'] != '') {
+                                echo '<input type="hidden" name="k" value="' . $_GET['k'] . '">';
+                            }
+                        } else {
+                        ?>
+                        <?php
+
+                        } ?>
+                        <div class="input-group mb-0">
+                            <input type="hidden" name="p" value="journal">
+                            <input type="hidden" name="act" value="report">
+                            <input type="hidden" name="cat" value="personal">
+                            <?php
+                            $sql = "SELECT proj_owner_citizenid as citizenid, proj_owner_prename as prename, proj_owner_firstname as firstname, proj_owner_lastname as lastname FROM project WHERE proj_owner_citizenid != '' AND proj_status = 'enable' GROUP BY proj_owner_citizenid, proj_owner_prename, proj_owner_firstname, proj_owner_lastname ORDER BY proj_owner_firstname, proj_owner_lastname";
+                            $econ_member = $fnc->get_db_array($sql);
+                            $fnc->debug_console("econ member", $econ_member[0]);
+                            ?>
+                            <select class="form-select form-select-sm" name="k" id="k" onchange="this.form.submit();">
+                                <?php
+                                echo '<option value=""';
+                                if (!isset($_GET["k"]) || $_GET["k"] == "") {
+                                    echo ' selected';
+                                }
+                                echo '>' . 'แสดงข้อมูลบุคลากรทุกคน' . '</option>';
+                                foreach ($econ_member as $member) {
+                                    echo '<option value="' . $member["citizenid"] . '"';
+                                    if (isset($_GET["k"]) && $_GET["k"] == $member["citizenid"]) {
+                                        echo ' selected';
+                                        $cur_personal = ' ' . $fnc->gen_titlePosition_short($member["prename"]) . ' ' . $member["firstname"] . '&nbsp;&nbsp;' . $member["lastname"];
+                                    }
+                                    echo '>' . $member["firstname"] . '&nbsp;&nbsp;' . $member["lastname"] . ' (' . $fnc->gen_titlePosition_short($member["prename"]) . ')' . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <?php
+                        $sql_year = "SELECT proj_fiscalyear AS fyear FROM project WHERE proj_status = 'enable' GROUP BY proj_fiscalyear ORDER BY proj_fiscalyear DESC";
+                        // $fyear = $fnc->get_db_array($sql_year);
+                        $fyear = $fnc->get_db_array($sql_year);
+                        $fnc->debug_console("fiscal year = ", $fyear);
+                        if ($disp_year > $fyear[0]["fyear"] && $disp_year != "5yrs") {
+                            $disp_year = $fyear[0]["fyear"];
+                            $fnc->debug_console("display year update to:\\n" . $disp_year);
+                        }
+                        if (!empty($fyear)) {
+                        ?>
+                            <select class="form-select form-select-sm" name="fyear" onchange="this.form.submit();">
+                                <?php
+                                echo '<option value="5yrs"';
+                                if ($disp_year == "5yrs") {
+                                    echo ' selected';
+                                };
+                                echo '>ย้อนหลัง 5 ปีงปม.</option>';
+                                // for ($y = 2565; $y >= 2560; $y--) {
+                                foreach ($fyear as $y) {
+                                    echo '<option value="' . $y['fyear'] . '"';
+                                    if ($disp_year == $y['fyear']) {
+                                        echo ' selected';
+                                    };
+                                    echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
+                                }
+                                ?>
+                            </select>
+                            <?php
+                            if (isset($_GET['p']) && $_GET['p'] != '') {
+                                echo '<input type="hidden" name="p" value="' . $_GET['p'] . '">';
+                            }
+                            ?>
+                        <?php } ?>
+                    </form>
+                </div>
+
+            </div>
+
+            <div class="card-body mt-0" style="font-size: 0.8em;">
+                <?php
+                if (isset($_GET['k']) && $_GET['k'] != '') {
+                    $k = 'ของ' . $cur_personal;
+                } else {
+                    $k = '';
+                }
+                if ($disp_year != '') {
+                    $y = ' ปี งปม. ' . $disp_year;
+                } else {
+                    $y = ' ทั้งหมด';
+                }
+                // ***
+                // echo '<h5 class="card-title mt-2 h5 text-primary">journal ' . $k . $y . '</h5>';
+                echo '<div class="text-center">
+                <p class="h4 mb-1" style="font-size: 0.9rem;">สรุปผลงานการบริการวิชาการ';
+                if (isset($_GET["k"]) && $_GET["k"] != '') {
+                    echo 'ของ' . $cur_personal;
+                }
+                echo '</p>';
+                if ($disp_year == "5yrs") {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . ($fnc->get_fiscal_year() - 5) . ' - ' . $fnc->get_fiscal_year() . '</p>';
+                } else {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $disp_year . ' (ตุลาคม ' . ($disp_year - 1) . ' - กันยายน ' . $disp_year . ')</p>';
+                }
+                echo '<p class="h4 mb-3" style="font-size: 0.9rem;">คณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้</p>
+                </div>';
+
+                $this->gen_table_report($disp_year);
+                ?>
+            </div>
+
+            <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
+                last update: <?= date('M d, Y'); ?>
+            </div>
+
+            </form>
+        </div>
+    <?php
+    }
+    
+    public function gen_report_department()
+    {
+        $fnc = new web;
+        if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+            $disp_year = $fnc->get_fiscal_year();
+        } else {
+            $disp_year = $_GET['fyear'];
+        }
+        $fnc->debug_console("display year:\\n" . $disp_year);
+    ?>
+        <div class="card p-0 p-md-0 border border-white">
+            <div class="card-header bg-light bg-gradient row d-print-none">
+                <div class="col-12 col-md-12 col-lg-9 d-print-none">
+                    <?php
+                    // if ($data_status == 'delete') {
+                    //     echo '<h5 class="card-title mt-2 h3 text-primary">journal Deleted</h5>';
+                    // } else {
+                    echo '<h5 class="card-title mt-2 h5 text-primary">Project Report by Department</h5>';
+                    // }
+                    ?>
+                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานสรุปผลงานบริการวิชาการของหลักสูตร</h6>
+                </div>
+
+                <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3 d-print-none">
+                    <form action="?" method="get">
+                        <div class="input-group mb-0">
+                            <input type="hidden" name="p" value="journal">
+                            <input type="hidden" name="act" value="report">
+                            <input type="hidden" name="cat" value="department">
+                            <select class="form-select form-select-sm" name="d" id="d" onchange="this.form.submit();">
+                                <?php
+                                $sql = "SELECT * FROM `department` ORDER BY `department_name`";
+                                $department = $fnc->get_db_array($sql);
+                                $fnc->debug_console("department ", $department[0]);
+                                echo '<option value=""';
+                                if (!isset($_GET["d"]) || $_GET["d"] == "") {
+                                    echo ' selected';
+                                }
+                                echo '>' . 'แสดงหน่วยงานทั้งหมด' . '</option>';
+                                foreach ($department as $opt) {
+                                    echo '<option value="' . $opt["department_name"] . '"';
+                                    if (isset($_GET["d"]) && $_GET["d"] == $opt["department_name"]) {
+                                        echo ' selected';
+                                        $cur_department = $opt["department_name"];
+                                    }
+                                    echo '>' . $opt["department_name"] . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <?php
+                        $sql_year = "SELECT proj_fiscalyear AS fyear FROM project WHERE proj_status = 'enable' GROUP BY proj_fiscalyear ORDER BY proj_fiscalyear DESC";
+                        $fyear = $fnc->get_db_array($sql_year);
+                        $fnc->debug_console("b year = ", $fyear);
+                        $fnc->debug_console("b year sql = ", $sql_year);
+                        if ($disp_year > $fyear[0]["fyear"] && $disp_year != "5yrs") {
+                            $disp_year = $fyear[0]["fyear"];
+                            $fnc->debug_console("display year update to:\\n" . $disp_year);
+                        }
+                        if (!empty($fyear)) {
+                        ?>
+                            <select class="form-select form-select-sm" name="fyear" onchange="this.form.submit();">
+                                <?php
+                                echo '<option value="5yrs"';
+                                if ($disp_year == "5yrs") {
+                                    echo ' selected';
+                                };
+                                echo '>ย้อนหลัง 5 ปีงปม.</option>';
+                                // for ($y = 2565; $y >= 2560; $y--) {
+                                foreach ($fyear as $y) {
+                                    echo '<option value="' . $y['fyear'] . '"';
+                                    if ($disp_year == $y['fyear']) {
+                                        echo ' selected';
+                                    };
+                                    echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
+                                }
+                                ?>
+                            </select>
+                            <?php
+                            if (isset($_GET['p']) && $_GET['p'] != '') {
+                                echo '<input type="hidden" name="p" value="' . $_GET['p'] . '">';
+                            }
+                            ?>
+                        <?php } ?>
+                    </form>
+                </div>
+
+            </div>
+
+            <div class="card-body mt-0" style="font-size: 0.8em;">
+                <?php
+                if (isset($_GET['d']) && $_GET['d'] != '') {
+                    $d = 'ของ' . $cur_department;
+                } else {
+                    $d = '';
+                }
+                if (isset($_GET['fyear']) && $_GET['fyear'] != '') {
+                    $y = ' ปี งปม. ' . $_GET['fyear'];
+                } else {
+                    $y = ' ทั้งหมด';
+                }
+                // ***
+                // echo '<h5 class="card-title mt-2 h5 text-primary">research ' . $d . $y . '</h5>';
+                echo '<div class="text-center">
+                <p class="h4 mb-1" style="font-size: 0.9rem;">สรุปผลงานการบริการวิชาการ';
+                if (isset($_GET["d"]) && $_GET["d"] != '') {
+                    echo ' ของ' . $_GET["d"];
+                }
+                echo '</p>';
+                if ($disp_year == "5yrs") {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . ($fnc->get_fiscal_year() - 5) . ' - ' . $fnc->get_fiscal_year() . '</p>';
+                } else {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $disp_year . ' (ตุลาคม ' . ($disp_year - 1) . ' - กันยายน ' . $disp_year . ')</p>';
+                }
+                echo '<p class="h4 mb-3" style="font-size: 0.9rem;">คณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้</p>
+                </div>';
+
+                $this->gen_table_report($disp_year);
+                ?>
+            </div>
+
+            <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
+                last update: <?= date('M d, Y'); ?>
+            </div>
+
+            </form>
+        </div>
+<?php
+    }    
+
+
+    public function gen_report_personal_old()
+    {
+        // $fnc = new web;
+        global $fnc;
     ?>
 
         <div class="card p-0 p-md-3 box_shadow">
@@ -1518,9 +1975,10 @@ class project_fnc
     <?php
     }
 
-    public function gen_report_department()
+    public function gen_report_department_old()
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
     ?>
 
         <div class="card p-0 p-md-3 box_shadow">
@@ -1714,7 +2172,8 @@ class project_fnc
 
     public function gen_report_apa()
     {
-        $fnc = new web;
+        // $fnc = new web;
+        global $fnc;
         echo '<div class="bg-white p-3">';
         $data_array = $fnc->get_db_array("SELECT * FROM `project` WHERE `jour_status` = 'enable'");
         $fnc->debug_console("data array:", $data_array);

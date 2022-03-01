@@ -44,10 +44,11 @@ function department_table()
 <?php
 }
 
-function department_form_append() {
+function department_form_append()
+{
     global $fnc;
-    ?>
-<div class="card p-0 p-md-3 box_shadow">
+?>
+    <div class="card p-0 p-md-3 box_shadow">
         <div class="card-header bg-light bg-gradient">
             <h5 class="card-title mt-2 h3 text-primary">New Department</h5>
             <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">เพิ่มหลักสูตร/สาขาวิชา</h6>
@@ -77,51 +78,126 @@ function department_form_append() {
         </form>
     </div>
 
-<?php
+    <?php
 }
 
-function department_form_update($d_id) {
+function department_form_update($d_id)
+{
     global $fnc;
     $sql = "SELECT * FROM `department` WHERE `department_id` = " . $d_id;
     $row = $fnc->get_db_row($sql);
     if (!empty($row)) {
     ?>
-<div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient">
-            <h5 class="card-title mt-2 h3 text-primary">Update Department</h5>
-            <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">แก้ไขหลักสูตร/สาขาวิชา</h6>
+        <div class="card p-0 p-md-3 box_shadow">
+            <div class="card-header bg-light bg-gradient">
+                <h5 class="card-title mt-2 h3 text-primary">Update Department</h5>
+                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">แก้ไขหลักสูตร/สาขาวิชา</h6>
+            </div>
+
+            <form action="../db_mgt.php?p=setting&act=department_update" method="post" autocomplete="off">
+                <div class="card-body mt-3">
+                    <div class="col mb-3">
+                        <label for="department_name" class="form-label">หลักสูตร/สาขาวิชา <span class="lbl_required">*</span></label>
+                        <input type="text" class="form-control" name="department_name" id="department_name" aria-describedby="department_nameHelp" maxlength="80" value="<?= $row['department_name'] ?>">
+                        <div id="department_nameHelp" class="form-text">ระบุชื่อหลักสูตร, สาขาวิชา หรือหน่วยงาน</div>
+                    </div>
+                </div>
+
+                <div class="card-footer text-end">
+                    <input type="hidden" name="department_id" value="<?= $row['department_id'] ?>">
+                    <input type="hidden" name="fst" value="department_update">
+                    <div class="row gx-2 gx-md-4 mt-3">
+                        <div class="col-4 col-md-3 offset-md-3">
+                            <button type="button" class="btn btn-danger w-100 px-0 px-md-2 py-2 text-uppercase" onclick="department_delete_confirmation(<?= $d_id ?>);">close</button>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <button type="button" class="btn btn-secondary w-100 px-0 px-md-2 py-2 text-uppercase" onclick="window.location='setting.php?p=department'">close</button>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <button type="submit" class="btn btn-primary w-100 px-0 px-md-2 py-2 text-uppercase">Submit</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
         </div>
-
-        <form action="../db_mgt.php?p=setting&act=department_update" method="post" autocomplete="off">
-            <div class="card-body mt-3">
-                <div class="col mb-3">
-                    <label for="department_name" class="form-label">หลักสูตร/สาขาวิชา <span class="lbl_required">*</span></label>
-                    <input type="text" class="form-control" name="department_name" id="department_name" aria-describedby="department_nameHelp" maxlength="80" value="<?= $row['department_name'] ?>">
-                    <div id="department_nameHelp" class="form-text">ระบุชื่อหลักสูตร, สาขาวิชา หรือหน่วยงาน</div>
-                </div>
-            </div>
-
-            <div class="card-footer text-end">
-                <input type="hidden" name="department_id" value="<?= $row['department_id'] ?>">
-                <input type="hidden" name="fst" value="department_update">
-                <div class="row gx-2 gx-md-4 mt-3">
-                    <div class="col-4 col-md-3 offset-md-3">
-                        <button type="button" class="btn btn-danger w-100 px-0 px-md-2 py-2 text-uppercase" onclick="department_delete_confirmation(<?= $d_id ?>);">close</button>
-                    </div>
-                    <div class="col-4 col-md-3">
-                        <button type="button" class="btn btn-secondary w-100 px-0 px-md-2 py-2 text-uppercase" onclick="window.location='setting.php?p=department'">close</button>
-                    </div>
-                    <div class="col-4 col-md-3">
-                        <button type="submit" class="btn btn-primary w-100 px-0 px-md-2 py-2 text-uppercase">Submit</button>
-                    </div>
-                </div>
-            </div>
-
-        </form>
-    </div>
-    <?php } else { echo "data not founded to edit.<br>" . $sql; } ?>
+    <?php } else {
+        echo "data not founded to edit.<br>" . $sql;
+    } ?>
 
 <?php
+}
+
+function check_db_fiscalyear()
+{
+    global $fnc;
+    $sql = "SELECT `res_id` as chk_id, `res_period_begin` as chk_date, `res_fiscalyear` as fiscalyear FROM `research` WHERE `res_fiscalyear` != ''";
+    $data_array = $fnc->get_db_array($sql);
+    if (!empty($data_array)) {
+        echo '
+
+        <h3>DB Research</h3>';
+        foreach ($data_array as $data) {
+            if ($fnc->get_fiscal_year($data["chk_date"]) != $data["fiscalyear"]) {
+                echo '
+                <p class="my-2 text-danger"><a href="research.php?p=research&act=viewinfo&rid=' . $data["chk_id"] . '" target="_blank" class="link-danger">ID: ' . $data["chk_id"] . ' - Fiscal Year Error Month,Year=' . date("M", strtotime($data["chk_date"])) . ', ' . (date("Y", strtotime($data["chk_date"])) + 543) . ' // DB=<strong>' . $data["fiscalyear"] . '</strong> : Right=<strong>' . $fnc->get_fiscal_year($data["chk_date"]) . '</strong></a></p>';
+            } else {
+                echo '
+                <p class="my-0">ID: ' . $data["chk_id"] . ' - Fiscal Year Successfully Month,Year=' . date("M", strtotime($data["chk_date"])) . ', ' . (date("Y", strtotime($data["chk_date"])) + 543) . ' // DB=<strong>' . $data["fiscalyear"] . '</strong> vs Right=<strong>' . $fnc->get_fiscal_year($data["chk_date"]) . '</strong></p>';
+            }
+        }
+    }
+
+    $sql = "SELECT `pro_id` as chk_id, `pro_date_begin` as chk_date, `pro_fiscalyear` as fiscalyear FROM `proceeding` WHERE `pro_fiscalyear` != ''";
+    $data_array = $fnc->get_db_array($sql);
+    if (!empty($data_array)) {
+        echo '
+
+        <h3 class="mt-3">DB Proceeding</h3>';
+        foreach ($data_array as $data) {
+            if ($fnc->get_fiscal_year($data["chk_date"]) != $data["fiscalyear"]) {
+                echo '
+                <p class="my-2 text-danger"><a href="proceeding.php?p=proceeding&act=viewinfo&pid=' . $data["chk_id"] . '" target="_blank" class="link-danger">ID: ' . $data["chk_id"] . ' - Fiscal Year Error Month,Year=' . date("M", strtotime($data["chk_date"])) . ', ' . (date("Y", strtotime($data["chk_date"])) + 543) . ' // DB=<strong>' . $data["fiscalyear"] . '</strong> : Right=<strong>' . $fnc->get_fiscal_year($data["chk_date"]) . '</strong></a></p>';
+            } else {
+                echo '
+                <p class="my-0">ID: ' . $data["chk_id"] . ' - Fiscal Year Successfully Month,Year=' . date("M", strtotime($data["chk_date"])) . ', ' . (date("Y", strtotime($data["chk_date"])) + 543) . ' // DB=<strong>' . $data["fiscalyear"] . '</strong> vs Right=<strong>' . $fnc->get_fiscal_year($data["chk_date"]) . '</strong></p>';
+            }
+        }
+    }
+
+    $sql = "SELECT `jour_id` as chk_id, `jour_date_avaliable` as chk_date, `jour_fiscalyear` as fiscalyear FROM `journal` WHERE `jour_fiscalyear` != ''";
+    $data_array = $fnc->get_db_array($sql);
+    if (!empty($data_array)) {
+        echo '
+        
+        <h3 class="mt-3">DB Journal</h3>';
+        foreach ($data_array as $data) {
+            if ($fnc->get_fiscal_year($data["chk_date"]) != $data["fiscalyear"]) {
+                echo '
+                <p class="my-2 text-danger"><a href="journal.php?p=journal&act=viewinfo&jid=' . $data["chk_id"] . '" target="_blank" class="link-danger">ID: ' . $data["chk_id"] . ' - Fiscal Year Error Month,Year=' . date("M", strtotime($data["chk_date"])) . ', ' . (date("Y", strtotime($data["chk_date"])) + 543) . ' // DB=<strong>' . $data["fiscalyear"] . '</strong> : Right=<strong>' . $fnc->get_fiscal_year($data["chk_date"]) . '</strong></a></p>';
+            } else {
+                echo '
+                <p class="my-0">ID: ' . $data["chk_id"] . ' - Fiscal Year Successfully Month,Year=' . date("M", strtotime($data["chk_date"])) . ', ' . (date("Y", strtotime($data["chk_date"])) + 543) . ' // DB=<strong>' . $data["fiscalyear"] . '</strong> vs Right=<strong>' . $fnc->get_fiscal_year($data["chk_date"]) . '</strong></p>';
+            }
+        }
+    }
+
+    $sql = "SELECT `proj_id` as chk_id, `proj_period_begin` as chk_date, `proj_fiscalyear` as fiscalyear FROM `project` WHERE `proj_fiscalyear` != ''";
+    $data_array = $fnc->get_db_array($sql);
+    if (!empty($data_array)) {
+        echo '
+        
+        <h3 class="mt-3">DB Project</h3>';
+        foreach ($data_array as $data) {
+            if ($fnc->get_fiscal_year($data["chk_date"]) != $data["fiscalyear"]) {
+                echo '
+                <p class="my-2 text-danger"><a href="project.php?p=project&act=viewinfo&jid=' . $data["chk_id"] . '" target="_blank" class="link-danger">ID: ' . $data["chk_id"] . ' - Fiscal Year Error Month,Year=' . date("M", strtotime($data["chk_date"])) . ', ' . (date("Y", strtotime($data["chk_date"])) + 543) . ' // DB=<strong>' . $data["fiscalyear"] . '</strong> : Right=<strong>' . $fnc->get_fiscal_year($data["chk_date"]) . '</strong></a></p>';
+            } else {
+                echo '
+                <p class="my-0">ID: ' . $data["chk_id"] . ' - Fiscal Year Successfully Month,Year=' . date("M", strtotime($data["chk_date"])) . ', ' . (date("Y", strtotime($data["chk_date"])) + 543) . ' // DB=<strong>' . $data["fiscalyear"] . '</strong> vs Right=<strong>' . $fnc->get_fiscal_year($data["chk_date"]) . '</strong></p>';
+            }
+        }
+    }
 }
 ?>
 <html lang="en">
@@ -144,64 +220,7 @@ function department_form_update($d_id) {
 
 <body style="background-color: #DFD9EA;">
 
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top" style="background-color: #592464;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="../admin/"><?= $fnc->system_name ?></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="navbar-nav me-auto mb-2 mb-md-0 text-capitalize justify-content-end">
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="../admin/">home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Research</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle<?php if (isset($_GET['p']) && $_GET['p'] == 'proceeding') {
-                                                                echo ' active';
-                                                            } ?>" aria-current="page" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Proceeding</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="../admin/index.php?p=proceeding" target="_top">Data Manager</a></li>
-                            <li><a class="dropdown-item" href="../admin/index.php?p=proceeding&act=append" target="_top">Create New</a></li>
-                            <li><a class="dropdown-item" href="../admin/index.php?p=proceeding&act=viewdeleted" target="_top">Deleted Data</a></li>
-                            <li><a class="dropdown-item" href="../admin/index.php?p=proceeding&act=report">reports</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Journal</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Project</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">SDG</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" aria-current="page" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">admin</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item<?php if (isset($_GET["p"]) && $_GET["p"] == "department") {
-                                                            echo ' active" aria-current="page';
-                                                        } ?>" href="../admin/setting.php?p=department" target="_top">หลักสูตร/สาขาวิชา</a></li>
-
-                            <!-- <li><a class="dropdown-item" href="#">Jobs Manager</a></li> -->
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="../admin/report.php">reports</a></li>
-                            <li><a class="dropdown-item" href="../admin/setting.php">Settings</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../sign/signout.php?p=signout">Sign-out</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-
+    <?php include('main_menu.php'); ?>
 
     <main style="margin-top: 2.5em;">
         <div class="container mx-auto p-3 p-md-5">
@@ -218,19 +237,46 @@ function department_form_update($d_id) {
                                     break;
                                 case "formupdate":
                                     if (isset($_GET["d_id"])) {
-                                    echo '<h2 class="text-capitalize">Department Form Update</h2>';
-                                    department_form_update($_GET["d_id"]);
+                                        echo '<h2 class="text-capitalize">Department Form Update</h2>';
+                                        department_form_update($_GET["d_id"]);
                                     }
                                     break;
                             }
                         } else {
-                        echo '<h2 class="text-capitalize">Department manager</h2>';
-                        department_table();
+                            echo '<h2 class="text-capitalize">Department manager</h2>';
+                            department_table();
                         }
+                        break;
+                    case "chkFiscalYear":
+                        echo '<div class="container">';
+                        check_db_fiscalyear();
+                        echo '</div>';
                         break;
                 }
             } else {
-                echo "none parameters";
+                // echo "none parameters";
+            ?>
+                <div class="container">
+                    <form>
+                        <div class="mb-3">
+                            <label for="exampleInputEmail1" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleInputPassword1" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="exampleInputPassword1">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                            <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+
+
+                </div>
+            <?php
             }
             ?>
 

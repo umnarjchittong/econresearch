@@ -66,6 +66,23 @@
     //     })
     // }
 
+    function signout_confirmation() {
+        Swal.fire({
+            title: 'ออกจากระบบ ?',
+            text: "คุณต้องการออกจากระบบตอนนี้.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'ออกจากระบบ',
+            cancelButtonColor: '#666',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location = "../sign/?p=signout"
+            }
+        });
+    }
+
     function proceeding_delete_confirmation(pid) {
         Swal.fire({
             title: 'Are you sure ?',
@@ -88,7 +105,7 @@
             }
         })
     }
-    
+
     function proceeding_attachment_delete_confirmation(pid, att_id) {
         Swal.fire({
             title: 'Are you sure ?',
@@ -111,7 +128,7 @@
             }
         })
     }
-    
+
     function proceeding_coworker_delete_confirmation(pid, cowid) {
         Swal.fire({
             title: 'Are you sure ?',
@@ -180,7 +197,7 @@
             }
         })
     }
-    
+
     function attachment_delete_confirmation(page, id, att_id) {
         Swal.fire({
             title: 'Are you sure ?',
@@ -203,7 +220,7 @@
             }
         })
     }
-    
+
     function coworker_delete_confirmation(page, id, cowid) {
         Swal.fire({
             title: 'Are you sure ?',
@@ -226,7 +243,7 @@
             }
         })
     }
-    
+
     function department_delete_confirmation(d_id) {
         Swal.fire({
             title: 'Are you sure ?',
@@ -249,5 +266,37 @@
             }
         })
     }
-    
+
+    function image_popup(imgSrc) {
+        imgtitle = '';
+        imgCaption = '';
+        imgAlt = '';
+        Swal.fire({
+            // title: imgtitle,
+            // text: imgCaption,
+            imageUrl: imgSrc,
+            imageWidth: '100%',
+            imageHeight: '100%',
+            imageAlt: imgAlt,
+            padding: '1rem',
+            showConfirmButton: true,
+        });
+    }
+
+    // * https://www.w3schools.com/bootstrap/bootstrap_ref_js_modal.asp
+
+//     Link HTML
+
+// <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">Open Modal</a>
+// Modal JavaScript
+
+// //triggered when modal is about to be shown
+// $('#my_modal').on('show.bs.modal', function(e) {
+
+//     //get data-id attribute of the clicked element
+//     var bookId = $(e.relatedTarget).data('book-id');
+
+//     //populate the textbox
+//     $(e.currentTarget).find('input[name="bookId"]').val(bookId);
+// });
 </script>

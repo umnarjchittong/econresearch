@@ -340,83 +340,13 @@ class proceeding_fnc
 
             </form>
         </div>
-        <?php
-    }
-
-    public function gen_proceeding_tr($data_array)
-    {
-        $fnc = new web;
-
-        if (isset($_GET["act"]) && $_GET["act"] == "report") {
-            $linkable = false;
-        } else {
-            $linkable = true;
-        }
-
-        $fnc->debug_console("data list: ", $data_array);
-        $x = 1;
-        foreach ($data_array as $row) {
-            if (!empty($row["pro_tier"]) && $row["pro_tier"] == "ระดับนานาชาติ") {
-                $pro_tier = '../images/tier_icon_global_64.png';
-            } else {
-                $pro_tier = '../images/tier_icon_local_64.png';
-            }
-            $pro_tier = '<img src="' . $pro_tier . '" class="mb-1 me-2" width="16em">';
-        ?>
-            <tr>
-                <td scope="row" class="text-center"><?= $x ?></td>
-                <td class="d-none d-md-table-cell" nowrap><?php
-                                                            if ($linkable) {
-                                                                echo '<a href="?p=proceeding&find=memberId&k=' . $row["pro_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"] . '</a>';
-                                                            } else {
-                                                                echo $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"];
-                                                            }
-                                                            ?>
-                    <?php
-                    $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'proceeding' AND `cow_ref_id` = " . $row["pro_id"];
-                    $fnc->debug_console("co worker sql: " . $sql);
-                    $co_worker = $fnc->get_db_array($sql);
-                    if (!empty($co_worker)) {
-                        // $fnc->debug_console("co worker data: " . " pro id " . $row["pro_id"] . " cnt " . count($co_worker) . " - " , $co_worker);
-                        foreach ($co_worker as $cow) {
-                            echo '<br>';
-                            if (!empty($cow["cow_citizenid"]) && $linkable) {
-                                echo '<a href="?p=proceeding&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
-                            } else {
-                                echo '<span class="ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
-                            }
-                        }
-                    }
-                    ?>
-                </td>
-                <td><?php
-                    if ($linkable) {
-                        echo $pro_tier . '<a href="?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_study"] . '</a>';
-                    } else {
-                        echo $pro_tier . $row["pro_study"];
-                    }
-                    ?>
-                </td>
-                <td><?php
-                    if ($linkable) {
-                        // echo '<a href="?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_conf"] . '</a>';
-                        echo $row["pro_conf"];
-                    } else {
-                        echo $row["pro_conf"];
-                    }
-                    ?>
-                </td>
-                <td class="text-center d-none d-md-table-cell"><?php $fnc->gen_date_semi_th(($row["pro_date_begin"])) ?></td>
-            </tr>
-        <?php
-            $x++;
-        }
+    <?php
     }
 
     public function gen_proceeding_table($data_status = 'enable')
     {
         $fnc = new web;
-        ?>
+    ?>
         <div class="card p-0 p-md-3 box_shadow">
             <div class="card-header bg-light bg-gradient row">
                 <div class="col-12 col-md-8 col-lg-9">
@@ -459,7 +389,7 @@ class proceeding_fnc
                             <button class="btn btn-outline-info btn-sm" type="submit" id="button-addon2">ค้น</button>
                         </div>
                         <?php
-                        $sql_year = "Select Year(proceeding.pro_date_begin) As b_year From proceeding Where proceeding.pro_status = 'enable' Group By Year(proceeding.pro_date_begin)";
+                        $sql_year = "SELECT YEAR(pro_date_begin) AS b_year FROM v_proceeding_report2 WHERE pro_status = 'enable' GROUP BY YEAR(pro_date_begin) ORDER BY b_year DESC";
                         $byear = $fnc->get_db_array($sql_year);
                         $fnc->debug_console("b year = ", $byear);
                         if (!empty($byear)) {
@@ -508,25 +438,54 @@ class proceeding_fnc
                     </thead>
                     <tbody style="font-size: 0.85em;">
                         <?php
-                        $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                        $sql .= "pro.pro_status LIKE '" . $data_status . "'";
+                        // $sql = "SELECT * FROM proceeding LEFT JOIN co_worker ON co_worker.cow_ref_id = proceeding.pro_id WHERE co_worker.  = 'proceeding' AND proceeding.pro_status = 'enable' AND( proceeding.pro_owner_citizenid = '1509900700434' OR co_worker.cow_citizenid = '1509900700434' ) GROUP BY proceeding.pro_id, proceeding.pro_date_begin ORDER BY proceeding.pro_date_begin DESC";
+                        // $sql = "SELECT * FROM proceeding LEFT JOIN co_worker ON co_worker.cow_ref_id = proceeding.pro_id WHERE co_worker.cow_ref_table  = 'proceeding' AND proceeding.pro_status = 'enable'";
+                        $sql = "SELECT pro_id FROM v_proceeding_report2 WHERE";
+                        // " AND (proceeding.pro_owner_citizenid = '1509900700434' OR co_worker.cow_citizenid = '1509900700434') GROUP BY proceeding.pro_id, proceeding.pro_date_begin ORDER BY proceeding.pro_date_begin DESC";
+                        // $sql = "Select * From v_proceeding_report Where";
+                        $sql .= " pro_status = '" . $data_status . "'";
                         if (isset($_GET["find"]) && $_GET["find"] != "" && isset($_GET["k"]) && $_GET["k"] != "") {
                             switch ($_GET["find"]) {
                                 case "memberId":
-                                    $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))"; // (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))";
+                                    // $sql .= " AND (proceeding.pro_owner_citizenid = '" . $_GET["k"] . "' OR co_worker.cow_citizenid = '" . $_GET["k"] . "')"; // (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))";
+                                    $sql .= " AND (citizenid = '" . $_GET["k"] . "')"; // (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))";
                                     break;
                                 case "search":
-                                    $sql .= " AND (pro.pro_owner_prename LIKE '%" . $_GET["k"] . "%' Or pro.pro_owner_firstname LIKE '%" . $_GET["k"] . "%' Or ((cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or pro.pro_study LIKE '%" . $_GET["k"] . "%') AND cowo.cow_ref_table LIKE 'proceeding'))";
+                                    $sql .= " AND (firstname LIKE '%" . $_GET["k"] . "%' Or lastname LIKE '%" . $_GET["k"] . "%' Or pro_study LIKE '%" . $_GET["k"] . "%')";
+                                    // $sql .= " AND (proceeding.pro_owner_firstname LIKE '%" . $_GET["k"] . "%' Or proceeding.pro_owner_lastname LIKE '%" . $_GET["k"] . "%' Or proceeding.department_name LIKE '%" . $_GET["k"] . "%' Or co_worker.cow_firstname LIKE '%" . $_GET["k"] . "%' Or co_worker.cow_lastname LIKE '%" . $_GET["k"] . "%' Or co_worker.department_name LIKE '%" . $_GET["k"] . "%' Or proceeding.pro_study LIKE '%" . $_GET["k"] . "%')";
                                     break;
                             }
                         }
                         if (isset($_GET["byear"]) && $_GET["byear"] != "") {
-                            $sql_year = " AND Year(pro.pro_date_begin) LIKE '" . $_GET["byear"] . "'";
+                            $sql_year = " AND Year(proceeding.pro_date_begin) LIKE '" . $_GET["byear"] . "'";
                         } else {
                             $sql_year = "";
                         }
-                        $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
-                        $sql_order = " ORDER BY pro.pro_date_begin Desc"; // order
+                        $sql_group = " Group By pro_id, pro_date_begin";
+                        $sql_order = " Order By pro_date_begin Desc";
+                        // $sql_group = " GROUP BY proceeding.pro_id, proceeding.pro_date_begin";
+                        // $sql_order = " ORDER BY proceeding.pro_date_begin DESC";
+                        // $sql_order = " ORDER BY pro_id DESC";
+
+                        // $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
+                        // $sql .= "pro.pro_status LIKE '" . $data_status . "'";
+                        // if (isset($_GET["find"]) && $_GET["find"] != "" && isset($_GET["k"]) && $_GET["k"] != "") {
+                        //     switch ($_GET["find"]) {
+                        //         case "memberId":
+                        //             $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))"; // (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))";
+                        //             break;
+                        //         case "search":
+                        //             $sql .= " AND (pro.pro_owner_prename LIKE '%" . $_GET["k"] . "%' Or pro.pro_owner_firstname LIKE '%" . $_GET["k"] . "%' Or ((cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or pro.pro_study LIKE '%" . $_GET["k"] . "%') AND cowo.cow_ref_table LIKE 'proceeding'))";
+                        //             break;
+                        //     }
+                        // }
+                        // if (isset($_GET["byear"]) && $_GET["byear"] != "") {
+                        //     $sql_year = " AND Year(pro.pro_date_begin) LIKE '" . $_GET["byear"] . "'";
+                        // } else {
+                        //     $sql_year = "";
+                        // }
+                        // $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
+                        // $sql_order = " ORDER BY pro.pro_date_begin Desc"; // order
                         $sql .= $sql_year . $sql_group . $sql_order;
                         $fnc->debug_console('sql table owner: \n' . $sql);
                         $data_array = $fnc->get_db_array($sql);
@@ -554,14 +513,90 @@ class proceeding_fnc
 
             </form>
         </div>
-    <?php
+        <?php
+    }
+
+    public function gen_proceeding_tr($data_array)
+    {
+        $fnc = new web;
+
+        if (isset($_GET["act"]) && $_GET["act"] == "report") {
+            $linkable = false;
+        } else {
+            $linkable = true;
+        }
+
+        $fnc->debug_console("data list: ", $data_array[0]);
+        $x = 1;
+        foreach ($data_array as $pro) {
+            $sql = "SELECT * FROM `proceeding` WHERE `pro_id` = " . $pro["pro_id"];
+            $row = $fnc->get_db_row($sql);
+            if (!empty($row)) {
+                if (!empty($row["pro_tier"]) && $row["pro_tier"] == "ระดับนานาชาติ") {
+                    $pro_tier = '../images/tier_icon_global_64.png';
+                } else {
+                    $pro_tier = '../images/tier_icon_local_64.png';
+                }
+                $pro_tier = '<img src="' . $pro_tier . '" class="mb-1 me-2" width="16em">';
+        ?>
+                <tr>
+                    <td scope="row" class="text-center"><?= $x 
+                                                        ?><?//= $row["pro_id"]; ?></td>
+                    <td class="d-none d-md-table-cell" nowrap><?php
+                                                                if ($linkable) {
+                                                                    // echo '<a href="?p=proceeding&find=memberId&k=' . $row["citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["prename"]) . $row["firstname"] . ' ' . $row["lastname"] . '</a>';
+                                                                    echo '<a href="?p=proceeding&find=memberId&k=' . $row["pro_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"] . '</a>';
+                                                                } else {
+                                                                    // echo $fnc->gen_titlePosition_short($row["prename"]) . $row["firstname"] . ' ' . $row["lastname"];
+                                                                    echo $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"];
+                                                                }
+                                                                ?>
+                        <?php
+                        $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'proceeding' AND `cow_ref_id` = " . $row["pro_id"];
+                        // $fnc->debug_console("co worker sql: " . $sql);
+                        $co_worker = $fnc->get_db_array($sql);
+                        if (!empty($co_worker)) {
+                            foreach ($co_worker as $cow) {
+                                echo '<br>';
+                                if (!empty($cow["cow_citizenid"]) && $linkable) {
+                                    echo '<a href="?p=proceeding&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                                } else {
+                                    echo '<span class="ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
+                                }
+                            }
+                        }
+                        ?>
+                    </td>
+                    <td><?php
+                        if ($linkable) {
+                            echo $pro_tier . '<a href="?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_study"] . '</a>';
+                        } else {
+                            echo $pro_tier . $row["pro_study"];
+                        }
+                        ?>
+                    </td>
+                    <td><?php
+                        if ($linkable) {
+                            // echo '<a href="?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_conf"] . '</a>';
+                            echo $row["pro_conf"];
+                        } else {
+                            echo $row["pro_conf"];
+                        }
+                        ?>
+                    </td>
+                    <td class="text-center d-none d-md-table-cell"><?php $fnc->gen_date_semi_th(($row["pro_date_begin"])) ?></td>
+                </tr>
+        <?php
+            }
+            $x++;
+        }
     }
 
     public function gen_proceeding_owner($id, $row)
     {
         $fnc = new web;
         $sum_ratio = 0;
-    ?>
+        ?>
 
         <!-- * เจ้าของผลงาน / ผู้ร่วมงาน -->
         <div class="mb-3 mt-4 col-12 col-md-8 offset-md-2">
@@ -1070,11 +1105,11 @@ class proceeding_fnc
     <?php
     }
 
-    public function proceeding_report_submenu()
+    public function data_report_submenu()
     {
         $fnc = new web;
     ?>
-        <div class="text-white-50 mb-3 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
+        <div class="text-white-50 mb-0 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
             <div class="container px-0 px-md-5">
                 <ul class="nav justify-content-end">
                     <li class="nav-item">
@@ -1104,22 +1139,201 @@ class proceeding_fnc
     <?php
     }
 
+    public function gen_table_report($disp_year)
+    {
+        global $fnc;
+    ?>
+        <table class="table table-bordered table-inverse table-responsive">
+            <thead class="thead-inverse bg-light">
+                <tr class="text-center fw-bold align-middle">
+                    <th style="width:5em;">ลำดับที่</th>
+                    <th>ชื่อ-สกุล</th>
+                    <?php ?>
+                    <th>สัดส่วน</th>
+                    <?php ?>
+                    <th>การนำเสนอผลงาน</th>
+                    <th style="width:3em;">ระดับ</th>
+                    <th>ชื่อการประุชม</th>
+                    <th>สถานที่</th>
+                    <th style="width:8.5em;">วันที่</th>
+                    <th>หมายเหตุ</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 0.85em;">
+                <?php
+                // $sql = "Select * From v_proceeding_report Where pro_status = 'enable'";
+                $sql = "SELECT pro_id FROM v_proceeding_report2 WHERE pro_status = 'enable'";
+                if (isset($_GET["cat"]) && $_GET["cat"] == 'department') {
+                    // $sql = "SELECT pro_id FROM v_proceeding_dpm WHERE pro_status = 'enable'";
+                }
+                if (isset($_GET["k"]) && $_GET["k"] != "") {
+                    // $sql .= " AND (pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR cow_citizenid LIKE '" . $_GET["k"] . "')";
+                    $sql .= " AND citizenid LIKE '" . $_GET["k"] . "'";
+                }
+                if (isset($_GET["d"]) && $_GET["d"] != "") {
+                    // $sql .= " AND (pro_department_name = '" . $_GET["d"] . "' OR cow_department_name = '" . $_GET["d"] . "')";
+                    $sql .= " AND department_name = '" . $_GET["d"] . "'";
+                }
+                if ($disp_year != "" && $disp_year != "5yrs") {
+                    $sql_year = " AND pro_fiscalyear = '" . ($disp_year) . "'";
+                } else {
+                    $sql_year = "";
+                }
+                if ($disp_year == "5yrs") {
+                    $sql_year = " AND pro_fiscalyear >= '" . ($fnc->get_fiscal_year() - 5) . "' AND pro_fiscalyear <= '" . ($fnc->get_fiscal_year()) . "'";
+                }
+                $sql_group = " Group By pro_date_begin, pro_id";
+                $sql_order = " Order By pro_date_begin Desc"; // order
+                $sql .= $sql_year . $sql_group . $sql_order;
+                $fnc->debug_console('sql proceeding table owner: \n' . $sql);
+                $data_array = $fnc->get_db_array($sql);
+                $fnc->debug_console("data array:", $data_array);
+                if (!empty($data_array)) {
+                    $this->gen_table_tr_report($data_array);
+                } else {
+                    echo '<tr style="page-break-before:auto">';
+                    echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="7">no data founded</td>';
+                    echo '</tr>';
+                } ?>
+
+            </tbody>
+        </table>
+        <?php
+    }
+
+    public function gen_table_tr_report($data_array)
+    {
+        $fnc = new web;
+
+        if (isset($_GET["act"]) && $_GET["act"] == "report") {
+            $linkable = false;
+        } else {
+            $linkable = true;
+        }
+
+        $fnc->debug_console("data list sample: ", $data_array[0]);
+        $x = 1;
+        foreach ($data_array as $pro) {
+            $sql = "SELECT proceeding.* FROM proceeding WHERE pro_id = " . $pro["pro_id"];
+            $row = $fnc->get_db_row($sql);
+            if (!empty($row)) {
+        ?>
+                <!-- <tr style="page-break-before: always;"> -->
+                <tr>
+                    <td scope="row" class="text-center"><?= $x ?></td>
+                    <td nowrap>
+                        <?php
+                        echo '<p class="m-0 border-bottom border-secondary">';
+                        if ($linkable) {
+                            echo '<a href="?p=proceeding&find=memberId&k=' . $row["pro_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"] . '</a>';
+                            // echo '<a href="?p=proceeding&find=memberId&k=' . $row["citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["prename"]) . $row["firstname"] . ' ' . $row["lastname"] . '</a>';
+                        } else {
+                            echo $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"];
+                            // echo $fnc->gen_titlePosition_short($row["prename"]) . $row["firstname"] . ' ' . $row["lastname"];
+                        }
+                        echo '</p>';
+                        echo '<strong class="text-danger">Dept:</strong>' . $row["department_name"];
+                        ?>
+                        <?php
+                        $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'proceeding' AND `cow_ref_id` = " . $row["pro_id"];
+                        // $fnc->debug_console("co worker sql: " . $sql);
+                        $co_worker = $fnc->get_db_array($sql);
+                        if (!empty($co_worker)) {
+                            foreach ($co_worker as $cow) {
+                                echo '<p class="m-0 border-bottom border-secondary ms-2">';
+                                if (!empty($cow["cow_citizenid"]) && $linkable) {
+                                    echo '<a href="?p=proceeding&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                                } else {
+                                    echo '<span class="">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
+                                }
+                                echo '</p>';
+                                echo '<strong class="text-danger ms-2">Dept:</strong>' . $cow["department_name"];
+                            }
+                        }
+                        ?>
+                    </td>
+                    <?php ?>
+                    <td class="text-center">
+                        <?= '<p class="border-bottom border-secondary">' . $row["pro_ratio"] . '</p>'; ?>
+                        <?php
+                        $sql = "SELECT cow_ratio FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'proceeding' AND `cow_ref_id` = " . $row["pro_id"];
+                        // $fnc->debug_console("co worker sql: " . $sql);
+                        $co_worker = $fnc->get_db_array($sql);
+                        if (!empty($co_worker)) {
+                            foreach ($co_worker as $cow) {
+                                echo '<p class="border-bottom border-secondary">' . $cow["cow_ratio"] . '</p>';
+                            }
+                        }
+                        ?>
+                    </td>
+                    <?php ?>
+                    <td class="text-start"><?php
+                                            if ($linkable) {
+                                                echo '<a href="?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_study"] . '</a>';
+                                            } else {
+                                                echo $row["pro_study"];
+                                            }
+                                            ?></td>
+                    <td class="text-center"><?php
+                                            if (!empty($row["pro_tier"])) {
+                                                echo $row["pro_tier"];
+                                            }
+                                            ?>
+                    </td>
+                    <td class="text-start"><?php
+                                            if (!empty($row["pro_conf"])) {
+                                                echo $row["pro_conf"];
+                                            }
+                                            ?>
+                    </td>
+                    <td><?= $row["pro_location"] ?></td>
+                    <td class="text-center">
+                        <?php
+                        if (!empty($row["pro_date_begin"])) {
+                            if (!empty($row["pro_tier"]) && $row["pro_tier"] == "ระดับนานาชาติ") {
+                                $fnc->gen_date_range_semi_en($row["pro_date_begin"], $row["pro_date_end"]);
+                            } else {
+                                $fnc->gen_date_range_semi_th($row["pro_date_begin"], $row["pro_date_end"]);
+                            }
+                        }
+                        // if (!empty($row["pro_date_end"])) {
+                        //     echo '<br>- ';
+                        //     $fnc->gen_date_semi_th(($row["pro_date_end"]));
+                        // }
+                        ?></td>
+                    <td><?php
+                        echo $row["pro_detail"];
+                        ?>
+                    </td>
+                </tr>
+        <?php
+            }
+            $x++;
+        }
+    }
+
     public function gen_report_personal()
     {
         $fnc = new web;
-    ?>
+        if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+            $disp_year = $fnc->get_fiscal_year();
+        } else {
+            $disp_year = $_GET['fyear'];
+        }
+        $fnc->debug_console("display year:\\n" . $disp_year);
+        ?>
 
-        <div class="card p-0 p-md-3 box_shadow">
-            <div class="card-header bg-light bg-gradient row">
-                <div class="col-12 col-md-12 col-lg-9">
+        <div class="card p-0 p-md-0 border border-white">
+            <div class="card-header bg-light bg-gradient row d-print-none">
+                <div class="col-12 col-md-12 col-lg-9 d-print-none">
                     <?php
                     // if ($data_status == 'delete') {
                     //     echo '<h5 class="card-title mt-2 h3 text-primary">Proceeding Deleted</h5>';
                     // } else {
-                    echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding Report by Personal</h5>';
+                    echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding Report</h5>';
                     // }
                     ?>
-                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการรายบุคคล</h6>
+                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานการตีพิมพ์ผลงานการวิจัย/บทความทางวิชาการ</h6>
                 </div>
 
                 <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3 d-print-none">
@@ -1141,45 +1355,52 @@ class proceeding_fnc
                             <input type="hidden" name="p" value="proceeding">
                             <input type="hidden" name="act" value="report">
                             <input type="hidden" name="cat" value="personal">
+                            <?php
+                            $sql = "SELECT citizenid, prename, firstname, lastname FROM v_proceeding_report2 WHERE citizenid != '' AND pro_status = 'enable' GROUP BY citizenid, prename, firstname, lastname ORDER BY firstname";
+                            $econ_member = $fnc->get_db_array($sql);
+                            $fnc->debug_console("econ member", $econ_member[0]);
+                            ?>
                             <select class="form-select form-select-sm" name="k" id="k" onchange="this.form.submit();">
+                                <!-- <select class="form-select form-select-sm" name="k" id="k" aria-label="Default select example" onchange="this.form.submit();"> -->
                                 <?php
-                                $MJU_API = new MJU_API;
-                                $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
-                                $econ_member = $MJU_API->GetAPI_array($api_url);
-                                $fnc->debug_console("econ member", $econ_member[0]);
                                 echo '<option value=""';
                                 if (!isset($_GET["k"]) || $_GET["k"] == "") {
                                     echo ' selected';
                                 }
                                 echo '>' . 'แสดงข้อมูลบุคลากรทุกคน' . '</option>';
                                 foreach ($econ_member as $member) {
-                                    echo '<option value="' . $member["citizenId"] . '"';
-                                    if (isset($_GET["k"]) && $_GET["k"] == $member["citizenId"]) {
+                                    echo '<option value="' . $member["citizenid"] . '"';
+                                    if (isset($_GET["k"]) && $_GET["k"] == $member["citizenid"]) {
                                         echo ' selected';
-                                        $cur_personal = $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"] . ' (' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ')';
+                                        $cur_personal = ' ' . $fnc->gen_titlePosition_short($member["prename"]) . ' ' . $member["firstname"] . '&nbsp;&nbsp;' . $member["lastname"];
                                     }
-                                    echo '>' . $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"] . ' (' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ')' . '</option>';
+                                    echo '>' . $member["firstname"] . '&nbsp;&nbsp;' . $member["lastname"] . ' (' . $fnc->gen_titlePosition_short($member["prename"]) . ')' . '</option>';
                                 }
                                 ?>
                             </select>
                         </div>
                         <?php
-                        $sql_year = "Select pro_fiscalyear As fyear From proceeding Where proceeding.pro_status = 'enable' Group By pro_fiscalyear Order By pro_fiscalyear Desc";
+                        $sql_year = "SELECT pro_fiscalyear As fyear FROM proceeding WHERE pro_status = 'enable' GROUP BY pro_fiscalyear ORDER BY pro_fiscalyear DESC";
+                        // $fyear = $fnc->get_db_array($sql_year);
                         $fyear = $fnc->get_db_array($sql_year);
                         $fnc->debug_console("fiscal year = ", $fyear);
+                        if ($disp_year > $fyear[0]["fyear"] && $disp_year != "5yrs") {
+                            $disp_year = $fyear[0]["fyear"];
+                            $fnc->debug_console("display year update to:\\n" . $disp_year);
+                        }
                         if (!empty($fyear)) {
                         ?>
-                            <select class="form-select form-select-sm" name="fyear" aria-label="Default select example" onchange="this.form.submit();">
+                            <select class="form-select form-select-sm" name="fyear" onchange="this.form.submit();">
                                 <?php
-                                echo '<option value=""';
-                                if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+                                echo '<option value="5yrs"';
+                                if ($disp_year == "5yrs") {
                                     echo ' selected';
                                 };
-                                echo '>แสดงทุกปี งปม.</option>';
+                                echo '>ย้อนหลัง 5 ปีงปม.</option>';
                                 // for ($y = 2565; $y >= 2560; $y--) {
                                 foreach ($fyear as $y) {
                                     echo '<option value="' . $y['fyear'] . '"';
-                                    if (isset($_GET['fyear']) && $_GET['fyear'] != "" && $_GET['fyear'] == $y['fyear']) {
+                                    if ($disp_year == $y['fyear']) {
                                         echo ' selected';
                                     };
                                     echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
@@ -1197,112 +1418,40 @@ class proceeding_fnc
 
             </div>
 
-            <div class="card-body mt-3">
+            <div class="card-body mt-0" style="font-size: 0.8em;">
                 <?php
                 if (isset($_GET['k']) && $_GET['k'] != '') {
                     $k = 'ของ' . $cur_personal;
                 } else {
                     $k = '';
                 }
-                if (isset($_GET['fyear']) && $_GET['fyear'] != '') {
-                    $y = ' ปี งปม. ' . $_GET['fyear'];
+                if ($disp_year != '') {
+                    $y = ' ปี งปม. ' . $disp_year;
                 } else {
                     $y = ' ทั้งหมด';
                 }
-                echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $k . $y . '</h5>';
+                // ***
+                // echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $k . $y . '</h5>';
+                echo '<div class="text-center">
+                <p class="h4 mb-1" style="font-size: 0.9rem;">สรุปผลงานการนำเสนอผลงานการวิจัย/บทความทางวิชาการ';
+                if (isset($_GET["k"]) && $_GET["k"] != '') {
+                    echo 'ของ' . $cur_personal;
+                }
+                echo '</p>';
+                if ($disp_year == "5yrs") {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $fnc->get_fiscal_year() . ' (ตุลาคม ' . ($fnc->get_fiscal_year() - 1) . ' - กันยายน ' . $fnc->get_fiscal_year() . ')</p>';
+                } else {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $disp_year . ' (ตุลาคม ' . ($disp_year - 1) . ' - กันยายน ' . $disp_year . ')</p>';
+                }
+                echo '<p class="h4 mb-3" style="font-size: 0.9rem;">คณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้</p>
+                </div>';
+
+                $this->gen_table_report($disp_year);
                 ?>
-                <table class="table table-striped table-bordered table-inverse table-responsive">
-                    <thead class="thead-inverse">
-                        <tr class="text-center fw-bold">
-                            <th style="width:3em;">#</th>
-                            <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                            <th>ชื่อเรื่อง</th>
-                            <th>ชื่อการประชุม</th>
-                            <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 0.85em;">
-                        <?php
-                        $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                        $sql .= "pro.pro_status LIKE 'enable'";
-                        if (isset($_GET["k"]) && $_GET["k"] != "") {
-                            $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
-                        }
-                        if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                            $sql_year = " AND pro.pro_fiscalyear LIKE '" . ($_GET["fyear"]) . "'";
-                        } else {
-                            $sql_year = "";
-                        }
-                        $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
-                        $sql_order = " ORDER BY pro.pro_date_begin Asc"; // order
-                        $sql .= $sql_year . $sql_group . $sql_order;
-                        $fnc->debug_console('sql table owner: \n' . $sql);
-                        $data_array = $fnc->get_db_array($sql);
-                        if (!empty($data_array)) {
-                            $this->gen_proceeding_tr($data_array);
-                        } else {
-                            echo '<tr style="page-break-before:auto">';
-                            echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                            echo '</tr>';
-                        } ?>
-
-                    </tbody>
-                </table>
-
             </div>
-
-            <?php if (isset($_GET['fyear']) && $_GET['fyear'] != "") { ?>
-                <div class="card-body mt-3">
-                    <?php
-                    $y = 'ย้อนหลัง 5 ปี งปม.';
-                    echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $k . ' ' . $y . '</h5>';
-                    ?>
-                    <table class="table table-striped table-bordered table-inverse table-responsive">
-                        <thead class="thead-inverse|thead-default">
-                            <tr class="text-center fw-bold">
-                                <th style="width:3em;">#</th>
-                                <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                                <th>ชื่อเรื่อง</th>
-                                <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                            </tr>
-                        </thead>
-                        <tbody style="font-size: 0.85em;">
-                            <?php
-                            $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                            $sql .= "pro.pro_status LIKE 'enable'";
-                            if (isset($_GET["k"]) && $_GET["k"] != "") {
-                                $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
-                            }
-                            if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                                $sql_year = " AND pro.pro_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND pro.pro_fiscalyear < '" . ($_GET["fyear"]) . "'";
-                            } else {
-                                $sql_year = "";
-                            }
-                            $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
-                            $sql_order = " ORDER BY pro.pro_date_begin Asc"; // order
-                            $sql .= $sql_year . $sql_group . $sql_order;
-                            $fnc->debug_console('sql table owner: \n' . $sql);
-                            $data_array = $fnc->get_db_array($sql);
-                            if (!empty($data_array)) {
-                                $this->gen_proceeding_tr($data_array);
-                            } else {
-                                echo '<tr style="page-break-before:auto">';
-                                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                                echo '</tr>';
-                            } ?>
-
-                        </tbody>
-                    </table>
-
-                </div>
-            <?php } ?>
 
             <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
                 last update: <?= date('M d, Y'); ?>
-                <!-- <div class="col mt-3">
-                <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button>
-
-            </div> -->
             </div>
 
             </form>
@@ -1313,19 +1462,25 @@ class proceeding_fnc
     public function gen_report_department()
     {
         $fnc = new web;
+        if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+            $disp_year = $fnc->get_fiscal_year();
+        } else {
+            $disp_year = $_GET['fyear'];
+        }
+        $fnc->debug_console("display year:\\n" . $disp_year);
     ?>
-
-        <div class="card p-0 p-md-3 box_shadow">
-            <div class="card-header bg-light bg-gradient row">
-                <div class="col-12 col-md-8 col-lg-9">
+        <div class="card p-0 p-md-0 border border-white">
+            <div class="card-header bg-light bg-gradient row d-print-none">
+                <div class="col-12 col-md-12 col-lg-9 d-print-none">
                     <?php
                     // if ($data_status == 'delete') {
                     //     echo '<h5 class="card-title mt-2 h3 text-primary">Proceeding Deleted</h5>';
                     // } else {
                     echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding Report by Department</h5>';
                     // }
+
                     ?>
-                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการของหลักสูตร</h6>
+                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการ ของหลักสูตร</h6>
                 </div>
 
                 <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3 d-print-none">
@@ -1356,22 +1511,27 @@ class proceeding_fnc
                             </select>
                         </div>
                         <?php
-                        $sql_year = "Select pro_fiscalyear As fyear From proceeding Where proceeding.pro_status = 'enable' Group By pro_fiscalyear Order By pro_fiscalyear Desc";
+                        $sql_year = "SELECT pro_fiscalyear As fyear FROM proceeding WHERE pro_status = 'enable' GROUP BY pro_fiscalyear ORDER BY pro_fiscalyear DESC";
                         $fyear = $fnc->get_db_array($sql_year);
                         $fnc->debug_console("b year = ", $fyear);
+                        $fnc->debug_console("b year sql = ", $sql_year);
+                        if ($disp_year > $fyear[0]["fyear"] && $disp_year != "5yrs") {
+                            $disp_year = $fyear[0]["fyear"];
+                            $fnc->debug_console("display year update to:\\n" . $disp_year);
+                        }
                         if (!empty($fyear)) {
                         ?>
-                            <select class="form-select form-select-sm" name="fyear" aria-label="Default select example" onchange="this.form.submit();">
+                            <select class="form-select form-select-sm" name="fyear" onchange="this.form.submit();">
                                 <?php
-                                echo '<option value=""';
-                                if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
+                                echo '<option value="5yrs"';
+                                if ($disp_year == "5yrs") {
                                     echo ' selected';
                                 };
-                                echo '>แสดงทั้งหมด</option>';
+                                echo '>ย้อนหลัง 5 ปีงปม.</option>';
                                 // for ($y = 2565; $y >= 2560; $y--) {
                                 foreach ($fyear as $y) {
                                     echo '<option value="' . $y['fyear'] . '"';
-                                    if (isset($_GET['fyear']) && $_GET['fyear'] != "" && $_GET['fyear'] == $y['fyear']) {
+                                    if ($disp_year == $y['fyear']) {
                                         echo ' selected';
                                     };
                                     echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
@@ -1389,7 +1549,7 @@ class proceeding_fnc
 
             </div>
 
-            <div class="card-body mt-3">
+            <div class="card-body mt-0" style="font-size: 0.8em;">
                 <?php
                 if (isset($_GET['d']) && $_GET['d'] != '') {
                     $d = 'ของ' . $cur_department;
@@ -1401,100 +1561,28 @@ class proceeding_fnc
                 } else {
                     $y = ' ทั้งหมด';
                 }
-                echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $d . $y . '</h5>';
+                // ***
+                // echo '<h5 class="card-title mt-2 h5 text-primary">research ' . $d . $y . '</h5>';
+                echo '<div class="text-center">
+                <p class="h4 mb-1" style="font-size: 0.9rem;">สรุปผลงานการนำเสนอผลงานการวิจัย/บทความทางวิชาการ';
+                if (isset($_GET["d"]) && $_GET["d"] != '') {
+                    echo ' ของ' . $_GET["d"];
+                }
+                echo '</p>';
+                if ($disp_year == "5yrs") {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $fnc->get_fiscal_year() . ' (ตุลาคม ' . ($fnc->get_fiscal_year() - 1) . ' - กันยายน ' . $fnc->get_fiscal_year() . ')</p>';
+                } else {
+                    echo '<p class="h4 mb-1" style="font-size: 0.9rem;">ปีงบประมาณ ' . $disp_year . ' (ตุลาคม ' . ($disp_year - 1) . ' - กันยายน ' . $disp_year . ')</p>';
+                }
+                echo '<p class="h4 mb-3" style="font-size: 0.9rem;">คณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้</p>
+                </div>';
+
+                $this->gen_table_report($disp_year);
                 ?>
-                <table class="table table-striped table-bordered table-inverse table-responsive">
-                    <thead class="thead-inverse|thead-default">
-                        <tr class="text-center fw-bold">
-                            <th style="width:3em;">#</th>
-                            <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                            <th>ชื่อเรื่อง</th>
-                            <th>ชื่อการประชุม</th>
-                            <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 0.85em;">
-                        <?php
-                        $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                        $sql .= "pro.pro_status LIKE 'enable'";
-                        if (isset($_GET["d"]) && $_GET["d"] != "") {
-                            $sql .= " AND (pro.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
-                        }
-                        if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                            $sql_year = " AND (pro.pro_fiscalyear) LIKE '" . ($_GET["fyear"]) . "'";
-                        } else {
-                            $sql_year = "";
-                        }
-                        $sql_group = " Group By pro.pro_fiscalyear, pro.pro_id";
-                        $sql_order = " ORDER BY pro.pro_id Asc"; // order
-                        $sql .= $sql_year . $sql_group . $sql_order;
-                        $fnc->debug_console('sql table owner: \n' . $sql);
-                        $data_array = $fnc->get_db_array($sql);
-                        if (!empty($data_array)) {
-                            $this->gen_proceeding_tr($data_array);
-                        } else {
-                            echo '<tr style="page-break-before:auto">';
-                            echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                            echo '</tr>';
-                        } ?>
-
-                    </tbody>
-                </table>
-
             </div>
-
-            <?php if (isset($_GET['fyear']) && $_GET['fyear'] != '') { ?>
-                <div class="card-body mt-3">
-                    <?php
-                    $y = 'ย้อนหลัง 5 ปี งปม.';
-                    echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $d . ' ' . $y . '</h5>';
-                    ?>
-                    <table class="table table-striped table-bordered table-inverse table-responsive">
-                        <thead class="thead-inverse|thead-default">
-                            <tr class="text-center fw-bold">
-                                <th style="width:3em;">#</th>
-                                <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                                <th>ชื่อเรื่อง</th>
-                                <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                            </tr>
-                        </thead>
-                        <tbody style="font-size: 0.85em;">
-                            <?php
-                            $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                            $sql .= "pro.pro_status LIKE 'enable'";
-                            if (isset($_GET["d"]) && $_GET["d"] != "") {
-                                $sql .= " AND (pro.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
-                            }
-                            if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                                $sql_year = " AND pro.pro_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND pro.pro_fiscalyear < '" . ($_GET["fyear"]) . "'";
-                            } else {
-                                $sql_year = "";
-                            }
-                            $sql_group = " Group By pro.pro_fiscalyear, pro.pro_id";
-                            $sql_order = " ORDER BY pro.pro_id Asc"; // order
-                            $sql .= $sql_year . $sql_group . $sql_order;
-                            $fnc->debug_console('sql table owner: \n' . $sql);
-                            $data_array = $fnc->get_db_array($sql);
-                            if (!empty($data_array)) {
-                                $this->gen_proceeding_tr($data_array);
-                            } else {
-                                echo '<tr style="page-break-before:auto">';
-                                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                                echo '</tr>';
-                            } ?>
-
-                        </tbody>
-                    </table>
-
-                </div>
-            <?php } ?>
 
             <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
                 last update: <?= date('M d, Y'); ?>
-                <!-- <div class="col mt-3">
-                <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button>
-
-            </div> -->
             </div>
 
             </form>

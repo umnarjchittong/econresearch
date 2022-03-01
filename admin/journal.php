@@ -30,60 +30,63 @@ $journal_fnc = new journal_fnc();
 
 <body style="background-color: #DFD9EA;">
 
-<?php include('main_menu.php'); ?>
+    <div class="d-print-none">
+        <?php include('main_menu.php'); ?>
+    </div>
 
     <?php
     // * sub-menu
     if (isset($_GET['act']) && $_GET['act'] == "report") {
-        $journal_fnc->journal_report_submenu();
+        $journal_fnc->data_report_submenu();
     } else {
-        echo '<div style="margin-top:3em;">&nbsp;</div>';
+        echo '<div class="d-print-none" style="margin-top:2em; height: 1.5em;"></div>';
     }
     ?>
 
-    <main class="mb-3">
-        <div class="container mx-auto py-3">
+    <?php
+    if (isset($_GET['p']) && $_GET['p'] == 'journal' && $_GET['act'] != 'report') {
+        echo '<main class="mb-3">
+                <div class="container mx-auto py-3">';
+        if (isset($_GET['act']) && $_GET['act'] == "append") {
+            $journal_fnc->gen_append_form();
+        } elseif (isset($_GET['jid']) && $_GET['act'] == "update") {
+            $journal_fnc->gen_update_form($_GET['jid']);
+        } elseif (isset($_GET['jid']) && $_GET['act'] == "viewinfo") {
+            $journal_fnc->gen_data_info($_GET['jid']);
+        } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
+            $journal_fnc->gen_journal_table('delete');
+        } elseif (isset($_GET['jid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
+            $journal_fnc->gen_journal_coworker($_GET['jid']);
+        } elseif (isset($_GET['jid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
+            $journal_fnc->gen_journal_attachment($_GET['jid']);
+        } else {
+            $journal_fnc->gen_journal_table();
+        }
+        echo '</div>
+                </main>';
+    } else {
+        // echo "none parameters";
+    }
+    ?>
 
-            <?php
-            if (isset($_GET['p']) && $_GET['p'] != '') {
-                switch ($_GET['p']) {
-                    case "journal":
-                        if (isset($_GET['act']) && $_GET['act'] == "append") {
-                            $journal_fnc->gen_append_form();
-                        } elseif (isset($_GET['jid']) && $_GET['act'] == "update") {
-                            $journal_fnc->gen_update_form($_GET['jid']);
-                        } elseif (isset($_GET['jid']) && $_GET['act'] == "viewinfo") {
-                            $journal_fnc->gen_data_info($_GET['jid']);
-                        } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
-                            $journal_fnc->gen_journal_table('delete');
-                        } elseif (isset($_GET['cat']) && $_GET['cat'] != '') {
-                            switch ($_GET['cat']) {
-                                case "personal":
-                                    $journal_fnc->gen_report_personal();
-                                    break;
-                                case "department":
-                                    $journal_fnc->gen_report_department();
-                                    break;
-                                case "apasample":
-                                    $journal_fnc->gen_report_apa();
-                                    break;
-                            }
-                        } elseif (isset($_GET['jid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                            $journal_fnc->gen_journal_coworker($_GET['jid']);
-                        } elseif (isset($_GET['jid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
-                            $journal_fnc->gen_journal_attachment($_GET['jid']);
-                        } else {
-                            $journal_fnc->gen_journal_table();
-                        }
-                        break;
-                }
-            } else {
-                echo "none parameters";
+    <?php
+    if (isset($_GET['act']) && $_GET['act'] == 'report') {
+        if (isset($_GET['cat']) && $_GET['cat'] != '') {
+            switch ($_GET['cat']) {
+                case "personal":
+                    $journal_fnc->gen_report_personal();
+                    break;
+                case "department":
+                    $journal_fnc->gen_report_department();
+                    break;
+                case "apasample":
+                    $journal_fnc->gen_report_apa();
+                    break;
             }
-            ?>
+        }
+    }
 
-        </div>
-    </main>
+    ?>
 
 
     <!-- Bootstrap JavaScript Libraries -->

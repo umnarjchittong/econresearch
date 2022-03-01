@@ -66,11 +66,21 @@
                             </li>
                             <li><a class="dropdown-item" href="../admin/report.php">reports</a></li>
                             <li><a class="dropdown-item" href="../admin/datatable.php">data table</a></li>
+                            <li><a class="dropdown-item" href="../admin/setting.php?p=chkFiscalYear">Fiscal Year</a></li>
                             <li><a class="dropdown-item" href="../admin/setting.php">Settings</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=dev">Developer</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=admin">Admin</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=dean">Dean</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=">Officer</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=Katesuda">Katesuda</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=Prasert">Prasert</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../sign/signout.php?p=signout">Sign-out</a>
+                        <a class="nav-link" href="#" onclick="signout_confirmation();">Sign-out</a>
                     </li>
                 </ul>
             </div>
