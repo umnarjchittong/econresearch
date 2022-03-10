@@ -41,6 +41,14 @@ if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
 <body>
     <?PHP include("header.php"); ?>
 
+    <?PHP
+    include ('homepage_configure.php');
+    
+    echo '<div class="container">';
+    include('carousel.php');
+    echo '</div>';
+    ?>
+
     <?php
     function gen_data_blog($row)
     {
@@ -51,9 +59,9 @@ if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
         $data_array = $fnc->get_db_array($sql);
         $researcher_list = "";
         echo '<p class="researcher_list">';
-        foreach ($data_array as $cow) {
-            $researcher_list .= ', ' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . '&nbsp;&nbsp;' . $cow["cow_lastname"];
-        }
+        // foreach ($data_array as $cow) {
+        //     $researcher_list .= ', ' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . '&nbsp;&nbsp;' . $cow["cow_lastname"];
+        // }
         echo $row['proj_owner_prename'] . $row['proj_owner_firstname'] . ' ' . $row['proj_owner_lastname'] . $researcher_list;
         echo '</p>';
         echo '<p class="research_source"><strong>แหล่งทุน</strong> ' . $row['proj_budget_source'] . '</p>';

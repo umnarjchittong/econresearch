@@ -1,8 +1,10 @@
 <!doctype html>
 <?php
+// die('<h1>NO USED</h1>');
 require('../vendor/autoload.php');
 require('../core.php');
 $fnc = new web;
+$sql_display_limit = ' limit 5';
 
 if (empty($_SESSION["admin"])) {
     die('<meta http-equiv="refresh" content="0;url=../sign/">');
@@ -11,1661 +13,350 @@ if (empty($_SESSION["admin"])) {
 }
 
 
-function gen_append_form()
+function gen_my_research($data_array)
 {
     global $fnc;
+    $linkable = 'true';
 ?>
-    <div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient">
-            <h5 class="card-title mt-2 h3 text-primary">Proceeding: New</h5>
-            <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">การนำเสนอผลงานวิจัย/ผลงานทางวิชาการ</h6>
-        </div>
-
-        <form action="../db_mgt.php" method="post" autocomplete="off">
-            <div class="card-body mt-3">
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="pro_study" id="pro_study" aria-describedby="pro_studyHelp" placeholder="ชื่อผลงาน/เรื่อง" required>
-                    <label for="pro_study" class="form-label">ชื่อผลงาน/เรื่อง <span class="lbl_required">*</span></label>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="pro_conf" id="pro_conf" aria-describedby="pro_confHelp" placeholder="ชื่อการการประชุมวิชาการ" required>
-                    <label for="pro_conf" class="form-label">ชื่อการประชุมวิชาการ <span class="lbl_required">*</span></label>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="pro_conf_owner" id="pro_conf_owner" aria-describedby="pro_conf_ownerHelp" placeholder="หน่วยงานที่จัดประชุม">
-                    <label for="pro_conf_owner" class="form-label">หน่วยงานที่จัดประชุม</label>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="pro_location" id="pro_location" aria-describedby="pro_locationHelp" placeholder="สถานที่จัดประชุม">
-                    <label for="pro_location" class="form-label">สถานที่จัดประชุม</label>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="pro_volume_issue" id="pro_volume_issue" aria-describedby="pro_volume_issueHelp" placeholder="9(1)">
-                    <label for="pro_volume_issue" class="form-label">ปีที่ Volume (ฉบับที่ Issue) </label>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="pro_page" id="pro_page" aria-describedby="pro_pageHelp" placeholder="101-104">
-                    <label for="pro_page" class="form-label">หน้าที่ตีพิมพ์ </label>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="pro_link" id="pro_link" aria-describedby="pro_linkHelp" placeholder="http://mju.ac.th">
-                    <label for="pro_link" class="form-label">ลิงก์ออนไลน์ </label>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-12 col-md-6 mb-3">
-                        <label for="pro_date_begin" class="form-label">ระดับการนำเสนอ <span class="lbl_required">*</span></label>
-                        <div class="col-12 mb-3">
-                            <div class="form-check form-check-inline ms-2 ms-md-5">
-                                <input class="form-check-input" type="radio" name="pro_tier" id="pro_tier_1" value="ระดับชาติ" checked>
-                                <label class="form-check-label" for="pro_tier_1">ชาติ</label>
-                            </div>
-                            <div class="form-check form-check-inline ms-2 ms-md-3">
-                                <input class="form-check-input" type="radio" name="pro_tier" id="pro_tier_2" value="ระดับนานาชาติ">
-                                <label class="form-check-label" for="pro_tier_2">นานาชาติ</label>
-                            </div>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <div class="row g-3">
-                                <div class="col-md-6 form-floating">
-                                    <input type="date" class="form-control" name="pro_date_begin" id="pro_date_begin" aria-describedby="pro_date_beginHelp" required>
-                                    <label for="pro_date_begin" class="form-label">วันที่นำเสนอ <span class="lbl_required">*</span></label>
-                                </div>
-                                <div class="col-md-6  form-floating">
-                                    <input type="date" class="form-control" name="pro_date_end" id="pro_date_end" aria-describedby="pro_date_endHelp">
-                                    <label for="pro_date_end" class="form-label">วันที่สิ้นสุด (ถ้ามี)</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-floating col-12 mb-3">
-                            <textarea class="form-control" name="pro_detail" id="pro_detail" rows="5" style="height: 10em;" placeholder="(ถ้ามี)"></textarea>
-                            <label for="pro_detail" class="form-label">รายละเอียด</label>
-                        </div>
-
-                    </div>
-
-                    <div class="col-12 col-md-6 mb-3">
-                        <?php
-                        $sql_department = "SELECT `department_name` FROM `department` WHERE `department_name` <> '' ORDER BY `department_order`,`department_name`";
-                        $dept = $fnc->get_db_array($sql_department);
-                        if (!empty($dept)) { ?>
-                            <div class="col-12 mb-3 form-floating">
-                                <select class="form-select" name="department_name" id="department_name" aria-describedby="department_nameHelp" required>
-                                    <?php
-                                    $sql = "SELECT * FROM `department` ORDER BY `department_order`, `department_name`";
-                                    $data_array = $fnc->get_db_array($sql);
-                                    echo '<option value=""';
-                                    echo ' selected';
-                                    echo '>ไม่ระบุ</option>';
-                                    foreach ($data_array as $opt) {
-                                        echo '<option value="' . $opt["department_name"] . '"';
-                                        if ($dept['department_name'] == $opt['department_name']) {
-                                            // echo ' selected';
-                                        }
-                                        echo '>' . $opt["department_name"] . '</option>';
-                                    }
-                                    ?>
-                                </select>
-                                <label for="department_name" class="form-label">หลักสูตร/สาขาวิชา <span class="lbl_required">*</span></label>
-                            </div>
-                        <?php } ?>
-
-                        <div class="col-12 mb-3 form-floating">
-                            <select class="form-select" size="8" style="height: 10em;" name="pro_owner_citizenid" id="pro_owner_citizenid" aria-describedby="pro_owner_citizenidHelp" required>
-                                <?php
-                                $MJU_API = new MJU_API;
-                                $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
-                                $econ_member = $MJU_API->GetAPI_array($api_url);
-                                $fnc->debug_console("econ member", $econ_member[0]);
-                                foreach ($econ_member as $member) {
-                                    echo '<option value="' . $member["citizenId"] . '">' . $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"] . ' (' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ')' . '</option>';
-                                }
-                                ?>
-                            </select>
-                            <label for="pro_owner_citizenid" class="form-label">Owner <span class="lbl_required">*</span></label>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="col form-floating">
-                                <input type="number" class="form-control" name="pro_ratio" id="pro_ratio" aria-describedby="pro_ratioHelp" value="100" max="100" maxlength="5">
-                                <label for="pro_ratio" class="form-label">สัดส่วน (%)</label>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="card-footer text-end">
-                <input type="hidden" name="fst" value="proceeding_append">
-                <div class="row px-3 gx-3 mt-3">
-                    <div class="col-6 col-md-3 offset-md-6">
-                        <button type="button" class="btn btn-secondary w-100 py-2 text-uppercase" onclick="window.location='?p=proceeding'">close</button>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <button type="submit" class="btn btn-primary w-100 py-2 ms-3 text-uppercase">Save</button>
-                    </div>
-                </div>
-            </div>
-
-        </form>
-    </div>
-<?php
-}
-
-function gen_update_form($pro_id)
-{
-    global $fnc;
-    $sql = "SELECT * FROM `proceeding` WHERE `pro_id` = " . $pro_id;
-    $row = $fnc->get_db_row($sql);
-    $fnc->debug_console("data row: ", $row);
-?>
-    <div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient row justify-content-between">
-            <div class="col-auto">
-                <h5 class="card-title mt-2 h3 text-primary">Proceeding: Updating</h5>
-                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">การนำเสนอผลงานวิจัย/ผลงานทางวิชาการ - ปรับปรุงข้อมูล</h6>
-            </div>
-
-            <?php gen_proceeding_action_menu(); ?>
-        </div>
-
-
-        <form action="../db_mgt.php" method="post" autocomplete="off">
-            <div class="card-body mt-3">
-                <div class="col mb-3 form-floating">
-                    <input type="text" class="form-control" name="pro_study" id="pro_study" aria-describedby="pro_studyHelp" value="<?= $row["pro_study"] ?>" required>
-                    <label for="pro_study" class="form-label">ชื่อผลงาน/เรื่อง <span class="lbl_required">*</span></label>
-                    <!-- <div id="pro_studyHelp" class="form-text">We'll never share your email with anyone else.</div> -->
-                </div>
-
-                <div class="col mb-3 form-floating">
-                    <input type="text" class="form-control" name="pro_conf" id="pro_conf" aria-describedby="pro_confHelp" value="<?= $row["pro_conf"] ?>" required>
-                    <label for="pro_conf" class="form-label">ชื่อการประชุมวิชาการ <span class="lbl_required">*</span></label>
-                </div>
-
-                <div class="col mb-3 form-floating">
-                    <input type="text" class="form-control" name="pro_conf_owner" id="pro_conf_owner" aria-describedby="pro_conf_ownerHelp" value="<?= $row["pro_conf_owner"] ?>">
-                    <label for="pro_conf_owner" class="form-label">หน่วยงานที่จัดประชุม</label>
-                </div>
-
-                <div class="col mb-3 form-floating">
-                    <input type="text" class="form-control" name="pro_location" id="pro_location" aria-describedby="pro_locationHelp" value="<?= $row["pro_location"] ?>">
-                    <label for="pro_location" class="form-label">สถานที่จัดประชุม</label>
-                </div>
-
-                <div class="col mb-3 form-floating">
-                    <input type="text" class="form-control" name="pro_volume_issue" id="pro_volume_issue" aria-describedby="pro_volume_issueHelp" value="<?= $row["pro_volume_issue"] ?>">
-                    <label for="pro_volume_issue" class="form-label">ปีที่ Volume (ฉบับที่ Issue) </label>
-                </div>
-
-                <div class="col mb-3 form-floating">
-                    <input type="text" class="form-control" name="pro_page" id="pro_page" aria-describedby="pro_pageHelp" value="<?= $row["pro_page"] ?>">
-                    <label for="pro_page" class="form-label">หน้าที่ตีพิมพ์ </label>
-                </div>
-
-                <div class="col mb-3 form-floating">
-                    <input type="text" class="form-control" name="pro_link" id="pro_link" aria-describedby="pro_linkHelp" value="<?= $row["pro_link"] ?>">
-                    <label for="pro_link" class="form-label">ลิงก์ออนไลน์ </label>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-12 col-md-6 mb-3">
-                        <label for="pro_date_begin" class="form-label">ระดับการนำเสนอ <span class="lbl_required">*</span></label>
-                        <div class="col-12 mb-3">
-                            <div class="form-check form-check-inline ms-2 ms-md-5">
-                                <input class="form-check-input" type="radio" name="pro_tier" id="pro_tier_1" value="ระดับชาติ" <?php if ($row["pro_tier"] == 'ระดับชาติ') {
-                                                                                                                                    echo ' checked';
-                                                                                                                                } ?>>
-                                <label class="form-check-label" for="pro_tier_1">ชาติ</label>
-                            </div>
-                            <div class="form-check form-check-inline ms-2 ms-md-3">
-                                <input class="form-check-input" type="radio" name="pro_tier" id="pro_tier_2" value="ระดับนานาชาติ" <?php if ($row["pro_tier"] == 'ระดับนานาชาติ') {
-                                                                                                                                        echo ' checked';
-                                                                                                                                    } ?>>
-                                <label class="form-check-label" for="pro_tier_2">นานาชาติ</label>
-                            </div>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <div class="row g-3">
-                                <div class="col-md-6 form-floating">
-                                    <input type="date" class="form-control" name="pro_date_begin" id="pro_date_begin" aria-describedby="pro_date_beginHelp" value="<?= $row["pro_date_begin"] ?>" required>
-                                    <label for="pro_date_begin" class="form-label">วันที่นำเสนอ <span class="lbl_required">*</span></label>
-                                </div>
-                                <div class="col-md-6 form-floating">
-                                    <input type="date" class="form-control" name="pro_date_end" id="pro_date_end" aria-describedby="pro_date_endHelp" value="<?= $row["pro_date_end"] ?>">
-                                    <label for="pro_date_end" class="form-label">วันที่สิ้นสุด (ถ้ามี)</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 mb-3 form-floating">
-                            <textarea class="form-control" name="pro_detail" id="pro_detail" rows="5" style="height: 10em;" placeholder="(ถ้ามี)"><?= $row["pro_detail"] ?></textarea>
-                            <label for="pro_detail" class="form-label">รายละเอียด</label>
-                        </div>
-
-                        <!-- <div class="col-12 mb-3">
-                                    <label for="pro_attach" class="form-label">ไฟล์แนบ (ถ้ามี)</label>
-                                    <input class="form-control" type="file" name="pro_attach" id="pro_attach" accept=".pdf" multiple>
-                                </div> -->
-
-                    </div>
-
-                    <div class="col-12 col-md-6 mb-3">
-                        <?php
-                        $sql_department = "SELECT `department_name` FROM `department` WHERE `department_name` <> '' ORDER BY `department_order`,`department_name`";
-                        $dept = $fnc->get_db_array($sql_department);
-                        if (!empty($dept)) { ?>
-                            <div class="col-12 mb-3 form-floating">
-                                <select class="form-select" name="department_name" id="department_name" aria-describedby="department_nameHelp">
-                                    <?php
-                                    $sql = "SELECT * FROM `department` ORDER BY `department_order`, `department_name`";
-                                    $data_array = $fnc->get_db_array($sql);
-                                    echo '<option value=""';
-                                    if ($row['department_name'] == "") {
-                                        echo ' selected';
-                                    }
-                                    echo '>' . 'ไม่ระบุ' . '</option>';
-                                    foreach ($data_array as $opt) {
-                                        echo '<option value="' . $opt["department_name"] . '"';
-                                        if ($row['department_name'] == $opt['department_name']) {
-                                            echo ' selected';
-                                        }
-                                        echo '>' . $opt["department_name"] . '</option>';
-                                    }
-                                    ?>
-                                </select>
-                                <label for="department_name" class="form-label">หลักสูตร/สาขาวิชา <span class="lbl_required">*</span></label>
-                            </div>
-                        <?php } elseif (!empty($row['department_name'])) { ?>
-                            <div class="col-12 mb-3">
-                                <label for="department_name" class="form-label">หลักสูตร/สาขาวิชา <span class="lbl_required">*</span></label>
-                                <input type="text" class="form-control" name="department_name" id="department_name" aria-describedby="department_nameHelp" value="<?= $row["department_name"] ?>" readonly>
-                            </div>
-                        <?php } ?>
-
-                        <div class="col-12 mb-3 form-floating">
-                            <select class="form-select" size="8" style="height: 10em;" name="pro_owner_citizenid" id="pro_owner_citizenid" aria-describedby="pro_owner_citizenidHelp">
-                                <?php
-                                $MJU_API = new MJU_API;
-                                $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
-                                // $econ_member = $MJU_API->GetAPI_array($api_url);
-                                $econ_member = econ_member_remove_exists($pro_id, $MJU_API->GetAPI_array($api_url), "owner");
-                                $fnc->debug_console("econ member", $econ_member[0]);
-                                foreach ($econ_member as $member) {
-                                    echo '<option value="' . $member["citizenId"] . '"';
-                                    if ($row["pro_owner_citizenid"] == $member["citizenId"]) {
-                                        echo ' selected';
-                                    }
-                                    echo '>' . $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"] . ' (' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ')' . '</option>';
-                                }
-                                ?>
-                            </select>
-                            <label for="pro_owner_citizenid" class="form-label">Owner <span class="lbl_required">*</span></label>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="col form-floating">
-                                <input type="number" class="form-control" name="pro_ratio" id="pro_ratio" aria-describedby="pro_ratioHelp" max="100" value="<?= $row["pro_ratio"] ?>" maxlength="5">
-                                <label for="pro_ratio" class="form-label">สัดส่วน (%)</label>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="card-footer text-end">
-                <input type="hidden" name="fst" value="proceeding_update">
-                <input type="hidden" name="pro_id" value="<?= $pro_id ?>">
-                <div class="row px-3 gx-3 mt-3">
-                    <div class="col-6 col-md-3 offset-md-6">
-                        <button type="button" class="btn btn-outline-secondary w-100 py-2 text-uppercase" onclick="window.open('../admin/?p=proceeding&act=viewinfo&pid=<?= $pro_id ?>','_top');">close</button>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <button type="submit" class="btn btn-outline-primary w-100 py-2 ms-3 text-uppercase">Update</button>
-                    </div>
-                </div>
-            </div>
-
-        </form>
-    </div>
-    <?php
-}
-
-function gen_proceeding_tr($data_array)
-{
-    global $fnc;
-
-    if (isset($_GET["act"]) && $_GET["act"] == "report") {
-        $linkable = false;
-    } else {
-        $linkable = true;
-    }
-
-    $fnc->debug_console("data list: ", $data_array);
-    $x = 1;
-    foreach ($data_array as $row) {
-        if (!empty($row["pro_tier"]) && $row["pro_tier"] == "ระดับนานาชาติ") {
-            $pro_tier = '../images/tier_icon_global_64.png';
-        } else {
-            $pro_tier = '../images/tier_icon_local_64.png';
-        }
-        $pro_tier = '<img src="' . $pro_tier . '" class="mb-1 me-2" width="16em">';
-    ?>
-        <tr>
-            <td scope="row" class="text-center"><?= $x ?></td>
-            <td class="d-none d-md-table-cell" nowrap><?php
-                                                if ($linkable) {
-                                                    echo '<a href="?p=proceeding&find=memberId&k=' . $row["pro_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"] . '</a>';
-                                                } else {
-                                                    echo $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"];
-                                                }
-                                                ?>
-                <?php
-                $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'proceeding' AND `cow_ref_id` = " . $row["pro_id"];
-                $fnc->debug_console("co worker sql: " . $sql);
-                $co_worker = $fnc->get_db_array($sql);
-                if (!empty($co_worker)) {
-                    // $fnc->debug_console("co worker data: " . " pro id " . $row["pro_id"] . " cnt " . count($co_worker) . " - " , $co_worker);
-                    foreach ($co_worker as $cow) {
-                        echo '<br>';
-                        if (!empty($cow["cow_citizenid"]) && $linkable) {
-                            echo '<a href="?p=proceeding&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
-                        } else {
-                            echo '<span class="ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
-                        }
-                    }
-                }
-                ?>
-            </td>
-            <td><?php
-                if ($linkable) {
-                    echo $pro_tier . '<a href="?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_study"] . '</a>';
-                } else {
-                    echo $pro_tier . $row["pro_study"];
-                }
-                ?>
-            </td>
-            <td><?php
-                if ($linkable) {
-                    // echo '<a href="?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_conf"] . '</a>';
-                    echo $row["pro_conf"];
-                } else {
-                    echo $row["pro_conf"];
-                }
-                ?>
-            </td>
-            <td class="text-center d-none d-md-table-cell"><?php $fnc->gen_date_semi_th(($row["pro_date_begin"])) ?></td>
-        </tr>
-    <?php
-        $x++;
-    }
-}
-
-function gen_proceeding_table($data_status = 'enable')
-{
-    global $fnc;
-    ?>
-    <div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient row">
-            <div class="col-12 col-md-8 col-lg-9">
-                <?php
-                if ($data_status == 'delete') {
-                    echo '<h5 class="card-title mt-2 h3 text-primary">Proceeding Deleted</h5>';
-                } else {
-                    echo '<h5 class="card-title mt-2 h3 text-primary">Proceedings Management</h5>';
-                }
-                ?>
-                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการ</h6>
-            </div>
-
-            <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3">
-                <form action="?" method="get">
-                    <?php
-                    if (isset($_GET['find']) && $_GET['find'] == 'memberId') {
-                        if (isset($_GET['find']) && $_GET['find'] != '') {
-                            echo '<input type="hidden" name="find" value="' . $_GET['find'] . '">';
-                        }
-                        if (isset($_GET['k']) && $_GET['k'] != '') {
-                            echo '<input type="hidden" name="k" value="' . $_GET['k'] . '">';
-                        }
-                    } else {
-                    ?>
-                    <?php
-
-                    } ?>
-                    <div class="input-group mb-0">
-                        <input type="hidden" name="find" value="search">
-                        <input type="text" class="form-control form-control-sm" name="k" placeholder="ค้นหา" <?php if (isset($_GET['find']) && $_GET['find'] == "search") {
-                                                                                                                    echo ' value="' . $_GET['k'] . '"';
-                                                                                                                } ?> aria-describedby="button-addon2">
-                        <button class="btn btn-outline-info btn-sm" type="submit" id="button-addon2">ค้น</button>
-                    </div>
-                    <?php
-                    $sql_year = "Select Year(proceeding.pro_date_begin) As b_year From proceeding Where proceeding.pro_status = 'enable' Group By Year(proceeding.pro_date_begin)";
-                    $byear = $fnc->get_db_array($sql_year);
-                    $fnc->debug_console("b year = ", $byear);
-                    if (!empty($byear)) {
-                    ?>
-                        <select class="form-select form-select-sm" name="byear" aria-label="Default select example" onchange="this.form.submit();">
+    <table class="table table-striped table-bordered table-hover table-inverse table-responsive">
+        <thead class="thead-inverse|thead-default">
+            <tr class="text-center fw-bold">
+                <th style="width:3em;">#</th>
+                <th class="d-none d-md-table-cell">นักวิจัย</th>
+                <th>ชื่องานวิจัย/เรื่อง</th>
+                <th>แหล่งทุน</th>
+                <th class="d-none d-md-table-cell" style="width:7em;">ระยะเวลา</th>
+            </tr>
+        </thead>
+        <tbody style="font-size: 0.85em;">
+            <?php
+            if (!empty($data_array)) {
+                $x = 1;
+                foreach ($data_array as $row) {
+            ?>
+                    <tr>
+                        <td scope="row" class="text-center"><?= $x ?></td>
+                        <td class="d-none d-md-table-cell" nowrap><?php
+                                                                    if ($linkable) {
+                                                                        echo '<a href="research.php?p=research&find=memberId&k=' . $row["res_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["res_owner_prename"]) . $row["res_owner_firstname"] . ' ' . $row["res_owner_lastname"] . '</a>';
+                                                                    } else {
+                                                                        echo $fnc->gen_titlePosition_short($row["res_owner_prename"]) . $row["res_owner_firstname"] . ' ' . $row["res_owner_lastname"];
+                                                                    }
+                                                                    ?>
                             <?php
-                            echo '<option value=""';
-                            if (!isset($_GET['byear']) || $_GET['byear'] == "") {
-                                echo ' selected';
-                            };
-                            echo '>แสดงทั้งหมด</option>';
-                            // for ($y = 2565; $y >= 2560; $y--) {
-                            foreach ($byear as $y) {
-                                echo '<option value="' . $y['b_year'] . '"';
-                                if (isset($_GET['byear']) && $_GET['byear'] != "" && $_GET['byear'] == $y['b_year']) {
-                                    echo ' selected';
-                                };
-                                echo '>ปี พ.ศ. ' . ($y['b_year'] + 543) . '</option>';
+                            $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'research' AND `cow_ref_id` = " . $row["res_id"];
+                            $fnc->debug_console("co worker sql: " . $sql);
+                            $co_worker = $fnc->get_db_array($sql);
+                            if (!empty($co_worker)) {
+                                // $fnc->debug_console("co worker data: " . " res_ id " . $row["res_id"] . " cnt " . count($co_worker) . " - " , $co_worker);
+                                foreach ($co_worker as $cow) {
+                                    echo '<br>';
+                                    if (!empty($cow["cow_citizenid"]) && $linkable) {
+                                        echo '<a href="research.php?p=research&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                                    } else {
+                                        echo '<span class="ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
+                                    }
+                                }
                             }
                             ?>
-                        </select>
-                        <?php
-                        if (isset($_GET['p']) && $_GET['p'] != '') {
-                            echo '<input type="hidden" name="p" value="' . $_GET['p'] . '">';
-                        }
-                        ?>
-                    <?php } ?>
-                </form>
-            </div>
-
-
-        </div>
-
-
-        <div class="card-body mt-3">
-
-            <table class="table table-striped table-bordered table-hover table-inverse table-responsive">
-                <thead class="thead-inverse|thead-default">
-                    <tr class="text-center fw-bold">
-                        <th style="width:3em;">#</th>
-                        <th class="d-none d-md-table-cell">เจ้าของผลงาน</th>
-                        <th>ชื่อผลงาน/เรื่อง</th>
-                        <th>ชื่อการประชุมวิชาการ</th>
-                        <th class="d-none d-md-table-cell" style="width:7em;">วันที่นำเสนอ</th>
-                    </tr>
-                </thead>
-                <tbody style="font-size: 0.85em;">
-                    <?php
-                    $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                    $sql .= "pro.pro_status LIKE '" . $data_status . "'";
-                    if (isset($_GET["find"]) && $_GET["find"] != "" && isset($_GET["k"]) && $_GET["k"] != "") {
-                        switch ($_GET["find"]) {
-                            case "memberId":
-                                $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
-                                break;
-                            case "search":
-                                $sql .= " AND (pro.pro_owner_prename LIKE '%" . $_GET["k"] . "%' Or pro.pro_owner_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or pro.pro_study LIKE '%" . $_GET["k"] . "%')";
-                                break;
-                        }
-                    }
-                    if (isset($_GET["byear"]) && $_GET["byear"] != "") {
-                        $sql_year = " AND Year(pro.pro_date_begin) LIKE '" . $_GET["byear"] . "'";
-                    } else {
-                        $sql_year = "";
-                    }
-                    $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
-                    $sql_order = " ORDER BY pro.pro_date_begin Desc"; // order
-                    $sql .= $sql_year . $sql_group . $sql_order;
-                    $fnc->debug_console('sql table owner: \n' . $sql);
-                    $data_array = $fnc->get_db_array($sql);
-                    if (!empty($data_array)) {
-                        gen_proceeding_tr($data_array);
-                    } else {
-                        echo '<tr>';
-                        echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                        echo '</tr>';
-                    } ?>
-
-                </tbody>
-            </table>
-
-
-        </div>
-
-        <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
-            last update: <?= date('M d, Y'); ?>
-            <!-- <div class="col mt-3">
-                <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button>
-
-            </div> -->
-        </div>
-
-        </form>
-    </div>
-<?php
-}
-
-function gen_proceeding_owner($pro_id, $row)
-{
-    global $fnc;
-    $sum_ratio = 0;
-?>
-
-    <!-- * เจ้าของผลงาน / ผู้ร่วมงาน -->
-    <div class="mb-3 mt-4 col-12 col-md-8 offset-md-2">
-        <table class="table table-striped table-bordered table-hover table-inverse table-responsive">
-            <thead class="thead-inverse|thead-default">
-                <tr>
-                    <th class="text-center" style="width:3em;">#</th>
-                    <th>นักวิจัย</th>
-                    <th>หลักสูตร/สาขาวิชา</th>
-                    <th id="ratio_title" class="text-center">สัดส่วน</th>
-                    <?php
-                    if (isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                        echo '<th id="ratio_title" class="text-center">นำออก</th>';
-                    }
-                    ?>
-                </tr>
-            </thead>
-            <tbody style="font-size: 0.8em;">
-                <tr>
-                    <td scope="row" class="text-center">1</td>
-                    <td><?= '<a href="?p=proceeding&find=memberId&k=' . $row["pro_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"] . '</a>' ?></td>
-                    <td class="text-start"><a href="?p=proceeding&act=report&cat=department&d=<?= $row["department_name"] ?>" target="_top" class="link-primary fw-bold"><?= $row["department_name"] ?></a></td>
-                    <td class="text-center"><?= $row["pro_ratio"] ?></td>
-                    <?php
-                    if (isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                        echo '<td class="text-center"></td>';
-                    }
-                    ?>
-
-                </tr>
-                <?php
-                $sum_ratio += $row["pro_ratio"];
-                $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'proceeding' AND `cow_ref_id` = " . $pro_id;
-                $fnc->debug_console("co worker sql: " . $sql);
-                $co_worker = $fnc->get_db_array($sql);
-                if (!empty($co_worker[0])) {
-                    // echo "<pre>" . print_r($co_worker[0]) . "</pre>";
-                    $x = 2;
-                    foreach ($co_worker as $cow) {
-                ?>
-                        <tr>
-                            <td scope="row" class="text-center"><?= $x; ?></td>
-                            <?php
-                            if (!empty($cow["cow_citizenid"])) {
-                                echo '<td><a href="?p=proceeding&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a></td>';
+                        </td>
+                        <td><?php
+                            if ($linkable) {
+                                echo '<a href="research.php?p=research&act=viewinfo&rid=' . $row["res_id"] . '" target="_top" class="fw-bold">' . $row["res_name"] . '</a>';
                             } else {
-                                echo '<td>' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</td>';
+                                echo $row["res_name"];
+                            }
+                            if (!empty($row["res_researchID"])) {
+                                echo '<a href="https://erp.mju.ac.th/researchDetail.aspx?rid=' . $row["res_researchID"] . '" target="_blank" class="ms-3 link-danger"><i class="bi bi-info-circle me-1"></i>ERP</a>';
                             }
                             ?>
-                            <td class="text-start"><a href="?p=proceeding&act=report&cat=department&d=<?= $cow["department_name"] ?>" target="_top" class="link-primary fw-bold"><?= $cow["department_name"] ?></a></td>
-                            <td class="text-center"><?= $cow["cow_ratio"] ?></td>
-                            <?php
-                            if (isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                                echo '<td class="text-center"><a href="#" target="_top" onclick="proceeding_coworker_delete_confirmation(' . $pro_id . ', ' . $cow["cow_id"] . ');" class="text-danger fw-bold" style="font-size: 1.1em;"><i class="bi bi-person-dash-fill"></i></a></td>';
+                        </td>
+                        <td><?php
+                            if ($linkable) {
+                                // echo '<a href="research.php?p=' . $_GET['p'] . '&act=viewinfo&rid=' . $row["res_id"] . '" target="_top" class="fw-bold">' . $row["res_conf"] . '</a>';
+                                echo $row["res_budget_source"];
+                            } else {
+                                echo $row["res_budget_source"];
                             }
                             ?>
-                        </tr>
-                <?php
-                        $sum_ratio += $cow["cow_ratio"];
-                        $x++;
-                    }
-                } ?>
-            </tbody>
-        </table>
-        <?php
-        if ($sum_ratio > 100) {
-            echo '<script type="text/javascript">';
-            echo 'document.getElementById("ratio_title").setAttribute("class", "text-center text-danger");';
-            // echo 'document.getElementById("ratio_title").innerHTML = "Hello World";';
-            echo '</script>';
-        } elseif ($sum_ratio < 100) {
-            echo '<script type="text/javascript">';
-            echo 'document.getElementById("ratio_title").setAttribute("class", "text-center text-warning");';
-            // echo 'document.getElementById("ratio_title").innerHTML = "Hello World";';
-            echo '</script>';
-        }
-
-        ?>
-
-    </div>
-
-<?php
-}
-
-function gen_proceeding_detail($pro_id)
-{
-    global $fnc;
-
-    $sql = "SELECT * FROM proceeding WHERE pro_id = " . $pro_id;
-    $row = $fnc->get_db_row($sql);
-
-    $label_cls = "col-12 col-md-4 col-lg-3 col-form-label fw-bold text-primary text-md-end";
-    $data_cls = "col-11 offset-1 col-md-8 offset-md-0 col-lg-9 col-form-label";
-?>
-
-    <div class="row mb-3">
-        <label class="<?= $label_cls ?>">ชื่อผลงาน/ชื่อเรื่อง</label>
-        <label class="<?= $data_cls ?>"><?= $row["pro_study"] ?></label>
-    </div>
-
-    <?php if (!empty($row["pro_conf"])) { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">ชื่อการประชุมวิชาการ</label>
-            <label class="<?= $data_cls ?>"><?= $row["pro_conf"] ?></label>
-        </div>
-    <?php } ?>
-
-    <?php if (!empty($row["pro_conf_owner"])) { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">หน่วยงานที่จัดประชุม</label>
-            <label class="<?= $data_cls ?>"><?= $row["pro_conf_owner"] ?></label>
-        </div>
-    <?php } ?>
-
-    <?php if (!empty($row["pro_location"])) { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">สถานที่จัดประชุม</label>
-            <label class="<?= $data_cls ?>"><?= $row["pro_location"] ?></label>
-        </div>
-    <?php } ?>
-
-    <?php if (!empty($row["pro_volume_issue"])) { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">ปีที่ Volume (ฉบับที่ Issue)</label>
-            <label class="<?= $data_cls ?>"><?= $row["pro_volume_issue"] ?></label>
-        </div>
-    <?php } ?>
-
-    <?php if (!empty($row["pro_page"])) { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">หน้าที่ตีพิมพ์</label>
-            <label class="<?= $data_cls ?>"><?= $row["pro_page"] ?></label>
-        </div>
-    <?php } ?>
-
-    <?php if (!empty($row["pro_link"])) { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">ลิงก์ออนไลน์</label>
-            <label class="<?= $data_cls ?>"><?= $row["pro_link"] ?></label>
-        </div>
-    <?php } ?>
-
-    <?php
-    if (!empty($row["pro_tier"]) && $row["pro_tier"] == "ระดับนานาชาติ") {
-        $pro_tier = '../images/tier_icon_global_64.png';
-    } else {
-        $pro_tier = '../images/tier_icon_local_64.png';
-    }
-    $pro_tier = '<img src="' . $pro_tier . '" class="mb-1 me-2" width="16em">';
-    ?>
-    <div class="row mb-3">
-        <label class="<?= $label_cls ?>">ระดับ</label>
-        <label class="<?= $data_cls ?>"><?= $pro_tier . $row["pro_tier"] ?></label>
-    </div>
-
-    <div class="row mb-3">
-        <label class="<?= $label_cls ?>">วันที่นำเสนอ</label>
-        <label class="<?= $data_cls ?>"><?php
-                                        $fnc->gen_date_full_thai($row["pro_date_begin"]);
-                                        if ($row["pro_date_begin"] < $row["pro_date_end"]) {
-                                            echo ' - ';
-                                            echo $fnc->gen_date_full_thai($row["pro_date_end"]);
-                                        } ?></label>
-    </div>
-
-    <?php if (!empty($row["department_name"]) && "a" == "b") { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">อยู่ในหลักสูตร/สาขาวิชา</label>
-            <label class="<?= $data_cls ?>"><?= $row["department_name"] ?></label>
+                        </td>
+                        <td class="text-center d-none d-md-table-cell"><?php $fnc->gen_date_semi_th(($row["res_period_begin"])) ?></td>
+                    </tr>
             <?php
-            $sql = "Select co_worker.department_name From co_worker Inner Join proceeding On co_worker.cow_ref_id = proceeding.pro_id Where proceeding.pro_id = 10 And co_worker.cow_status = 'enable'";
-            $departments = $fnc->get_db_array($sql);
-            foreach ($departments as $row) {
-                echo '<label class="col-11 offset-1 col-md-9 offset-md-3 col-form-label">' . $row["department_name"] . '</label>';
-            }
-            ?>
-        </div>
-    <?php } ?>
+                    $x++;
+                }
+            } else {
+                echo '<tr>';
+                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="5">no data founded</td>';
+                echo '</tr>';
+            } ?>
+        </tbody>
+    </table>
+<?php
+}
 
-    <?php if (!empty($row["pro_detail"])) { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">รายละเอียด</label>
-            <label class="<?= $data_cls ?>"><?= $row["pro_detail"] ?></label>
-        </div>
-    <?php } ?>
-
-    <?php if ($row["pro_attach"] == "true") { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">เอกสารแนบ</label>
-            <!-- <label class="<? //= $data_cls 
-                                ?>"><? //= $row["pro_attach"] 
-                                    ?></label> -->
-            <div class="mb-3 mt-2 col-12 col-md-8">
-                <?php if ($row["pro_attach"] == "true") { ?>
-                    <div class="list-group" style="font-size: 0.8em;">
-                        <!-- <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
-                        The current link item
-                    </a> -->
-                        <?php
-                        $sql = "SELECT * FROM `attachment` WHERE `att_status` = 'enable' AND `att_ref_table` = 'proceeding' AND `att_ref_id` = " . $pro_id . " ORDER BY att_filename";
-                        $attachment_file = $fnc->get_db_array($sql);
-                        if (!empty($attachment_file)) {
-                            foreach ($attachment_file as $att) {
-                                // echo '<a href="../' . $att["att_filepath"] . $att["att_filename"] . '" target="_blank" class="list-group-item list-group-item-action text-primary">' . $att["att_filename"] . '</a>';
-                                echo '<li class="list-group-item">';
-                                echo '<div class="row">';
-                                echo '<div class="col-auto">';
-                                echo '<a href="../' . $att["att_filepath"] . $att["att_filename"] . '" target="_blank" class="text-primary fw-bold">' . $att["att_filename"] . '</a>';
-                                echo '</div>';
-                                if (isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                                    echo '<div class="col text-end">';
-                                    echo '<a onclick="proceeding_attachment_delete_confirmation(' . $pro_id . ',' . $att["att_id"] . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
-                                    echo '</div>';
-                                }
-                                echo '</div>';
-                                echo '</li>';
-                            }
+function gen_my_proceeding($data_array)
+{
+    global $fnc;
+    $linkable = 'true';
+?>
+    <table class="table table-striped table-bordered table-hover table-inverse table-responsive">
+        <thead class="thead-inverse|thead-default">
+            <tr class="text-center fw-bold">
+                <th style="width:3em;">#</th>
+                <th class="d-none d-md-table-cell">เจ้าของผลงาน</th>
+                <th>ชื่อผลงาน/เรื่อง</th>
+                <th>ชื่อการประชุมวิชาการ</th>
+                <th class="d-none d-md-table-cell" style="width:7em;">วันที่นำเสนอ</th>
+            </tr>
+        </thead>
+        <tbody style="font-size: 0.85em;">
+            <?php
+            if (!empty($data_array)) {
+                $x = 1;
+                foreach ($data_array as $pro) {
+                    $sql = "SELECT * FROM `proceeding` WHERE `pro_id` = " . $pro["pro_id"];
+                    $row = $fnc->get_db_row($sql);
+                    if (!empty($row)) {
+                        if (!empty($row["pro_tier"]) && $row["pro_tier"] == "ระดับนานาชาติ") {
+                            $pro_tier = '../images/tier_icon_global_64.png';
+                        } else {
+                            $pro_tier = '../images/tier_icon_local_64.png';
                         }
-                        ?>
-                    </div>
-                <?php } ?>
-            </div>
-        </div>
-    <?php } ?>
-
-    <?php if (isset($_GET['act']) && $_GET['act'] == "coWorker") { ?>
-        <form action="../db_mgt.php" method="post" autocomplete="off" enctype="multipart/form-data">
-            <div class="row mb-3">
-                <!-- <label class="col-sm-2 col-form-label fw-bold text-primary text-md-end">เพิ่มเอกสารแนบ</label> -->
-                <div class="mb-3 mt-0 col-12 col-md-8 offset-md-2">
-                    <div class="col-12 mb-3">
-                        <label for="pro_attach" class="form-label">ไฟล์แนบ (เลือกได้มากกว่า 1 ไฟล์)</label>
-                        <div class="input-group">
-                            <input type="file" class="form-control" name="pro_attach[]" id="pro_attach" aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".pdf, .jpg, .jpeg, .png" multiple required>
-                            <button class="btn btn-outline-primary text-uppercase" type="submit" id="inputGroupFileAddon04">upload</button>
-                        </div>
-                    </div>
-                    <input type="hidden" name="fst" value="uploadAttachments">
-                    <input type="hidden" name="ref_table" value="proceeding">
-                    <input type="hidden" name="ref_id" value="<?= $pro_id ?>">
-                </div>
-            </div>
-        </form>
-    <?php } ?>
-
-
-    <?php if (!empty($row["pro_notes"])) { ?>
-        <div class="row mb-3">
-            <label class="<?= $label_cls ?>">หมายเหตุ</label>
-            <label class="<?= $data_cls ?>"><?= $row["pro_notes"] ?></label>
-        </div>
-    <?php } ?>
-
-<?php gen_proceeding_owner($pro_id, $row);
-
-    return $row;
-}
-
-function gen_proceeding_action_menu()
-{
-?>
-    <div class="col-auto align-self-top text-end fw-bold text-primary" style="font-size:0.75em;">
-        <a href="?p=proceeding&act=viewinfo&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase" style="font-size:1em;">view info</a>
-        <a href="?p=proceeding&act=update&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase ms-3" style="font-size:1em;">update info</a>
-        <a href="?p=proceeding&act=coWorker&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase ms-3" style="font-size:1em;">co-worker/attachment</a>
-    </div>
-<?php
-}
-
-function gen_proceeding_info($pro_id)
-{
-    global $fnc;
-?>
-
-    <div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient row justify-content-between">
-            <div class="col-auto">
-                <h5 class="card-title mt-2 h3 text-primary">แสดงรายละเอียดของ Proceeding</h5>
-                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการ</h6>
-            </div>
-
-            <?php gen_proceeding_action_menu(); ?>
-        </div>
-
-
-        <div class="card-body mt-3">
-
-            <?php $row = gen_proceeding_detail($pro_id); ?>
-
-        </div>
-
-        <div class="card-footer text-end">
-            <div class="col mt-3">
-                <button type="button" class="btn btn-outline-secondary px-4 py-2 text-uppercase" onclick="window.open('?p=proceeding');">close</button>
-                <?php if ($row["pro_status"] == 'delete') { ?>
-                    <button type="button" class="btn btn-outline-success px-4 py-2 text-uppercase" onclick="window.open('../db_mgt.php?p=proceeding&act=restore&pid=<?= $pro_id ?>','_top');">restore</button>
-                <?php } else { ?>
-                    <button type="button" class="btn btn-outline-danger px-4 py-2 text-uppercase" onclick="proceeding_delete_confirmation(<?= $pro_id ?>);">delete</button>
-                    <!-- <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button> -->
-                <?php } ?>
-
-            </div>
-        </div>
-
-        </form>
-    </div>
-
-<?php
-}
-
-function array_remove_data($search_citizenId, $array_data)
-{
-    // $i = 0;
-    // echo "find : " . $search_citizenId . "<br>";
-    // foreach ($array_data as $econ_member) {
-    // echo "<pre>";
-    // print_r($array_data);
-    // echo "</pre>";
-    for ($i = 0; $i < count($array_data); $i++) {
-        // echo "sample array data : " . $array_data[$i]["citizenId"] . " = " . $search_citizenId . "<br>";
-        // echo "found: " . $array_data[$i][]["citizenId"] . "<br>";
-        if ($array_data[$i]["citizenId"] == $search_citizenId) {
-            unset($array_data[$i]);
-            // echo "remove id completed.<br>";
-            return $array_data;
-        }
-    }
-    return $array_data;
-}
-
-function econ_member_remove_exists($pro_id, $econ_member, $type = "owner")
-{
-    global $fnc;
-
-    $sql_own_co = "Select pro.pro_owner_citizenid, cowo.cow_citizenid From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id 
-                                    Where pro.pro_id = " . $pro_id . " Group By pro.pro_owner_citizenid, cowo.cow_citizenid";
-    $owner_coWorking = $fnc->get_db_array($sql_own_co);
-    // echo "get remove array data = " . $owner_coWorking[0]["pro_owner_citizenid"] . "<br>";
-    if ($type == "coworking") {
-        $econ_member = array_remove_data($owner_coWorking[0]["pro_owner_citizenid"], $econ_member);
-    }
-
-    foreach ($owner_coWorking as $own_cow) {
-        $econ_member = array_remove_data($own_cow["cow_citizenid"], $econ_member);
-    }
-    return $econ_member;
-}
-
-function gen_proceeding_coworker($pro_id)
-{
-    global $fnc;
-?>
-
-    <div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient row justify-content-between">
-            <div class="col-auto">
-                <h5 class="card-title mt-2 h3 text-primary text-capitalize">Proceeding Co-Worker</h5>
-                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการ - ผู้ร่วมงาน</h6>
-            </div>
-
-            <?php gen_proceeding_action_menu(); ?>
-        </div>
-
-
-        <div class="card-body mt-3">
-
-            <?php gen_proceeding_detail($pro_id); ?>
-
-        </div>
-
-        <?php
-        $MJU_API = new MJU_API;
-        $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
-        // $econ_member = $MJU_API->GetAPI_array($api_url);                                    
-        $econ_member = econ_member_remove_exists($pro_id, $MJU_API->GetAPI_array($api_url), "coworking");
-        $fnc->debug_console("econ member", $econ_member[0]);
-        ?>
-        <div class="card-body row">
-            <hr class="mt-0 mb-5">
-            <div class="col-md-5 offset-md-1 mb-4 mb-md-0">
-                <form action="../db_mgt.php" method="post" autocomplete="off">
-                    <div class="card col-">
-                        <div class="card-body p-4">
-                            <?php
-                            $sql_department = "SELECT `department_name` FROM `department` WHERE `department_name` <> '' ORDER BY `department_order`,`department_name`";
-                            $dept = $fnc->get_db_array($sql_department);
-                            if (!empty($dept)) { ?>
-                                <div class="col-12 mb-3">
-                                    <label for="department_name" class="form-label">หลักสูตร/สาขาวิชา <span class="lbl_required">*</span></label>
-                                    <select class="form-select" name="department_name" id="department_name" aria-describedby="department_nameHelp">
-                                        <?php
-                                        $sql = "SELECT * FROM `department` ORDER BY `department_order`, `department_name`";
-                                        $data_array = $fnc->get_db_array($sql);
-                                        foreach ($data_array as $opt) {
-                                            echo '<option value="' . $opt["department_name"] . '"';
-                                            if ($dept['department_name'] == $opt['department_name']) {
-                                                echo ' selected';
-                                            }
-                                            echo '>' . $opt["department_name"] . '</option>';
+                        $pro_tier = '<img src="' . $pro_tier . '" class="mb-1 me-2" width="16em">';
+            ?>
+                        <tr>
+                            <td scope="row" class="text-center"><?= $x
+                                                                ?><? //= $row["pro_id"]; 
+                                                                    ?></td>
+                            <td class="d-none d-md-table-cell" nowrap><?php
+                                                                        if ($linkable) {
+                                                                            // echo '<a href="research.php?p=proceeding&find=memberId&k=' . $row["citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["prename"]) . $row["firstname"] . ' ' . $row["lastname"] . '</a>';
+                                                                            echo '<a href="proceeding.php?p=proceeding&find=memberId&k=' . $row["pro_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"] . '</a>';
+                                                                        } else {
+                                                                            // echo $fnc->gen_titlePosition_short($row["prename"]) . $row["firstname"] . ' ' . $row["lastname"];
+                                                                            echo $fnc->gen_titlePosition_short($row["pro_owner_prename"]) . $row["pro_owner_firstname"] . ' ' . $row["pro_owner_lastname"];
+                                                                        }
+                                                                        ?>
+                                <?php
+                                $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'proceeding' AND `cow_ref_id` = " . $row["pro_id"];
+                                // $fnc->debug_console("co worker sql: " . $sql);
+                                $co_worker = $fnc->get_db_array($sql);
+                                if (!empty($co_worker)) {
+                                    foreach ($co_worker as $cow) {
+                                        echo '<br>';
+                                        if (!empty($cow["cow_citizenid"]) && $linkable) {
+                                            echo '<a href="proceeding.php?p=proceeding&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                                        } else {
+                                            echo '<span class="ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
                                         }
-                                        ?>
-                                    </select>
-                                </div>
-                            <?php } ?>
-
-                            <div class="col-12 mb-3">
-                                <label for="cow_citizenid" class="form-label text-capitalize">select co-worker <span class="lbl_required">*</span></label>
-                                <select class="form-select" size="8" name="cow_citizenid" id="cow_citizenid" aria-describedby="cow_citizenidHelp">
-                                    <?php
-                                    foreach ($econ_member as $member) {
-                                        echo '<option value="' . $member["citizenId"] . '">' . $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"] . ' (' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ')' . '</option>';
                                     }
+                                }
+                                ?>
+                            </td>
+                            <td><?php
+                                if ($linkable) {
+                                    echo $pro_tier . '<a href="proceeding.php?p=proceeding&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_study"] . '</a>';
+                                } else {
+                                    echo $pro_tier . $row["pro_study"];
+                                }
+                                ?>
+                            </td>
+                            <td><?php
+                                if ($linkable) {
+                                    // echo '<a href="proceeding.php?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["pro_id"] . '" target="_top" class="fw-bold">' . $row["pro_conf"] . '</a>';
+                                    echo $row["pro_conf"];
+                                } else {
+                                    echo $row["pro_conf"];
+                                }
+                                ?>
+                            </td>
+                            <td class="text-center d-none d-md-table-cell"><?php $fnc->gen_date_semi_th(($row["pro_date_begin"])) ?></td>
+                        </tr>
+            <?php
+                    }
+                    $x++;
+                }
+            } else {
+                echo '<tr>';
+                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="5">no data founded</td>';
+                echo '</tr>';
+            } ?>
+
+        </tbody>
+    </table>
+<?php
+}
+
+function gen_my_journal($data_array)
+{
+    global $fnc;
+    $linkable = 'true';
+?>
+    <table class="table table-striped table-bordered table-hover table-inverse table-responsive">
+        <thead class="thead-inverse|thead-default">
+            <tr class="text-center fw-bold">
+                <th style="width:3em;">#</th>
+                <th class="d-none d-md-table-cell">เจ้าของผลงาน</th>
+                <th>ชื่อผลงาน/เรื่อง</th>
+                <th>ชื่อวารสาร/ฐานข้อมูล</th>
+                <th class="d-none d-md-table-cell" style="width:7em;">วันที่เผยแพร่</th>
+            </tr>
+        </thead>
+        <tbody style="font-size: 0.85em;">
+            <?php
+
+            if (!empty($data_array)) {
+                $x = 1;
+                foreach ($data_array as $row) {
+                    if (!empty($row["jour_tier"]) && $row["jour_tier"] == "ระดับนานาชาติ") {
+                        $jour_tier = '../images/tier_icon_global_64.png';
+                    } else {
+                        $jour_tier = '../images/tier_icon_local_64.png';
+                    }
+                    $jour_tier = '<img src="' . $jour_tier . '" class="mb-1 me-2" width="16em">';
+            ?>
+                    <tr>
+                        <td scope="row" class="text-center"><?= $x ?></td>
+                        <td class="d-none d-md-table-cell" nowrap><?php
+                                                                    if ($linkable) {
+                                                                        echo '<a href="journal.php?p=journal&find=memberId&k=' . $row["jour_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["jour_owner_prename"]) . $row["jour_owner_firstname"] . ' ' . $row["jour_owner_lastname"] . '</a>';
+                                                                    } else {
+                                                                        echo $fnc->gen_titlePosition_short($row["jour_owner_prename"]) . $row["jour_owner_firstname"] . ' ' . $row["jour_owner_lastname"];
+                                                                    }
+                                                                    ?>
+                            <?php
+                            $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'journal' AND `cow_ref_id` = " . $row["jour_id"];
+                            $fnc->debug_console("co worker sql: " . $sql);
+                            $co_worker = $fnc->get_db_array($sql);
+                            if (!empty($co_worker)) {
+                                // $fnc->debug_console("co worker data: " . " pro id " . $row["jour_id"] . " cnt " . count($co_worker) . " - " , $co_worker);
+                                foreach ($co_worker as $cow) {
+                                    echo '<br>';
+                                    if (!empty($cow["cow_citizenid"]) && $linkable) {
+                                        echo '<a href="journal.php?p=journal&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                                    } else {
+                                        echo '<span class="ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
+                                    }
+                                }
+                            }
+                            ?>
+                        </td>
+                        <td><?php
+                            if ($linkable) {
+                                echo $jour_tier . '<a href="journal.php?p=journal&act=viewinfo&jid=' . $row["jour_id"] . '" target="_top" class="fw-bold">' . $row["jour_study"] . '</a>';
+                            } else {
+                                echo $jour_tier . $row["jour_study"];
+                            }
+                            ?>
+                        </td>
+                        <td><?php
+                            if ($linkable) {
+                                // echo '<a href="journal.php?p=' . $_GET['p'] . '&act=viewinfo&jid=' . $row["jour_id"] . '" target="_top" class="fw-bold">' . $row["jour_conf"] . '</a>';
+                                echo $row["jour_journal"];
+                            } else {
+                                echo $row["jour_journal"];
+                            }
+                            ?>
+                        </td>
+                        <td class="text-center d-none d-md-table-cell"><?php $fnc->gen_date_semi_th(($row["jour_date_avaliable"])) ?></td>
+                    </tr>
+            <?php
+                    $x++;
+                }
+            } else {
+                echo '<tr>';
+                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="5">no data founded</td>';
+                echo '</tr>';
+            } ?>
+
+        </tbody>
+    </table>
+<?php
+}
+
+function gen_my_project($data_array)
+{
+    global $fnc;
+    $linkable = 'true';
+?>
+    <table class="table table-striped table-bordered table-hover table-inverse table-responsive">
+        <thead class="thead-inverse|thead-default">
+            <tr class="text-center fw-bold">
+                <th style="width:3em;">#</th>
+                <th class="d-none d-md-table-cell">นักวิจัย</th>
+                <th>โครงการบริการวิชาการ</th>
+                <!-- <th>แหล่งทุน</th> -->
+                <th class="d-none d-md-table-cell" style="width:7em;">ระยะเวลา</th>
+            </tr>
+        </thead>
+        <tbody style="font-size: 0.85em;">
+            <?php
+            if (!empty($data_array)) {
+                $x = 1;
+                foreach ($data_array as $row) {
+            ?>
+                    <tr>
+                        <td scope="row" class="text-center"><?= $x ?></td>
+                        <td class="d-none d-md-table-cell" nowrap><?php
+                                                                    if ($linkable) {
+                                                                        echo '<a href="project.php?p=project&find=memberId&k=' . $row["proj_owner_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["proj_owner_prename"]) . $row["proj_owner_firstname"] . ' ' . $row["proj_owner_lastname"] . '</a>';
+                                                                    } else {
+                                                                        echo $fnc->gen_titlePosition_short($row["proj_owner_prename"]) . $row["proj_owner_firstname"] . ' ' . $row["proj_owner_lastname"];
+                                                                    }
+                                                                    ?>
+                            <?php
+                            $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'project' AND `cow_ref_id` = " . $row["proj_id"];
+                            $fnc->debug_console("co worker sql: " . $sql);
+                            $co_worker = $fnc->get_db_array($sql);
+                            if (!empty($co_worker)) {
+                                // $fnc->debug_console("co worker data: " . " proj_ id " . $row["proj_id"] . " cnt " . count($co_worker) . " - " , $co_worker);
+                                foreach ($co_worker as $cow) {
+                                    echo '<br>';
+                                    if (!empty($cow["cow_citizenid"]) && $linkable) {
+                                        echo '<a href="project.php?p=project&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a>';
+                                    } else {
+                                        echo '<span class="ms-2">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</span>';
+                                    }
+                                }
+                            }
+                            ?>
+                        </td>
+                        <td><?php
+                            if ($linkable) {
+                                echo '<a href="project.php?p=project&act=viewinfo&pid=' . $row["proj_id"] . '" target="_top" class="fw-bold">' . $row["proj_name"] . '</a>';
+                            } else {
+                                echo $row["proj_name"];
+                            }
+                            ?>
+                        </td>
+                        <!-- <td><?php
+                                    // if ($linkable) {
+                                    //     // echo '<a href="project.php?p=' . $_GET['p'] . '&act=viewinfo&pid=' . $row["proj_id"] . '" target="_top" class="fw-bold">' . $row["proj_conf"] . '</a>';
+                                    //     echo $row["proj_budget_source"];
+                                    // } else {
+                                    //     echo $row["proj_budget_source"];
+                                    // }
                                     ?>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <div class="col">
-                                    <label for="cow_ratio" class="form-label">สัดส่วน (%)</label>
-                                    <input type="number" class="form-control" name="cow_ratio" id="cow_ratio" aria-describedby="cow_ratioHelp" max="100" maxlength="5">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer text-end">
-                            <div class="col mt-0">
-                                <!-- <button type="button" class="btn btn-secondary px-4 py-2 text-uppercase">close</button>
-                        <button type="button" class="btn btn-danger px-4 py-2 text-uppercase">delete</button> -->
-                                <button type="submit" class="btn btn-outline-primary px-4 py-2 text-uppercase">Add</button>
-                                <input type="hidden" name="fst" value="proceedingCoWorkerIntAppend">
-                                <input type="hidden" name="ref_table" value="proceeding">
-                                <input type="hidden" name="ref_id" value="<?= $_GET["pid"] ?>">
-
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="col-md-5">
-                <form action="../db_mgt.php" method="post" autocomplete="off">
-                    <div class="card col-">
-                        <div class="card-body p-4">
-                            <div class="col-12 mb-3">
-                                <label for="pro_owner_citizenid" class="form-label text-capitalize">Register a new co-worker <span class="lbl_required">*</span></label>
-                                <div class="form-floating mb-3">
-                                    <input type="text" class="form-control form-control-sm" name="cow_prename" id="floatingPrename">
-                                    <label for="floatingPrename">คำนำหน้า/ตำแหน่งวิชาการ</label>
-                                </div>
-                                <div class="form-floating mb-3">
-                                    <input type="text" class="form-control form-control-sm" name="cow_firstname" id="floatingFirstname" required>
-                                    <label for="floatingFirstname">ชื่อ <span class="lbl_required">*</span></label>
-                                </div>
-                                <div class="form-floating">
-                                    <input type="text" class="form-control form-control-sm" name="cow_lastname" id="floatingLastname" required>
-                                    <label for="floatingLastname">นามสกุล <span class="lbl_required">*</span></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="col">
-                                    <label for="cow_ratio" class="form-label">สัดส่วน (%)</label>
-                                    <input type="number" class="form-control" name="cow_ratio" id="cow_ratio" aria-describedby="cow_ratioHelp" max="100" maxlength="5">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer text-end">
-                            <div class="col mt-0">
-                                <!-- <button type="button" class="btn btn-secondary px-4 py-2 text-uppercase">close</button>
-                        <button type="button" class="btn btn-danger px-4 py-2 text-uppercase">delete</button> -->
-                                <button type="submit" class="btn btn-outline-primary px-4 py-2 text-uppercase">Add</button>
-                                <input type="hidden" name="fst" value="proceedingCoWorkerExtAppend">
-                                <input type="hidden" name="ref_table" value="proceeding">
-                                <input type="hidden" name="ref_id" value="<?= $_GET["pid"] ?>">
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-
-
-
-        </form>
-    </div>
-
-<?php
-}
-
-function gen_proceeding_attachment($pro_id)
-{
-    global $fnc;
-?>
-
-    <div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient row justify-content-between">
-            <div class="col-auto">
-                <h5 class="card-title mt-2 h3 text-primary text-capitalize">Proceeding attachment</h5>
-                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการ - ไฟล์แนบ</h6>
-            </div>
-
-            <?php gen_proceeding_action_menu(); ?>
-        </div>
-
-
-        <div class="card-body mt-3">
-
-            <?php gen_proceeding_detail($pro_id); ?>
-
-        </div>
-
-        <div class="card-body">
-            <div class="col-md-8 mx-auto">
-                <form action="../db_mgt.php" method="post" autocomplete="off" enctype="multipart/form-data">
-                    <div class="col-12 mb-3">
-                        <label for="pro_attach" class="form-label">ไฟล์แนบ (เลือกได้มากกว่า 1 ไฟล์)</label>
-                        <div class="input-group">
-                            <input type="file" class="form-control" name="pro_attach[]" id="pro_attach" aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".pdf, .jpg, .jpeg, .png" multiple>
-                            <button class="btn btn-outline-primary text-uppercase" type="submit" id="inputGroupFileAddon04">upload</button>
-                        </div>
-                    </div>
-                    <input type="hidden" name="fst" value="uploadAttachments">
-                    <input type="hidden" name="ref_table" value="proceeding">
-                    <input type="hidden" name="ref_id" value="<?= $pro_id ?>">
-                </form>
-            </div>
-
-        </div>
-
-
-
-        </form>
-    </div>
-
-<?php
-}
-
-function report_submenu()
-{
-    global $fnc;
-?>
-    <div class="text-white-50 mb-3 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
-        <div class="container px-0 px-md-5">
-            <ul class="nav justify-content-end">
-                <li class="nav-item">
-                    <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'personal') {
-                                            echo ' active link-light" aria-current="page';
-                                        } else {
-                                            echo ' link-primary';
-                                        } ?>" href="?p=proceeding&act=report&cat=personal">รายบุคคล</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'department') {
-                                            echo ' active link-light" aria-current="page';
-                                        } else {
-                                            echo ' link-primary';
-                                        } ?>" href="?p=proceeding&act=report&cat=department">รายหลักสูตร</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'apasample') {
-                                            echo ' active link-light" aria-current="page';
-                                        } else {
-                                            echo ' link-primary';
-                                        } ?>" href="?p=proceeding&act=report&cat=apasample">APA's Ref</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-<?php
-}
-
-function gen_report_personal()
-{
-    global $fnc;
-?>
-
-    <div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient row">
-            <div class="col-12 col-md-12 col-lg-9">
-                <?php
-                // if ($data_status == 'delete') {
-                //     echo '<h5 class="card-title mt-2 h3 text-primary">Proceeding Deleted</h5>';
-                // } else {
-                echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding Report by Personal</h5>';
-                // }
-                ?>
-                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการรายบุคคล</h6>
-            </div>
-
-            <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3 d-print-none">
-                <form action="?" method="get">
-                    <?php
-                    if (isset($_GET['find']) && $_GET['find'] == 'memberId') {
-                        if (isset($_GET['find']) && $_GET['find'] != '') {
-                            echo '<input type="hidden" name="find" value="' . $_GET['find'] . '">';
-                        }
-                        if (isset($_GET['k']) && $_GET['k'] != '') {
-                            echo '<input type="hidden" name="k" value="' . $_GET['k'] . '">';
-                        }
-                    } else {
-                    ?>
-                    <?php
-
-                    } ?>
-                    <div class="input-group mb-0">
-                        <input type="hidden" name="p" value="proceeding">
-                        <input type="hidden" name="act" value="report">
-                        <input type="hidden" name="cat" value="personal">
-                        <select class="form-select form-select-sm" name="k" id="k" onchange="this.form.submit();">
-                            <?php
-                            $MJU_API = new MJU_API;
-                            $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
-                            $econ_member = $MJU_API->GetAPI_array($api_url);
-                            $fnc->debug_console("econ member", $econ_member[0]);
-                            echo '<option value=""';
-                            if (!isset($_GET["k"]) || $_GET["k"] == "") {
-                                echo ' selected';
-                            }
-                            echo '>' . 'แสดงข้อมูลบุคลากรทุกคน' . '</option>';
-                            foreach ($econ_member as $member) {
-                                echo '<option value="' . $member["citizenId"] . '"';
-                                if (isset($_GET["k"]) && $_GET["k"] == $member["citizenId"]) {
-                                    echo ' selected';
-                                    $cur_personal = $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"] . ' (' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ')';
-                                }
-                                echo '>' . $member["firstName"] . '&nbsp;&nbsp;' . $member["lastName"] . ' (' . $fnc->gen_titlePosition_short($member["titlePosition"]) . ')' . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <?php
-                    $sql_year = "Select pro_fiscalyear As fyear From proceeding Where proceeding.pro_status = 'enable' Group By pro_fiscalyear Order By pro_fiscalyear Desc";
-                    $fyear = $fnc->get_db_array($sql_year);
-                    $fnc->debug_console("fiscal year = ", $fyear);
-                    if (!empty($fyear)) {
-                    ?>
-                        <select class="form-select form-select-sm" name="fyear" aria-label="Default select example" onchange="this.form.submit();">
-                            <?php
-                            echo '<option value=""';
-                            if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
-                                echo ' selected';
-                            };
-                            echo '>แสดงทุกปี งปม.</option>';
-                            // for ($y = 2565; $y >= 2560; $y--) {
-                            foreach ($fyear as $y) {
-                                echo '<option value="' . $y['fyear'] . '"';
-                                if (isset($_GET['fyear']) && $_GET['fyear'] != "" && $_GET['fyear'] == $y['fyear']) {
-                                    echo ' selected';
-                                };
-                                echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
-                            }
-                            ?>
-                        </select>
-                        <?php
-                        if (isset($_GET['p']) && $_GET['p'] != '') {
-                            echo '<input type="hidden" name="p" value="' . $_GET['p'] . '">';
-                        }
-                        ?>
-                    <?php } ?>
-                </form>
-            </div>
-
-        </div>
-
-        <div class="card-body mt-3">
-            <?php
-            if (isset($_GET['k']) && $_GET['k'] != '') {
-                $k = 'ของ' . $cur_personal;
-            } else {
-                $k = '';
-            }
-            if (isset($_GET['fyear']) && $_GET['fyear'] != '') {
-                $y = ' ปี งปม. ' . $_GET['fyear'];
-            } else {
-                $y = ' ทั้งหมด';
-            }
-            echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $k . $y . '</h5>';
-            ?>
-            <table class="table table-striped table-bordered table-inverse table-responsive">
-                <thead class="thead-inverse">
-                    <tr class="text-center fw-bold">
-                        <th style="width:3em;">#</th>
-                        <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                        <th>ชื่อเรื่อง</th>
-                        <th>ชื่อการประชุม</th>
-                        <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
+                                    </td> -->
+                        <td class="text-center d-none d-md-table-cell"><?php $fnc->gen_date_semi_th(($row["proj_period_begin"])) ?></td>
                     </tr>
-                </thead>
-                <tbody style="font-size: 0.85em;">
-                    <?php
-                    $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                    $sql .= "pro.pro_status LIKE 'enable'";
-                    if (isset($_GET["k"]) && $_GET["k"] != "") {
-                        $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
-                    }
-                    if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                        $sql_year = " AND pro.pro_fiscalyear LIKE '" . ($_GET["fyear"]) . "'";
-                    } else {
-                        $sql_year = "";
-                    }
-                    $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
-                    $sql_order = " ORDER BY pro.pro_date_begin Asc"; // order
-                    $sql .= $sql_year . $sql_group . $sql_order;
-                    $fnc->debug_console('sql table owner: \n' . $sql);
-                    $data_array = $fnc->get_db_array($sql);
-                    if (!empty($data_array)) {
-                        gen_proceeding_tr($data_array);
-                    } else {
-                        echo '<tr style="page-break-before:auto">';
-                        echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                        echo '</tr>';
-                    } ?>
-
-                </tbody>
-            </table>
-
-        </div>
-
-        <?php if (isset($_GET['fyear']) && $_GET['fyear'] != "") { ?>
-            <div class="card-body mt-3">
-                <?php
-                $y = 'ย้อนหลัง 5 ปี งปม.';
-                echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $k . ' ' . $y . '</h5>';
-                ?>
-                <table class="table table-striped table-bordered table-inverse table-responsive">
-                    <thead class="thead-inverse|thead-default">
-                        <tr class="text-center fw-bold">
-                            <th style="width:3em;">#</th>
-                            <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                            <th>ชื่อเรื่อง</th>
-                            <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 0.85em;">
-                        <?php
-                        $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                        $sql .= "pro.pro_status LIKE 'enable'";
-                        if (isset($_GET["k"]) && $_GET["k"] != "") {
-                            $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR cowo.cow_citizenid Like '" . $_GET["k"] . "')";
-                        }
-                        if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                            $sql_year = " AND pro.pro_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND pro.pro_fiscalyear < '" . ($_GET["fyear"]) . "'";
-                        } else {
-                            $sql_year = "";
-                        }
-                        $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
-                        $sql_order = " ORDER BY pro.pro_date_begin Asc"; // order
-                        $sql .= $sql_year . $sql_group . $sql_order;
-                        $fnc->debug_console('sql table owner: \n' . $sql);
-                        $data_array = $fnc->get_db_array($sql);
-                        if (!empty($data_array)) {
-                            gen_proceeding_tr($data_array);
-                        } else {
-                            echo '<tr style="page-break-before:auto">';
-                            echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                            echo '</tr>';
-                        } ?>
-
-                    </tbody>
-                </table>
-
-            </div>
-        <?php } ?>
-
-        <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
-            last update: <?= date('M d, Y'); ?>
-            <!-- <div class="col mt-3">
-                <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button>
-
-            </div> -->
-        </div>
-
-        </form>
-    </div>
-<?php
-}
-
-function gen_report_department()
-{
-    global $fnc;
-?>
-
-    <div class="card p-0 p-md-3 box_shadow">
-        <div class="card-header bg-light bg-gradient row">
-            <div class="col-12 col-md-8 col-lg-9">
-                <?php
-                // if ($data_status == 'delete') {
-                //     echo '<h5 class="card-title mt-2 h3 text-primary">Proceeding Deleted</h5>';
-                // } else {
-                echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding Report by Department</h5>';
-                // }
-                ?>
-                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">รายงานข้อมูลการนำเสนอผลงานวิจัย/ผลงานทางวิชาการของหลักสูตร</h6>
-            </div>
-
-            <div class="col-6 offset-6 offset-md-0 col-md-4 col-lg-3 d-print-none">
-                <form action="?" method="get">
-                    <div class="input-group mb-0">
-                        <input type="hidden" name="p" value="proceeding">
-                        <input type="hidden" name="act" value="report">
-                        <input type="hidden" name="cat" value="department">
-                        <select class="form-select form-select-sm" name="d" id="d" onchange="this.form.submit();">
-                            <?php
-                            $sql = "SELECT * FROM `department` ORDER BY `department_name`";
-                            $department = $fnc->get_db_array($sql);
-                            $fnc->debug_console("department ", $department[0]);
-                            echo '<option value=""';
-                            if (!isset($_GET["d"]) || $_GET["d"] == "") {
-                                echo ' selected';
-                            }
-                            echo '>' . 'แสดงหน่วยงานทั้งหมด' . '</option>';
-                            foreach ($department as $opt) {
-                                echo '<option value="' . $opt["department_name"] . '"';
-                                if (isset($_GET["d"]) && $_GET["d"] == $opt["department_name"]) {
-                                    echo ' selected';
-                                    $cur_department = $opt["department_name"];
-                                }
-                                echo '>' . $opt["department_name"] . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <?php
-                    $sql_year = "Select pro_fiscalyear As fyear From proceeding Where proceeding.pro_status = 'enable' Group By pro_fiscalyear Order By pro_fiscalyear Desc";
-                    $fyear = $fnc->get_db_array($sql_year);
-                    $fnc->debug_console("b year = ", $fyear);
-                    if (!empty($fyear)) {
-                    ?>
-                        <select class="form-select form-select-sm" name="fyear" aria-label="Default select example" onchange="this.form.submit();">
-                            <?php
-                            echo '<option value=""';
-                            if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
-                                echo ' selected';
-                            };
-                            echo '>แสดงทั้งหมด</option>';
-                            // for ($y = 2565; $y >= 2560; $y--) {
-                            foreach ($fyear as $y) {
-                                echo '<option value="' . $y['fyear'] . '"';
-                                if (isset($_GET['fyear']) && $_GET['fyear'] != "" && $_GET['fyear'] == $y['fyear']) {
-                                    echo ' selected';
-                                };
-                                echo '>ปี งปม. ' . ($y['fyear']) . '</option>';
-                            }
-                            ?>
-                        </select>
-                        <?php
-                        if (isset($_GET['p']) && $_GET['p'] != '') {
-                            echo '<input type="hidden" name="p" value="' . $_GET['p'] . '">';
-                        }
-                        ?>
-                    <?php } ?>
-                </form>
-            </div>
-
-        </div>
-
-        <div class="card-body mt-3">
             <?php
-            if (isset($_GET['d']) && $_GET['d'] != '') {
-                $d = 'ของ' . $cur_department;
+                    $x++;
+                }
             } else {
-                $d = '';
-            }
-            if (isset($_GET['fyear']) && $_GET['fyear'] != '') {
-                $y = ' ปี งปม. ' . $_GET['fyear'];
-            } else {
-                $y = ' ทั้งหมด';
-            }
-            echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $d . $y . '</h5>';
-            ?>
-            <table class="table table-striped table-bordered table-inverse table-responsive">
-                <thead class="thead-inverse|thead-default">
-                    <tr class="text-center fw-bold">
-                        <th style="width:3em;">#</th>
-                        <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                        <th>ชื่อเรื่อง</th>
-                        <th>ชื่อการประชุม</th>
-                        <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                    </tr>
-                </thead>
-                <tbody style="font-size: 0.85em;">
-                    <?php
-                    $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                    $sql .= "pro.pro_status LIKE 'enable'";
-                    if (isset($_GET["d"]) && $_GET["d"] != "") {
-                        $sql .= " AND (pro.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
-                    }
-                    if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                        $sql_year = " AND (pro.pro_fiscalyear) LIKE '" . ($_GET["fyear"]) . "'";
-                    } else {
-                        $sql_year = "";
-                    }
-                    $sql_group = " Group By pro.pro_fiscalyear, pro.pro_id";
-                    $sql_order = " ORDER BY pro.pro_id Asc"; // order
-                    $sql .= $sql_year . $sql_group . $sql_order;
-                    $fnc->debug_console('sql table owner: \n' . $sql);
-                    $data_array = $fnc->get_db_array($sql);
-                    if (!empty($data_array)) {
-                        gen_proceeding_tr($data_array);
-                    } else {
-                        echo '<tr style="page-break-before:auto">';
-                        echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                        echo '</tr>';
-                    } ?>
+                echo '<tr>';
+                echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="5">no data founded</td>';
+                echo '</tr>';
+            } ?>
 
-                </tbody>
-            </table>
-
-        </div>
-
-        <?php if (isset($_GET['fyear']) && $_GET['fyear'] != '') { ?>
-            <div class="card-body mt-3">
-                <?php
-                $y = 'ย้อนหลัง 5 ปี งปม.';
-                echo '<h5 class="card-title mt-2 h5 text-primary">Proceeding ' . $d . ' ' . $y . '</h5>';
-                ?>
-                <table class="table table-striped table-bordered table-inverse table-responsive">
-                    <thead class="thead-inverse|thead-default">
-                        <tr class="text-center fw-bold">
-                            <th style="width:3em;">#</th>
-                            <th class="d-none d-md-table-cell">ผู้นำเสนอ</th>
-                            <th>ชื่อเรื่อง</th>
-                            <th class="d-none d-md-table-cell" style="width:5em;">วันที่</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 0.85em;">
-                        <?php
-                        $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                        $sql .= "pro.pro_status LIKE 'enable'";
-                        if (isset($_GET["d"]) && $_GET["d"] != "") {
-                            $sql .= " AND (pro.department_name LIKE '" . $_GET["d"] . "' OR cowo.department_name Like '" . $_GET["d"] . "')";
-                        }
-                        if (isset($_GET['fyear']) && $_GET['fyear'] != "") {
-                            $sql_year = " AND pro.pro_fiscalyear >= '" . ($_GET["fyear"] - 5) . "' AND pro.pro_fiscalyear < '" . ($_GET["fyear"]) . "'";
-                        } else {
-                            $sql_year = "";
-                        }
-                        $sql_group = " Group By pro.pro_fiscalyear, pro.pro_id";
-                        $sql_order = " ORDER BY pro.pro_id Asc"; // order
-                        $sql .= $sql_year . $sql_group . $sql_order;
-                        $fnc->debug_console('sql table owner: \n' . $sql);
-                        $data_array = $fnc->get_db_array($sql);
-                        if (!empty($data_array)) {
-                            gen_proceeding_tr($data_array);
-                        } else {
-                            echo '<tr style="page-break-before:auto">';
-                            echo '<td scope="row" class="text-center py-4 text-muted fw-bold text-uppercase" colspan="4">no data founded</td>';
-                            echo '</tr>';
-                        } ?>
-
-                    </tbody>
-                </table>
-
-            </div>
-        <?php } ?>
-
-        <div class="card-footer text-end text-muted" style="font-size: 0.6em;">
-            last update: <?= date('M d, Y'); ?>
-            <!-- <div class="col mt-3">
-                <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button>
-
-            </div> -->
-        </div>
-
-        </form>
-    </div>
+        </tbody>
+    </table>
 <?php
 }
-
-function  gen_report_apa()
-{
-    global $fnc;
-    echo '<div class="bg-white p-3">';
-    $data_array = $fnc->get_db_array("SELECT * FROM `proceeding` WHERE `pro_status` = 'enable'");
-    $fnc->debug_console("data array:", $data_array);
-    if (!empty($data_array)) {
-        echo '<table id="myTable" class="table table-striped table-bordered table-hover table-inverse table-responsive">';
-        echo '<thead class="thead-inverse">';
-        echo '<tr>
-            <th>ID</th>
-            <th>OWNER</th>
-            <th>TILE</th>
-        </tr>';
-        echo '</thead>';
-        echo '<tbody>';
-        foreach ($data_array as $row) {
-            echo '<tr>
-                <td scope="row">' . $row['pro_id'] . '</td>';
-            echo '<td>';
-            echo $fnc->gen_titlePosition_short($row['pro_owner_prename']);
-            echo $row['pro_owner_firstname'] . ' ' . $row['pro_owner_lastname'];
-            echo '</td>';
-            echo '<td>' . '<a href="?p=proceeding&act=report&cat=apasample&pid=' . $row['pro_id'] . '">' . $row['pro_study'] . '</a>' . '</td>
-            </tr>';
-        }
-    }
-
-    if (isset($_GET['pid']) && $_GET['pid'] != '') {
-        $pid = $_GET['pid'];
-        $row = $fnc->get_db_row("SELECT * FROM `proceeding` WHERE `pro_id` = " . $pid);
-        if (!empty($row)) {
-            echo '<h4>data</h4>';
-            echo '<pre style="font-size: 0.6em;">'  . print_r($row, true) . '</pre>';
-            echo '<hr class="my-3">';
-            echo '<strong>Sample: </strong>' . 'เกวลิน สมบูรณ์, ชลระดา หนันติ๊ และวรัทยา แจ้งกระจ่าง. (2564). Rice Price volatility of Exports Leaders in World Markets using TGARCH model. 2021 International Conference on Internet Finance and Digital Economy (ICIFDE 2021).' . '<br>';
-            // ชื่อผู้เขียนบทความ
-            $apa_owner = $row['pro_owner_firstname'] . ' ' . $row['pro_owner_lastname'];
-            $cow = $fnc->get_db_array("SELECT * FROM `co_worker` WHERE `cow_ref_table` = 'proceeding' AND `cow_ref_id` = " . $pid);
-            if (!empty($cow)) {
-                for ($i = 0; $i < count($cow); $i++) {
-                    if ($i == (count($cow) - 1)) {
-                        $apa_owner .= ' และ' . $cow[$i]['cow_firstname'] . ' ' . $cow[$i]['cow_lastname'];
-                    } else {
-                        $apa_owner .= ', ' . $cow[$i]['cow_firstname'] . ' ' . $cow[$i]['cow_lastname'];
-                    }
-                }
-            }
-            $apa = $apa_owner;
-            // ปีที่พิมพ์
-            if (!empty($row['pro_date_begin'])) {
-                $apa .= '. ' . '(' . (date("Y", strtotime($row['pro_date_begin'])) + 543) . ').';
-            }
-            // ชื่อบทความ
-            if (!empty($row['pro_study'])) {
-                $apa .= ' ' . $row['pro_study'];
-            }
-            // ชื่อวารสาร
-            if (!empty($row['pro_conf'])) {
-                $apa .= '. ' . $row['pro_conf'] . '.';
-            }
-            // ปีที่ volumn (ฉบับที่ Issue)
-            if (!empty($row['pro_volumn_issue'])) {
-                $apa .= '. ' . $row['pro_volumn_issue'] . '.';
-            }
-            // หน้าแรก-หน้าสุดท้าย
-            if (!empty($row['pro_page'])) {
-                $apa .= ', ' . $row['pro_page'];
-            }
-            echo '<br><strong>Output: </strong>' . $apa;            
-
-            // * apa v.7th วารสาร
-            echo '<hr><p class="text-info fw-bold mt-2">วารสาร</p>';
-            // ชื่อผู้เขียนบทความ
-            $apa = $apa_owner . '.';
-            // ปีที่พิมพ์
-            $apa .= ' (' . (date("Y", strtotime($row['pro_date_begin'])) + 543) . ').';
-            // ชื่อบทความ
-            if (!empty($row['pro_study'])) {
-                $apa .= ' ' . $row['pro_study'];
-                $apa .= ' [เอกสารนำเสนอ].';
-            }
-            // ชื่อวารสาร
-            if (!empty($row['pro_conf'])) {
-                $apa .= '. ' . $row['pro_conf'] . '.';
-            }
-            // ปีที่ volumn (ฉบับที่ Issue)
-            if (!empty($row['pro_volumn_issue'])) {
-                $apa .= '. ' . $row['pro_volumn_issue'] . '.';
-            }
-            // หน้าแรก-หน้าสุดท้าย
-            if (!empty($row['pro_page'])) {
-                $apa .= ', ' . $row['pro_page'] . '.';
-            }
-            // ลิงก์
-            if (!empty($row['pro_link'])) {
-                $apa .= ', ' . $row['pro_link'] . '';
-            }
-            echo $apa;
-
-            // * apa v.7th เอกสารการประชุมทางวิชาการ / การสัมมนา / การอภิปราย รายงานการประชุม
-            echo '<hr><p class="text-info fw-bold mt-2">เอกสารการประชุมทางวิชาการ / การสัมมนา / การอภิปราย รายงานการประชุม</p>';
-            // ชื่อผู้แต่ง
-            $apa = $apa_owner . '.';
-            // ปีที่พิมพ์, วันที่, เดือน
-            if (!empty($row['pro_date_begin'])) {
-                $apa .= ' (' . (date("Y", strtotime($row['pro_date_begin'])) + 543) . ', ';
-                if ($row['pro_date_begin'] != $row['pro_date_end']) {
-                    // echo date("m", strtotime($row['pro_date_begin'])) . ' vs ' . date("m", strtotime($row['pro_date_end']));
-                    if (date("n", strtotime($row['pro_date_begin'])) != date("n", strtotime($row['pro_date_end']))) {
-                        $apa .= date("j", strtotime($row['pro_date_begin'])) . ' ' . $fnc->month_fullname[date("n", strtotime($row['pro_date_begin']))] . '-' . date("j", strtotime($row['pro_date_end'])) . ' ' . $fnc->month_fullname[date("n", strtotime($row['pro_date_end']))] . ').';
-                    } else {
-                        $apa .= date("j", strtotime($row['pro_date_begin'])) . '-' . date("j", strtotime($row['pro_date_end'])) . ' ' . $fnc->month_fullname[date("n", strtotime($row['pro_date_begin']))] . ').';
-                    }
-                } else {
-                    $apa .= date("j", strtotime($row['pro_date_begin'])) . ' ' . $fnc->month_fullname[date("n", strtotime($row['pro_date_begin']))] . ').';
-                }
-            }
-            // ชื่อบทความหรือชื่อเรื่องของบท
-            if (!empty($row['pro_study'])) {
-                $apa .= ' ' . $row['pro_study'];
-                $apa .= ' [เอกสารนำเสนอ]';
-            }
-            // ชื่อการประชม
-            if (!empty($row['pro_conf'])) {
-                $apa .= '. ' . $row['pro_conf'];
-            }
-            // เมืองที่ประชุม
-            if (!empty($row['pro_location'])) {
-                $apa .= '. ' . $row['pro_location'] . '.';
-            }
-            echo $apa;
-
-            echo '<br><br>';
-        }
-    }
-    echo '</div>';
-}
-
-
-
 ?>
+
+
 <html lang="en">
 
 <head>
@@ -1682,71 +373,179 @@ function  gen_report_apa()
 
     <link rel="stylesheet" href="../css/style.css">
 
+    <style>
+            .accordion-button {
+                background-color: #baa0df;
+            }
+            .user_photo {
+                width: 120px;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            }
+        </style>
+
 </head>
 
 <body style="background-color: #DFD9EA;">
 
-<?php include('main_menu.php'); ?>
+    <?php include('main_menu.php'); ?>
 
-    <?php
-    // * sub-menu
-    if (isset($_GET['act']) && $_GET['act'] == "report") {
-        report_submenu();
-    } else {
-        echo '<div style="margin-top:3em;">&nbsp;</div>';
-    }
-    ?>
+    <div style="margin-top:3em;">&nbsp;</div>
 
     <main class="mb-3">
         <div class="container mx-auto py-3">
 
             <?php
-            if (isset($_GET['p']) && $_GET['p'] != '') {
-                switch ($_GET['p']) {
-                    case "proceeding":
-                        if (isset($_GET['act']) && $_GET['act'] == "append") {
-                            gen_append_form();
-                        } elseif (isset($_GET['pid']) && $_GET['act'] == "update") {
-                            gen_update_form($_GET['pid']);
-                        } elseif (isset($_GET['pid']) && $_GET['act'] == "viewinfo") {
-                            gen_proceeding_info($_GET['pid']);
-                        } elseif (isset($_GET['act']) && $_GET['act'] == "viewdeleted") {
-                            gen_proceeding_table('delete');
-                        } elseif (isset($_GET['cat']) && $_GET['cat'] != '') {
-                            switch ($_GET['cat']) {
-                                case "personal":
-                                    gen_report_personal();
-                                    break;
-                                case "department":
-                                    gen_report_department();
-                                    break;
-                                case "apasample":
-                                    gen_report_apa();
-                                    break;
-                            }
-                        } elseif (isset($_GET['pid']) && isset($_GET['act']) && $_GET['act'] == "coWorker") {
-                            gen_proceeding_coworker($_GET['pid']);
-                        } elseif (isset($_GET['pid']) && isset($_GET['act']) && $_GET['act'] == "attachment") {
-                            gen_proceeding_attachment($_GET['pid']);
-                        } else {
-                            gen_proceeding_table();
-                        }
-                        break;
-                }
-            } else {
-                echo "none parameters";
-            }
+            // if (isset($_GET['p']) && $_GET['p'] != '') {
+            //     switch ($_GET['p']) {
+            //         case "proceeding":
+            //             die("");
+            //             break;
+            //     }
+            // } else {
+            // }
             ?>
 
+
+
+            <div class="row">
+                <div class="col-3 text-center">
+                    <img src="<?= $_SESSION["admin"]["personnelPhoto"] ?>" class="img-thumbnail rounded rounded-3 mx-auto user_photo" alt="">
+                </div>
+                <div class="col-auto pt-3" style="font-size: 1rem;">
+                    <h2 style="font-size: 1.75em"><?= $_SESSION["admin"]["titlePosition"] . " " . $_SESSION["admin"]["firstName"] . "  " . $_SESSION["admin"]["lastName"] ?></h2>
+                    <h3 style="font-size: 1.6em"><?= $_SESSION["admin"]["titleNameEn"] . " " . $_SESSION["admin"]["firstName_en"] . "  " . $_SESSION["admin"]["lastName_en"] ?></h3>
+                    <h3 style="font-size: 1.2em"><?= "สิทธิ์การเข้าถึง : ระดับ" . $fnc->system_auth_lv[$_SESSION["admin"]["auth_lv"]] ?></h3>
+                </div>
+            </div>
+
+
+
         </div>
+
+        <div class="container-fluid p-3" style="font-size: 0.8rem">
+            <div class="accordion" id="accordionPanelsStayOpen">
+                <div class="accordion-item">
+                    <?php
+                    $sql = "Select res.* From research res Left Join co_worker cowo On cowo.cow_ref_id = res.res_id Where ";
+                    $sql .= "res.res_status Like 'enable'";
+                    $sql .= " AND (res_owner_citizenid LIKE '" . $_SESSION["admin"]["citizenId"] . "' OR (cowo.cow_citizenid Like '" . $_SESSION["admin"]["citizenId"] . "' AND cowo.cow_ref_table LIKE 'research'))";
+                    $sql_group = " Group By res_period_begin, res.res_id";
+                    $sql_order = " Order By res_period_begin Desc"; // order
+                    $sql .= $sql_group . $sql_order;
+                    $sql .= $sql_display_limit;
+                    $fnc->debug_console('sql table my research : \n' . $sql);
+                    $data_array = $fnc->get_db_array($sql);
+                    ?>
+                    <h2 class="accordion-header" id="panelsStayOpen-heading1">
+                        <button class="accordion-button<?php if (empty($data_array)) {
+                                                            echo ' collapsed';
+                                                        } ?> text-dark" id="accordion-button1" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse1" aria-expanded="true" aria-controls="panelsStayOpen-collapse1">
+                            งานวิจัย
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapse1" class="accordion-collapse collapse<?php if (!empty($data_array)) {
+                                                                                                echo ' show';
+                                                                                            } ?>" aria-labelledby="panelsStayOpen-heading1">
+                        <div class="accordion-body">
+                            <?php gen_my_research($data_array); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <?php
+                    $sql = "SELECT pro_id FROM v_proceeding_report2 WHERE";
+                    $sql .= " pro_status = 'enable'";
+                    $sql .= " AND (citizenid = '" . $_SESSION["admin"]["citizenId"] . "')"; // (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))";
+                    $sql_group = " Group By pro_id, pro_date_begin";
+                    $sql_order = " Order By pro_date_begin Desc";
+                    $sql .= $sql_group . $sql_order;
+                    $sql .= $sql_display_limit;
+                    $fnc->debug_console('sql table my proceeding: \n' . $sql);
+                    $data_array = $fnc->get_db_array($sql);
+                    ?>
+                    <h2 class="accordion-header" id="panelsStayOpen-heading2">
+                        <button class="accordion-button<?php if (empty($data_array)) {
+                                                            echo ' collapsed';
+                                                        } ?>" id="accordion-button2" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse2" aria-expanded="false" aria-controls="panelsStayOpen-collapse2">
+                            งานนำเสนอ
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapse2" class="accordion-collapse collapse<?php if (!empty($data_array)) {
+                                                                                                echo ' show';
+                                                                                            } ?>" aria-labelledby="panelsStayOpen-heading2">
+                        <div class="accordion-body">
+                            <?php gen_my_proceeding($data_array); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <?php
+                    $sql = "Select jou.* From journal jou Left Join co_worker cowo On cowo.cow_ref_id = jou.jour_id Where ";
+                    $sql .= "jou.jour_status Like 'enable'";
+                    $sql .= " AND (jou.jour_owner_citizenid LIKE '" . $_SESSION["admin"]["citizenId"] . "' OR  (cowo.cow_citizenid Like '" . $_SESSION["admin"]["citizenId"] . "' AND cowo.cow_ref_table LIKE 'journal'))";
+                    $sql_group = " Group By jou.jour_date_avaliable, jou.jour_id";
+                    $sql_order = " Order By jou.jour_date_avaliable Desc"; // order
+                    $sql .= $sql_group . $sql_order;
+                    $sql .= $sql_display_limit;
+                    $fnc->debug_console('sql table owner: \n' . $sql);
+                    $data_array = $fnc->get_db_array($sql);
+                    ?>
+                    <h2 class="accordion-header" id="panelsStayOpen-heading3">
+                        <button class="accordion-button<?php if (empty($data_array)) {
+                                                            echo ' collapsed';
+                                                        } ?>" id="accordion-button3" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse3" aria-expanded="false" aria-controls="panelsStayOpen-collapse3">
+                            งานตีพิมพ์
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapse3" class="accordion-collapse collapse<?php if (!empty($data_array)) {
+                                                                                                echo ' show';
+                                                                                            } ?>" aria-labelledby="panelsStayOpen-heading3">
+                        <div class="accordion-body">
+                            <?php gen_my_journal($data_array); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <?php
+                    $sql = "Select proj.* From project proj Left Join co_worker cowo On cowo.cow_ref_id = proj.proj_id Where ";
+                    $sql .= "proj.proj_status Like 'enable'";
+                    $sql .= " AND (proj.proj_owner_citizenid LIKE '" . $_SESSION["admin"]["citizenId"] . "' OR (cowo.cow_citizenid Like '" . $_SESSION["admin"]["citizenId"] . "' AND cowo.cow_ref_table LIKE 'project'))";
+                    $sql_group = " Group By proj.proj_period_begin, proj.proj_id";
+                    $sql_order = " Order By proj.proj_period_begin Desc"; // order
+                    $sql .= $sql_group . $sql_order;
+                    // * display 30 records per load
+                    $sql .= $sql_display_limit;
+                    $fnc->debug_console('sql table owner: \n' . $sql);
+                    $data_array = $fnc->get_db_array($sql);
+                    ?>
+                    <h2 class="accordion-header" id="panelsStayOpen-heading4">
+                        <button class="accordion-button<?php if (empty($data_array)) {
+                                                            echo ' collapsed';
+                                                        } ?>" id="accordion-button4" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse4" aria-expanded="false" aria-controls="panelsStayOpen-collapse4">
+                            งานบริการวิชาการ
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapse4" class="accordion-collapse collapse<?php if (!empty($data_array)) {
+                                                                                                echo ' show';
+                                                                                            } ?>" aria-labelledby="panelsStayOpen-heading4">
+                        <div class="accordion-body">
+                            <?php gen_my_project($data_array); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
+
 
 
     <!-- Bootstrap JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
 
-    <?php include('../sweet_alert.php'); ?>
+    <?php  include('../sweet_alert.php'); 
+    ?>
 
 </body>
 

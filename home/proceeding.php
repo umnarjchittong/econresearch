@@ -41,6 +41,14 @@ if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
 <body>
     <?PHP include("header.php"); ?>
 
+    <?PHP
+    include ('homepage_configure.php');
+    
+    echo '<div class="container">';
+    include('carousel.php');
+    echo '</div>';
+    ?>
+
     <?php
     function gen_data_blog($row)
     {

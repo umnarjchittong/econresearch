@@ -108,6 +108,7 @@ class proceeding_fnc
                                 </div>
                             <?php } ?>
 
+                            <?php if ($_SESSION["admin"]["auth_lv"] >= 7) { ?>
                             <div class="col-12 mb-3 form-floating">
                                 <select class="form-select" size="8" style="height: 10em;" name="pro_owner_citizenid" id="pro_owner_citizenid" aria-describedby="pro_owner_citizenidHelp" required>
                                     <?php
@@ -126,6 +127,15 @@ class proceeding_fnc
                                 </select>
                                 <label for="pro_owner_citizenid" class="form-label">Owner <span class="lbl_required">*</span></label>
                             </div>
+                            <?php } else { ?>
+                                <div class="col-12 mb-3 form-floating">
+                                    <div class="col form-floating">
+                                        <input type="hidden" name="pro_owner_citizenid" id="pro_owner_citizenid" value="<?= $_SESSION["admin"]["citizenId"] ?>">
+                                        <input type="text" class="form-control" name="pro_owner_fullname" id="pro_owner_fullname" aria-describedby="pro_owner_fullnameHelp" value="<?= $_SESSION["admin"]["firstName"] . " " . $_SESSION["admin"]["lastName"] . " (" . $fnc->gen_titlePosition_short($_SESSION["admin"]["titlePosition"]) . ")" ?>" readonly>
+                                        <label for="pro_owner_fullname" class="form-label">Owner <span class="lbl_required">*</span></label>
+                                    </div>
+                                </div>
+                            <?php } ?>
 
                             <div class="col-12">
                                 <div class="col form-floating">
@@ -141,13 +151,9 @@ class proceeding_fnc
 
                 <div class="card-footer text-end">
                     <input type="hidden" name="fst" value="proceeding_append">
-                    <div class="row px-3 gx-3 mt-3">
-                        <div class="col-6 col-md-3 offset-md-6">
-                            <button type="button" class="btn btn-secondary w-100 py-2 text-uppercase" onclick="window.location='?p=proceeding'">close</button>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <button type="submit" class="btn btn-primary w-100 py-2 ms-3 text-uppercase">Save</button>
-                        </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-secondary btn-sm px-3 py-2 text-uppercase" onclick="window.location='?p=proceeding'"><?= $fnc->icon_set["goback"] ?>go back</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-3 py-2 ms-3 text-uppercase"><?= $fnc->icon_set["create"] ?>create</button>
                     </div>
                 </div>
 
@@ -328,13 +334,9 @@ class proceeding_fnc
                 <div class="card-footer text-end">
                     <input type="hidden" name="fst" value="proceeding_update">
                     <input type="hidden" name="pro_id" value="<?= $id ?>">
-                    <div class="row px-3 gx-3 mt-3">
-                        <div class="col-6 col-md-3 offset-md-6">
-                            <button type="button" class="btn btn-outline-secondary w-100 py-2 text-uppercase" onclick="window.open('../admin/?p=proceeding&act=viewinfo&pid=<?= $pro_id ?>','_top');">close</button>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <button type="submit" class="btn btn-outline-primary w-100 py-2 ms-3 text-uppercase">Update</button>
-                        </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3 py-2 text-uppercase" onclick="window.open('?p=proceeding&act=viewinfo&pid=<?= $id ?>','_top');"><?= $fnc->icon_set["goback"] ?>go back</button>
+                        <button type="submit" class="btn btn-outline-primary btn-sm px-3 py-2 ms-3 text-uppercase"><?= $fnc->icon_set["update"] ?>Update</button>
                     </div>
                 </div>
 
@@ -438,22 +440,20 @@ class proceeding_fnc
                     </thead>
                     <tbody style="font-size: 0.85em;">
                         <?php
-                        // $sql = "SELECT * FROM proceeding LEFT JOIN co_worker ON co_worker.cow_ref_id = proceeding.pro_id WHERE co_worker.  = 'proceeding' AND proceeding.pro_status = 'enable' AND( proceeding.pro_owner_citizenid = '1509900700434' OR co_worker.cow_citizenid = '1509900700434' ) GROUP BY proceeding.pro_id, proceeding.pro_date_begin ORDER BY proceeding.pro_date_begin DESC";
-                        // $sql = "SELECT * FROM proceeding LEFT JOIN co_worker ON co_worker.cow_ref_id = proceeding.pro_id WHERE co_worker.cow_ref_table  = 'proceeding' AND proceeding.pro_status = 'enable'";
                         $sql = "SELECT pro_id FROM v_proceeding_report2 WHERE";
-                        // " AND (proceeding.pro_owner_citizenid = '1509900700434' OR co_worker.cow_citizenid = '1509900700434') GROUP BY proceeding.pro_id, proceeding.pro_date_begin ORDER BY proceeding.pro_date_begin DESC";
-                        // $sql = "Select * From v_proceeding_report Where";
                         $sql .= " pro_status = '" . $data_status . "'";
                         if (isset($_GET["find"]) && $_GET["find"] != "" && isset($_GET["k"]) && $_GET["k"] != "") {
                             switch ($_GET["find"]) {
                                 case "memberId":
-                                    // $sql .= " AND (proceeding.pro_owner_citizenid = '" . $_GET["k"] . "' OR co_worker.cow_citizenid = '" . $_GET["k"] . "')"; // (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))";
                                     $sql .= " AND (citizenid = '" . $_GET["k"] . "')"; // (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))";
                                     break;
                                 case "search":
                                     $sql .= " AND (firstname LIKE '%" . $_GET["k"] . "%' Or lastname LIKE '%" . $_GET["k"] . "%' Or pro_study LIKE '%" . $_GET["k"] . "%')";
-                                    // $sql .= " AND (proceeding.pro_owner_firstname LIKE '%" . $_GET["k"] . "%' Or proceeding.pro_owner_lastname LIKE '%" . $_GET["k"] . "%' Or proceeding.department_name LIKE '%" . $_GET["k"] . "%' Or co_worker.cow_firstname LIKE '%" . $_GET["k"] . "%' Or co_worker.cow_lastname LIKE '%" . $_GET["k"] . "%' Or co_worker.department_name LIKE '%" . $_GET["k"] . "%' Or proceeding.pro_study LIKE '%" . $_GET["k"] . "%')";
                                     break;
+                            }
+                        } else {
+                            if ($_SESSION["admin"]["auth_lv"] <= 7) {
+                                // $sql .= " AND (citizenid = '" . $_SESSION["admin"]["citizenId"] . "')";
                             }
                         }
                         if (isset($_GET["byear"]) && $_GET["byear"] != "") {
@@ -463,30 +463,9 @@ class proceeding_fnc
                         }
                         $sql_group = " Group By pro_id, pro_date_begin";
                         $sql_order = " Order By pro_date_begin Desc";
-                        // $sql_group = " GROUP BY proceeding.pro_id, proceeding.pro_date_begin";
-                        // $sql_order = " ORDER BY proceeding.pro_date_begin DESC";
-                        // $sql_order = " ORDER BY pro_id DESC";
-
-                        // $sql = "Select pro.* From proceeding pro Left Join co_worker cowo On cowo.cow_ref_id = pro.pro_id Where ";
-                        // $sql .= "pro.pro_status LIKE '" . $data_status . "'";
-                        // if (isset($_GET["find"]) && $_GET["find"] != "" && isset($_GET["k"]) && $_GET["k"] != "") {
-                        //     switch ($_GET["find"]) {
-                        //         case "memberId":
-                        //             $sql .= " AND (pro.pro_owner_citizenid LIKE '" . $_GET["k"] . "' OR (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))"; // (cowo.cow_citizenid Like '" . $_GET["k"] . "' AND cowo.cow_ref_table LIKE 'research'))";
-                        //             break;
-                        //         case "search":
-                        //             $sql .= " AND (pro.pro_owner_prename LIKE '%" . $_GET["k"] . "%' Or pro.pro_owner_firstname LIKE '%" . $_GET["k"] . "%' Or ((cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or pro.pro_study LIKE '%" . $_GET["k"] . "%') AND cowo.cow_ref_table LIKE 'proceeding'))";
-                        //             break;
-                        //     }
-                        // }
-                        // if (isset($_GET["byear"]) && $_GET["byear"] != "") {
-                        //     $sql_year = " AND Year(pro.pro_date_begin) LIKE '" . $_GET["byear"] . "'";
-                        // } else {
-                        //     $sql_year = "";
-                        // }
-                        // $sql_group = " Group By pro.pro_date_begin, pro.pro_id";
-                        // $sql_order = " ORDER BY pro.pro_date_begin Desc"; // order
                         $sql .= $sql_year . $sql_group . $sql_order;
+                        // * display 20 records per load
+                        $sql .= " limit 20";
                         $fnc->debug_console('sql table owner: \n' . $sql);
                         $data_array = $fnc->get_db_array($sql);
                         if (!empty($data_array)) {
@@ -540,8 +519,9 @@ class proceeding_fnc
                 $pro_tier = '<img src="' . $pro_tier . '" class="mb-1 me-2" width="16em">';
         ?>
                 <tr>
-                    <td scope="row" class="text-center"><?= $x 
-                                                        ?><?//= $row["pro_id"]; ?></td>
+                    <td scope="row" class="text-center"><?= $x
+                                                        ?><? //= $row["pro_id"]; 
+                                                            ?></td>
                     <td class="d-none d-md-table-cell" nowrap><?php
                                                                 if ($linkable) {
                                                                     // echo '<a href="?p=proceeding&find=memberId&k=' . $row["citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($row["prename"]) . $row["firstname"] . ' ' . $row["lastname"] . '</a>';
@@ -652,7 +632,7 @@ class proceeding_fnc
                                 if (isset($_GET['act']) && $_GET['act'] == "coWorker") {
                                     // echo '<td class="text-center"><a href="#" target="_top" onclick="proceeding_coworker_delete_confirmation(' . $id . ', ' . $cow["cow_id"] . ');" class="text-danger fw-bold" style="font-size: 1.1em;"><i class="bi bi-person-dash-fill"></i></a></td>';
                                     $confirm_parameter = "'proceeding'," . $id . ", " . $cow["cow_id"];
-                                    echo '<td class="text-center"><a href="#" target="_top" onclick="coworker_delete_confirmation(' . $confirm_parameter . ');" class="text-danger fw-bold" style="font-size: 1.1em;"><i class="bi bi-person-dash-fill"></i></a></td>';
+                                    echo '<td class="text-center"><a href="#" target="_top" onclick="coworker_delete_confirmation(' . $confirm_parameter . ');" class="text-danger fw-bold" style="font-size: 1.1em;">' . $fnc->icon_set["coworker_del"] . '</a></td>';
                                 }
                                 ?>
                             </tr>
@@ -820,7 +800,7 @@ class proceeding_fnc
                                         $confirm_parameter = "'proceeding'," . $id . "," . $att["att_id"];
                                         echo '<div class="col text-end">';
                                         // echo '<a onclick="proceeding_attachment_delete_confirmation(' . $id . ',' . $att["att_id"] . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
-                                        echo '<a onclick="attachment_delete_confirmation(' . $confirm_parameter . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . '<i class="bi bi-trash-fill"></i>' . '</a>';
+                                        echo '<a onclick="attachment_delete_confirmation(' . $confirm_parameter . ')" href="#" target="_TOP" class="text-danger fw-bold ms-3" style="font-size: 1.1em;">' . $fnc->icon_set["delete"] . '</a>';
                                         echo '</div>';
                                     }
                                     echo '</div>';
@@ -862,26 +842,34 @@ class proceeding_fnc
             </div>
         <?php } ?>
 
-    <?php $this->gen_proceeding_owner($id, $row);
+        <?php $this->gen_proceeding_owner($id, $row);
 
         return $row;
     }
 
     public function gen_proceeding_action_menu()
     {
-    ?>
-        <div class="col-auto align-self-top text-end fw-bold text-primary" style="font-size:0.75em;">
-            <a href="?p=proceeding&act=viewinfo&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase" style="font-size:1em;">view info</a>
-            <a href="?p=proceeding&act=update&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase ms-3" style="font-size:1em;">update info</a>
-            <a href="?p=proceeding&act=coWorker&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase ms-3" style="font-size:1em;">co-worker/attachment</a>
-        </div>
-    <?php
+        global $fnc;
+        $sql = "SELECT pro.pro_id FROM proceeding pro WHERE pro.pro_id = " . $_GET["pid"] . " AND pro.pro_owner_citizenid LIKE '" . $_SESSION["admin"]["citizenId"] . "'";
+        if (!empty($fnc->get_db_row($sql)) || $_SESSION["admin"]["auth_lv"] >= 7) {
+        ?>
+            <div class="col-12 col-lg-auto align-self-top text-end fw-bold text-primary" style="font-size:0.75em;">
+                <a href="?p=proceeding&act=viewinfo&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-3 text-uppercase" style="font-size:1em;"><?= $fnc->icon_set["viewinfo"] ?>view proceeding info</a>
+                <a href="?p=proceeding&act=coWorker&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-3 text-uppercase ms-3" style="font-size:1em;"><?= $fnc->icon_set["coworker"] ?>co-worker/attachment</a>
+                <?php if (isset($_GET['act']) && $_GET['act'] == "viewinfo") { ?>
+                    <div class="text-end mt-2">
+                        <a href="?p=proceeding&act=update&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-primary btn-sm px-3 text-uppercase" style="font-size:1em;"><?= $fnc->icon_set["updateinfo"] ?>update proceeding info</a>
+                    </div>
+                <?php } ?>
+            </div>
+        <?php
+        }
     }
 
     public function gen_proceeding_info($pro_id)
     {
         $fnc = new web;
-    ?>
+        ?>
 
         <div class="card p-0 p-md-3 box_shadow">
             <div class="card-header bg-light bg-gradient row justify-content-between">
@@ -901,15 +889,17 @@ class proceeding_fnc
             </div>
 
             <div class="card-footer text-end">
-                <div class="col mt-3">
-                    <button type="button" class="btn btn-outline-secondary px-4 py-2 text-uppercase" onclick="window.open('?p=proceeding');">close</button>
-                    <?php if ($row["pro_status"] == 'delete') { ?>
-                        <button type="button" class="btn btn-outline-success px-4 py-2 text-uppercase" onclick="window.open('../db_mgt.php?p=proceeding&act=restore&pid=<?= $pro_id ?>','_top');">restore</button>
+                <div class="col mt-3 me-1">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3 py-2 text-uppercase" onclick="window.open('?p=proceeding');"><?= $fnc->icon_set["goback"] ?>go back</button>
+                    <?php
+                    $sql = "SELECT pro.pro_id FROM proceeding pro WHERE pro.pro_id = " . $_GET["pid"] . " AND pro.pro_owner_citizenid LIKE '" . $_SESSION["admin"]["citizenId"] . "'";
+                    if (!empty($fnc->get_db_row($sql)) || $_SESSION["admin"]["auth_lv"] >= 7) {
+                     if ($row["pro_status"] == 'delete') { ?>
+                        <button type="button" class="btn btn-outline-success btn-sm px-3 py-2 text-uppercase" onclick="window.open('../db_mgt.php?p=proceeding&act=restore&pid=<?= $pro_id ?>','_top');"><?= $fnc->icon_set["restore"] ?>restore</button>
                     <?php } else { ?>
-                        <button type="button" class="btn btn-outline-danger px-4 py-2 text-uppercase" onclick="proceeding_delete_confirmation(<?= $pro_id ?>);">delete</button>
-                        <!-- <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button> -->
-                    <?php } ?>
-
+                        <button type="button" class="btn btn-outline-danger btn-sm px-3 py-2 text-uppercase ms-3" onclick="proceeding_delete_confirmation(<?= $pro_id ?>);"><?= $fnc->icon_set["delete"] ?>delete proceeding</button>
+                    <?php } 
+                 } ?>
                 </div>
             </div>
 
@@ -996,7 +986,7 @@ class proceeding_fnc
                                 <div class="col mt-0">
                                     <!-- <button type="button" class="btn btn-secondary px-4 py-2 text-uppercase">close</button>
                         <button type="button" class="btn btn-danger px-4 py-2 text-uppercase">delete</button> -->
-                                    <button type="submit" class="btn btn-outline-primary px-4 py-2 text-uppercase">Add</button>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm px-3 py-2 text-uppercase"><?= $fnc->icon_set["coworker_add"] ?>Add</button>
                                     <input type="hidden" name="fst" value="proceedingCoWorkerIntAppend">
                                     <input type="hidden" name="ref_table" value="proceeding">
                                     <input type="hidden" name="ref_id" value="<?= $_GET["pid"] ?>">
@@ -1037,7 +1027,7 @@ class proceeding_fnc
                                 <div class="col mt-0">
                                     <!-- <button type="button" class="btn btn-secondary px-4 py-2 text-uppercase">close</button>
                         <button type="button" class="btn btn-danger px-4 py-2 text-uppercase">delete</button> -->
-                                    <button type="submit" class="btn btn-outline-primary px-4 py-2 text-uppercase">Add</button>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm px-3 py-2 text-uppercase"><?= $fnc->icon_set["coworker_add"] ?>Add</button>
                                     <input type="hidden" name="fst" value="proceedingCoWorkerExtAppend">
                                     <input type="hidden" name="ref_table" value="proceeding">
                                     <input type="hidden" name="ref_id" value="<?= $_GET["pid"] ?>">
@@ -1110,8 +1100,8 @@ class proceeding_fnc
         $fnc = new web;
     ?>
         <div class="text-white-50 mb-0 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
-            <div class="container px-0 px-md-5">
-                <ul class="nav justify-content-end">
+            <div class="px-0 px-md-5">
+                <ul class="nav justify-content-start">
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'personal') {
                                                 echo ' active link-light" aria-current="page';
@@ -1273,7 +1263,9 @@ class proceeding_fnc
                                             } else {
                                                 echo $row["pro_study"];
                                             }
-                                            ?></td>
+                                            ?>
+                                            <a href="?p=proceeding&act=report&cat=apasample&pid=<?= $row["pro_id"] ?>" target="_blank" class="d-print-none"><span class="badge rounded-pill bg-secondary text-white px-2 ms-2 fw-light" style="font-size: 1em;">APA</span></a>
+                                        </td>
                     <td class="text-center"><?php
                                             if (!empty($row["pro_tier"])) {
                                                 echo $row["pro_tier"];

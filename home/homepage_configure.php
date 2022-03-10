@@ -18,7 +18,7 @@ $top_banner = array(
 // * carousel items
 $carousels = array(
     array(
-        "display" => "home,research", // home, research, proceeding, journal, project, researcher
+        "display" => " home,research", // home, research, proceeding, journal, project, researcher
         "type" => "text", // image
         "bgColor" => "#592464",
         "h1Cls" => "display-4 font-italic text-center",
@@ -28,14 +28,15 @@ $carousels = array(
         "pLinkCls" => "lead mb-0 text-center",
         "LinkCls" => "ext-white font-weight-bold",
         "LinkText" => "Continue reading...",
-        "LinkUrl" => "#"
+        "LinkUrl" => "#",
+        "imageUrl" => "https://cdn.vox-cdn.com/thumbor/h7BGgS-dE6lmXWC6S3eBJDLVUmw=/0x0:1600x800/1400x788/filters:focal(672x272:928x528):format(jpeg)/cdn.vox-cdn.com/uploads/chorus_image/image/55717463/google_ai_photography_street_view_2.0.jpg"
     ),
     array(
-        "display" => "home", // home, research, proceeding, journal, project, researcher
+        "display" => "imdex, home, proceeding, journal", // home, research, proceeding, journal, project, researcher
         "type" => "text", // image
         "bgColor" => "#222460",
         "h1Cls" => "display-4 font-italic text-center",
-        "h1Text" => "บทความล่าสุด",
+        "h1Text" => "งานนำเสนอ และบทความล่าสุด",
         "pCls" => "lead my-3 text-center",
         "pText" => "Multiple lines of text that form the lede, informing new readers quickly",
         "pLinkCls" => "lead mb-0 text-center",
@@ -44,13 +45,26 @@ $carousels = array(
         "LinkUrl" => "#"
     ),
     array(
-        "display" => "home", // home, research, proceeding, journal, project, researcher
+        "display" => "index, home, project", // home, research, proceeding, journal, project, researcher
         "type" => "text", // image
         "bgColor" => "#892434",
         "h1Cls" => "display-4 font-italic text-center",
         "h1Text" => "โครงการบริการวิชาการที่ได้รับรางวัล",
         "pCls" => "lead my-3 text-center",
         "pText" => "Multiple lines of text that form the lede, informing new readers quickly",
+        "pLinkCls" => "lead mb-0 text-center",
+        "LinkCls" => "text-white font-weight-bold",
+        "LinkText" => "Continue reading...",
+        "LinkUrl" => "#"
+    ),
+    array(
+        "display" => "index, home, researcher", // home, research, proceeding, journal, project, researcher
+        "type" => "text", // image
+        "bgColor" => "#598444",
+        "h1Cls" => "display-4 font-italic text-center",
+        "h1Text" => "นักวิจัยดีเด่น",
+        "pCls" => "lead my-3 text-center",
+        "pText" => "Multiple lines of text that form the lede, informing new readers quickly <br> <br> This is a wider card with supporting text below as a natural lead-in to additional content.",
         "pLinkCls" => "lead mb-0 text-center",
         "LinkCls" => "text-white font-weight-bold",
         "LinkText" => "Continue reading...",
@@ -100,15 +114,15 @@ purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.';
 
 // * Notices เอกสาร
 $notice = array(
-    array('ทุนสนับสนุนวิจัย 65','#'),
-    array('พัฒนาบุคลากร 65', '#')
+    array('ประกาศทุนสนับสนุนวิจัยคณะฯ 65','../download/Announcement researchECON 65.pdf'),
+    array('ประกาศหลักเกณฑ์และวิธีการสนับสนุนงบประมาณเพื่อการพัฒนาบุคลากรคณะฯ 65', '../download/Announcement personnel development fund ECON 65.pdf')
 );
 
 // * Download เอกสาร
 $download_list = array(
-    array('แบบฟอร์มงานวิจัย','#'),
-    array('รายงานความก้าวหน้า', '#'),
-    array('การนำไปใช้ประโยชน์', '#')
+    array('แบบเสนอโครงการวิจัย (Research Project) คณะเศรษฐศาสตร์ ','../download/Research Project Form [65].pdf'),
+    array('แบบฟอร์มรายงานความก้าวหน้าการดำเนินงานโครงการวิจัยฯ', '../download/Reserch project progress report form.pdf'),
+    array('แบบฟอร์มการนำผลงานวิจัยหรืองานสร้างสรรค์ไปเผยแพร่และใช้ประโยชน์', '../download/Publishing research form.pdf')
 );
 
 // * Links Other

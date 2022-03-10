@@ -16,9 +16,26 @@ class Constants
   public $database_sample = false;
   // public $system_alert = false;
   public $system_meta_redirect = 1;
+  public $system_auth_lv = array(1 => "สมาชิกระบบ", 3 => "นักวิจัย", 5 => "ผู้บริหาร", 7 => "เจ้าหน้าที่", 9 => "นักพัฒนาระบบ");
   public $month_name = array(1 => "ม.ค.", 2 => "ก.พ.", 3 => "มี.ค.", 4 => "เม.ย.", 5 => "พ.ค.", 6 => "มิ.ย.", 7 => "ก.ค.", 8 => "ส.ค.", 9 => "ก.ย.", 10 => "ต.ค.", 11 => "พ.ย.", 12 => "ธ.ค.");
   public $month_fullname = array(1 => "มกราคม", 2 => "กุมภาพันธ์", 3 => "มีนาคม", 4 => "เมษายน", 5 => "พฤษภาคม", 6 => "มิถุนายน", 7 => "กรกฎาคม", 8 => "สิงหาคม", 9 => "กันยายน", 10 => "ตุลาคม", 11 => "พฤศจิกายน", 12 => "ธันวาคม");
   public $api_url_personal = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/";
+  public $icon_set = array(
+    'activities' => '<i class="bi bi-list-ol me-2"></i>',
+    'activities_add' => '<i class="bi bi-plus-square me-2"></i>',
+    'photoview' => '<i class="bi bi-images me-2"></i>',
+    'tableview' => '<i class="bi bi-table me-2"></i>',
+    'goback' => '<i class="bi bi-skip-backward me-2"></i>',
+    'create' => '<i class="bi bi-plus-square me-2"></i>',
+    'update' => '<i class="bi bi-save me-2"></i>',
+    'save' => '<i class="bi bi-trash-fill me-2"></i>',
+    'delete' => '<i class="bi bi-trash me-2"></i>',
+    'viewinfo' => '<i class="bi bi-zoom-in me-2"></i>',
+    'coworker' => '<i class="bi bi-people me-2"></i>',
+    'updateinfo' => '<i class="bi bi-pencil-square me-2"></i>',
+    'coworker_add' => '<i class="bi bi-person-plus-fill me-2"></i>',
+    'coworker_del' => '<i class="bi bi-person-dash-fill me-2"></i>'
+  );
 }
 
 class CommonFnc extends Constants

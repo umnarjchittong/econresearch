@@ -53,6 +53,7 @@
                             <li><a class="dropdown-item" href="project.php?p=project&act=report">reports</a></li>
                         </ul>
                     </li>                    
+                    <?PHP if ($_SESSION["admin"]["auth_lv"] >= 7) { ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" aria-current="page" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">admin</a>
                         <ul class="dropdown-menu">
@@ -61,24 +62,28 @@
                                                         } ?>" href="../admin/setting.php?p=department" target="_top">หลักสูตร/สาขาวิชา</a></li>
 
                             <!-- <li><a class="dropdown-item" href="#">Jobs Manager</a></li> -->
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="../admin/report.php">reports</a></li>
+                            <?PHP if ($_SESSION["admin"]["auth_lv"] >= 7) { ?>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <!-- <li><a class="dropdown-item" href="../admin/report.php">reports</a></li> -->
                             <li><a class="dropdown-item" href="../admin/datatable.php">data table</a></li>
                             <li><a class="dropdown-item" href="../admin/setting.php?p=chkFiscalYear">Fiscal Year</a></li>
-                            <li><a class="dropdown-item" href="../admin/setting.php">Settings</a></li>
+                            <!-- <li><a class="dropdown-item" href="../admin/setting.php">Settings</a></li> -->
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=dev">Developer</a></li>
-                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=admin">Admin</a></li>
-                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=dean">Dean</a></li>
-                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=">Officer</a></li>
-                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=Katesuda">Katesuda</a></li>
-                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=Prasert">Prasert</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=dev" target="_top">9Developer</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=admin" target="_blank">8Admin</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=" target="_blank">7Officer</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=dean" target="_blank">5Dean</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=Katesuda" target="_blank">3Katesuda</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=Prasert" target="_blank">3Prasert</a></li>
+                            <li><a class="dropdown-item" href="../sign/logas.php?p=logAs&logAs=Kanitta" target="_blank">3Kanitta</a></li>
+                            <?PHP } ?>
                         </ul>
                     </li>
+                    <?PHP } ?>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="signout_confirmation();">Sign-out</a>
                     </li>

@@ -39,6 +39,14 @@ if (isset($_GET['exp']) && $_GET['exp'] != "") {
 <body>
     <?PHP include("header.php"); ?>
 
+    <?PHP
+    include('homepage_configure.php');
+
+    echo '<div class="container">';
+    include('carousel.php');
+    echo '</div>';
+    ?>
+
     <?php
     function gen_data_header()
     {
@@ -89,11 +97,16 @@ if (isset($_GET['exp']) && $_GET['exp'] != "") {
         <div class="row">
             <div class="col-md-8">
                 <h2 class="pb-4 mb-4 blog-post-title border-bottom" style="font-size: 2rem;">
-                    ทำเนียบนักวิจัย - ความเชี่ยวชาญด้าน <?= $exp ?>
+                    ทำเนียบนักวิจัย<h3>ความเชี่ยวชาญ <?= $exp ?></h3>
                 </h2>
 
                 <?php
-                $sql = "SELECT res.citizenid, res.techName, res.firstName, res.lastName, res.cv_filename FROM res_expert reex INNER JOIN researcher res ON reex.citizenid = res.citizenid GROUP BY res.citizenid, res.techName, res.firstName, res.lastName, res.cv_filename";
+                $sql = "SELECT * FROM `res_expert`";
+                if (isset($_GET['exp']) && $_GET['exp'] != '') {
+                    $sql .= " WHERE expert_group = '" . $_GET['exp'] . "'";
+                }
+                $sql .= " GROUP BY `citizenid` ORDER BY `firstName`, `lastName`";
+                $fnc->debug_console($sql);
                 $data_array = $fnc->get_db_array($sql);
                 // echo '<div class="blog-post">';
                 echo '<table class="table table-striped table-bordered table-hover table-inverse table-responsive">
@@ -129,19 +142,19 @@ if (isset($_GET['exp']) && $_GET['exp'] != "") {
 
             <aside class="col-md-4">
                 <div class="p-4 mb-3 bg-light rounded">
-                    <h4 class="font-italic">About</h4>
-                    <p class="mb-0">Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur
-                        purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
+                    <h4 class="font-italic">About Researcher</h4>
+                    <p class="mb-0"> <em>ทำเนียบนักวิจัย : Researcher</em> แสดงข้อมูลนักวิจัยสังกัดคณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้ มีการจัดหมวดหมู่ตามความชำนาญ ความเชี่ยวชาญ
+                ประสบการณ์การดำเนินการวิจัยของนักวิจัย</p>
                 </div>
 
                 <div class="p-4">
                     <h4 class="font-italic">ความเชี่ยวชาญ</h4>
                     <ol class="list-unstyled mb-0">
                         <?php
-                        $sql = "SELECT expert_id, expert_name FROM expertise ORDER BY expert_name ASC";
+                        $sql = "SELECT `expert_group` FROM `res_expert` GROUP BY `expert_group` ORDER BY `expert_group`";
                         $fiscalyear = $fnc->get_db_rows($sql);
                         foreach ($fiscalyear as $row) {
-                            echo '<li><a href="?exp=' . $row['expert_id'] . '">' . $row['expert_name'] . '</a></li>';
+                            echo '<li><a href="?exp=' . $row['expert_group'] . '">' . $row['expert_group'] . '</a></li>';
                         }
                         ?>
                     </ol>

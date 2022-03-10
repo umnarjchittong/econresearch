@@ -87,6 +87,7 @@ class project_fnc
                                 </div>
                             <?php } ?>
 
+                            <?php if ($_SESSION["admin"]["auth_lv"] >= 7) { ?>
                             <div class="col-12 mb-3 form-floating">
                                 <select class="form-select" size="8" style="height: 10em;" name="proj_owner_citizenid" id="proj_owner_citizenid" aria-describedby="proj_owner_citizenidHelp" required>
                                     <?php
@@ -105,6 +106,15 @@ class project_fnc
                                 </select>
                                 <label for="proj_owner_citizenid" class="form-label">Owner <span class="lbl_required">*</span></label>
                             </div>
+                            <?php } else { ?>
+                                <div class="col-12 mb-3 form-floating">
+                                    <div class="col form-floating">
+                                        <input type="hidden" name="proj_owner_citizenid" id="proj_owner_citizenid" value="<?= $_SESSION["admin"]["citizenId"] ?>">
+                                        <input type="text" class="form-control" name="proj_owner_fullname" id="proj_owner_fullname" aria-describedby="proj_owner_fullnameHelp" value="<?= $_SESSION["admin"]["firstName"] . " " . $_SESSION["admin"]["lastName"] . " (" . $fnc->gen_titlePosition_short($_SESSION["admin"]["titlePosition"]) . ")" ?>" readonly>
+                                        <label for="proj_owner_fullname" class="form-label">Owner <span class="lbl_required">*</span></label>
+                                    </div>
+                                </div>
+                            <?php } ?>
 
                         </div>
                     </div>
@@ -113,13 +123,9 @@ class project_fnc
 
                 <div class="card-footer text-end">
                     <input type="hidden" name="fst" value="project_append">
-                    <div class="row px-3 gx-3 mt-3">
-                        <div class="col-6 col-md-3 offset-md-6">
-                            <button type="button" class="btn btn-secondary w-100 py-2 text-uppercase" onclick="window.location='?p=project'">close</button>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <button type="submit" class="btn btn-primary w-100 py-2 ms-3 text-uppercase">Save</button>
-                        </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-secondary btn-sm px-3 py-2 text-uppercase" onclick="window.location='?p=project','_top'"><?= $fnc->icon_set["goback"] ?>go back</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-3 py-2 ms-3 text-uppercase"><?= $fnc->icon_set["create"] ?>create project</button>
                     </div>
                 </div>
 
@@ -258,13 +264,9 @@ class project_fnc
                 <div class="card-footer text-end">
                     <input type="hidden" name="fst" value="project_update">
                     <input type="hidden" name="proj_id" value="<?= $id ?>">
-                    <div class="row px-3 gx-3 mt-3">
-                        <div class="col-6 col-md-3 offset-md-6">
-                            <button type="button" class="btn btn-outline-secondary w-100 py-2 text-uppercase" onclick="window.open('../admin/?p=project&act=viewinfo&pid=<?= $id ?>','_top');">close</button>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <button type="submit" class="btn btn-outline-primary w-100 py-2 ms-3 text-uppercase">Update</button>
-                        </div>
+                    <div class="mt-3 text-end">
+                        <button type="button" class="btn btn-secondary btn-sm px-3 py-2 text-uppercase" onclick="window.open('?p=project&act=viewinfo&pid=<?= $id ?>','_top');"><?= $fnc->icon_set["goback"] ?>go back</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-3 py-2 ms-3 text-uppercase"><?= $fnc->icon_set["update"] ?>Update</button>
                     </div>
                 </div>
 
@@ -384,7 +386,7 @@ class project_fnc
                             <button class="btn btn-outline-info btn-sm" type="submit" id="button-addon2">ค้น</button>
                         </div>
                         <?php
-                        $sql_year = "Select Year(jour_date_avaliable) As b_year From project Where jour_status = 'enable' Group By Year(jour_date_avaliable)";
+                        $sql_year = "Select Year(proj_period_begin) As b_year From project Where proj_status = 'enable' Group By Year(proj_period_begin)";
                         $byear = $fnc->get_db_array($sql_year);
                         // $fnc->debug_console("b year = ", $byear);
                         if (!empty($byear)) {
@@ -443,6 +445,10 @@ class project_fnc
                                     $sql .= " AND (proj.proj_owner_firstname LIKE '%" . $_GET["k"] . "%' Or proj.proj_owner_lastname LIKE '%" . $_GET["k"] . "%' Or ((cowo.cow_firstname LIKE '%" . $_GET["k"] . "%' Or cowo.cow_lastname LIKE '%" . $_GET["k"] . "%' Or proj_name LIKE '%" . $_GET["k"] . "%') AND cowo.cow_ref_table LIKE 'project'))";
                                     break;
                             }
+                        } else {
+                            if ($_SESSION["admin"]["auth_lv"] <= 7) {
+                                //$sql .= " AND (proj.proj_owner_citizenid LIKE '" . $_SESSION["admin"]["citizenId"] . "' OR (cowo.cow_citizenid Like '" . $_SESSION["admin"]["citizenId"] . "' AND cowo.cow_ref_table LIKE 'project'))";
+                            }
                         }
                         if (isset($_GET["byear"]) && $_GET["byear"] != "") {
                             $sql_year = " AND Year(proj.proj_period_begin) LIKE '" . $_GET["byear"] . "'";
@@ -452,6 +458,8 @@ class project_fnc
                         $sql_group = " Group By proj.proj_period_begin, proj.proj_id";
                         $sql_order = " Order By proj.proj_period_begin Desc"; // order
                         $sql .= $sql_year . $sql_group . $sql_order;
+                        // * display 20 records per load
+                        $sql .= " limit 20";
                         $fnc->debug_console('sql table owner: \n' . $sql);
                         $data_array = $fnc->get_db_array($sql);
                         if (!empty($data_array)) {
@@ -489,12 +497,12 @@ class project_fnc
     ?>
 
         <!-- * เจ้าของผลงาน / ผู้ร่วมงาน -->
-        <div class="mb-3 mt-4 col-12 col-md-8 offset-md-2">
+        <div class="mb-3 mt-4 col-12 col-md-8 offset-md-3">
             <table class="table table-striped table-bordered table-hover table-inverse table-responsive">
                 <thead class="thead-inverse|thead-default">
                     <tr>
                         <th class="text-center" style="width:3em;">#</th>
-                        <th>นักวิจัย</th>
+                        <th>เจ้าของโครงการ</th>
                         <th>หลักสูตร/สาขาวิชา</th>
                     </tr>
                 </thead>
@@ -506,48 +514,20 @@ class project_fnc
                             } ?></td>
                         <td class="text-start"><a href="?p=project&d=<?= $row["department_name"] ?>" target="_top" class="link-primary fw-bold"><?= $row["department_name"] ?></a></td>
                     </tr>
-                    <?php
-                    if (!empty($row["proj_ratio"])) {
-                        $sum_ratio += $row["proj_ratio"];
-                    }
-                    $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = 'project' AND `cow_ref_id` = " . $id;
-                    $fnc->debug_console("co worker sql: " . $sql);
-                    $co_worker = $fnc->get_db_array($sql);
-                    if (!empty($co_worker[0])) {
-                        // echo "<pre>" . print_r($co_worker[0]) . "</pre>";
-                        $x = 2;
-                        foreach ($co_worker as $cow) {
-                    ?>
-                            <tr>
-                                <td scope="row" class="text-center"><?= $x; ?></td>
-                                <?php
-                                if (!empty($cow["cow_citizenid"])) {
-                                    echo '<td><a href="?p=project&find=memberId&k=' . $cow["cow_citizenid"] . '" target="_top" class="fw-bold">' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</a></td>';
-                                } else {
-                                    echo '<td>' . $fnc->gen_titlePosition_short($cow["cow_prename"]) . $cow["cow_firstname"] . ' ' . $cow["cow_lastname"] . '</td>';
-                                }
-                                ?>
-                                <td class="text-start"><a href="?p=project&d=<?= $cow["department_name"] ?>" target="_top" class="link-primary fw-bold"><?= $cow["department_name"] ?></a></td>
-                            </tr>
-                    <?php
-                            $sum_ratio += $cow["cow_ratio"];
-                            $x++;
-                        }
-                    } ?>
                 </tbody>
             </table>
             <?php
-            if ($sum_ratio > 100) {
-                echo '<script type="text/javascript">';
-                echo 'document.getElementById("ratio_title").setAttribute("class", "text-center text-danger");';
-                // echo 'document.getElementById("ratio_title").innerHTML = "Hello World";';
-                echo '</script>';
-            } elseif ($sum_ratio < 100) {
-                echo '<script type="text/javascript">';
-                echo 'document.getElementById("ratio_title").setAttribute("class", "text-center text-warning");';
-                // echo 'document.getElementById("ratio_title").innerHTML = "Hello World";';
-                echo '</script>';
-            }
+            // if ($sum_ratio > 100) {
+            //     echo '<script type="text/javascript">';
+            //     echo 'document.getElementById("ratio_title").setAttribute("class", "text-center text-danger");';
+            //     // echo 'document.getElementById("ratio_title").innerHTML = "Hello World";';
+            //     echo '</script>';
+            // } elseif ($sum_ratio < 100) {
+            //     echo '<script type="text/javascript">';
+            //     echo 'document.getElementById("ratio_title").setAttribute("class", "text-center text-warning");';
+            //     // echo 'document.getElementById("ratio_title").innerHTML = "Hello World";';
+            //     echo '</script>';
+            // }
 
             ?>
 
@@ -565,7 +545,7 @@ class project_fnc
         $row = $fnc->get_db_row($sql);
 
         $label_cls = "col-12 col-md-4 col-lg-3 col-form-label fw-bold text-primary text-md-end";
-        $data_cls = "col-11 offset-1 col-md-8 offset-md-0 col-lg-9 col-form-label";
+        $data_cls = "col-11 offset-1 col-md-8 offset-md-0 col-lg-8 col-form-label";
     ?>
 
         <div class="row mb-3">
@@ -592,11 +572,7 @@ class project_fnc
             <div class="row mb-3">
                 <label class="<?= $label_cls ?>">ระยะเวลา</label>
                 <label class="<?= $data_cls ?>"><?php
-                                                $fnc->gen_date_full_thai($row["proj_period_begin"]);
-                                                if (!empty($row["proj_period_finish"])) {
-                                                    echo " - ";
-                                                    $fnc->gen_date_full_thai($row["proj_period_finish"]);
-                                                }
+                                                $fnc->gen_date_range_semi_th($row["proj_period_begin"], $row["proj_period_finish"]);
                                                 ?></label>
             </div>
 
@@ -711,6 +687,13 @@ class project_fnc
         $sql = "SELECT * FROM project_activity WHERE pa_id = " . $id;
         $row = $fnc->get_db_row($sql);
 
+        if ($row["pa_attach"] == 'false') {
+            echo '<script>
+    document.getElementById("btn_photomgt").setAttribute("class", "d-none"); 
+  </script>';
+            // echo '';
+        }
+
         $label_cls = "col-12 col-md-4 col-lg-3 col-form-label fw-bold text-primary text-md-end";
         $data_cls = "col-11 offset-1 col-md-8 offset-md-0 col-lg-9 col-form-label";
     ?>
@@ -723,11 +706,7 @@ class project_fnc
         <div class="row mb-3">
             <label class="<?= $label_cls ?>">ระยะเวลาดำเนินกิจกรรม</label>
             <label class="<?= $data_cls ?>"><?php
-                                            $fnc->gen_date_full_thai($row["pa_period_begin"]);
-                                            if (!empty($row["pa_period_finish"])) {
-                                                echo " - ";
-                                                $fnc->gen_date_full_thai($row["pa_period_finish"]);
-                                            }
+                                            $fnc->gen_date_range_semi_th($row["pa_period_begin"], $row["pa_period_finish"]);
                                             ?></label>
         </div>
 
@@ -795,12 +774,16 @@ class project_fnc
             </div>
         <?php } ?>
 
+        <?php
+        $sql = "SELECT `proj_id` FROM `project` WHERE `proj_id` = " . $_GET["jid"] . " AND `proj_owner_citizenid` LIKE '" . $_SESSION["admin"]["citizenId"] . "'";
+        if (!empty($fnc->get_db_row($sql)) || $_SESSION["admin"]["auth_lv"] >= 7) {
+            ?>
         <form action="../db_mgt.php" method="post" autocomplete="off" enctype="multipart/form-data">
             <div class="row mb-3">
                 <!-- <label class="col-sm-2 col-form-label fw-bold text-primary text-md-end">เพิ่มเอกสารแนบ</label> -->
                 <div class="mb-3 mt-0 col-12 col-md-8 offset-md-2">
                     <div class="col-12 mb-3">
-                        <label for="file_attach" class="form-label">ไฟล์ภาพประกอบ (เลือกได้มากกว่า 1 ไฟล์)P</label>
+                        <label for="file_attach" class="form-label">ไฟล์ภาพประกอบ (เลือกได้มากกว่า 1 ไฟล์)</label>
                         <div class="input-group">
                             <input type="file" class="form-control" name="file_attach[]" id="file_attach" aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".jpg, .jpeg, .png" multiple required>
                             <button class="btn btn-outline-primary text-uppercase" type="submit" id="inputGroupFileAddon04">upload</button>
@@ -813,8 +796,21 @@ class project_fnc
                 </div>
             </div>
         </form>
+        <?php } ?>
 
         <?php
+        if (isset($_GET['act']) && $_GET['act'] == 'photomgt') {
+            $this->gen_photo_table_view($row, $id);
+        } elseif ($_GET['act'] == 'info') {
+            $this->gen_photo_grid_view($project, $row, $id);
+        }
+
+        return $row;
+    }
+
+    public function gen_photo_grid_view($project, $row, $id)
+    {
+        global $fnc;
         // * image grid view
         if ($row['pa_attach'] == "true") {
             $sql = "SELECT * FROM `attachment` WHERE `att_ref_table` = 'activity' AND `att_ref_id` = " . $id . " ORDER BY att_id";
@@ -911,31 +907,91 @@ class project_fnc
             <?php
             } ?>
         <?php
-        } ?>
+        }
+    }
 
-    <?php
-        return $row;
+    public function gen_photo_table_view($row, $id)
+    {
+        global $fnc;
+        // * image grid view
+        if ($row['pa_attach'] == "true") {
+            $sql = "SELECT * FROM `attachment` WHERE `att_ref_table` = 'activity' AND `att_ref_id` = " . $id . " ORDER BY att_id";
+            $attach_array = $fnc->get_db_array($sql);
+            $fnc->debug_console("attach sql:\\n" . $sql);
+            $fnc->debug_console("attach array:", $attach_array);
+            if (!empty($attach_array)) {
+                echo '<div class="row">';
+                echo '<table class="table table-striped table-bordered table-hover table-inverse table-responsive">';
+                echo '<thead class="thead-inverse">';
+                echo '<tr>';
+                echo '<th class="text-center" style="width: 3em;">#</th>';
+                echo '<th colspan="2">Photo File Name</th>';
+                // echo '<th style="width: 3em;"></th>';
+                echo '</tr>';
+                echo '</thead>';
+                echo '<tbody>';
+                $i = 1;
+                foreach ($attach_array as $att) {
+                    echo '<tr>';
+                    echo '<td scope="row" class="align-middle text-center">' . $i . '</td>';
+                    echo '<td class="align-middle"><img src="' . '../' . $att['att_filepath'] . $att['att_filename'] . '" class="img-thumbnail me-3" width="80px">' . $att['att_filename'] . '</td>';
+                    echo '<td class="align-middle text-center" style="width: 3em;">';
+                    $confirm_parameter = $_GET["pid"] . "," . $_GET["paid"] . "," . $att["att_id"];
+                    echo '<a onclick="activity_photo_delete_confirmation(' . $confirm_parameter . ')" href="#" target="_TOP" class="text-danger fw-bold" style="font-size: 1.1em;"><i class="bi bi-trash-fill"></i></a>';
+                    echo '</td>';
+                    echo '</tr>';
+                    $i++;
+                }
+                echo '</tbody>';
+                echo '</table>';
+                echo '</div>';
+            }
+        }
     }
 
     public function gen_data_action_menu()
     {
-    ?>
-        <div class="col-auto align-self-top text-end fw-bold text-primary" style="font-size:0.75em;">
-            <a href="?p=project&act=viewinfo&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase" style="font-size:1em;">view info</a>
-            <a href="?p=project&act=update&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase ms-3" style="font-size:1em;">update info</a>
-            <a href="?p=activity&act=view&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase ms-3" style="font-size:1em;">activities</a>
-            <!-- <a href="?p=<? //= $_GET["p"] 
-                                ?>&act=coWorker&pid=<? //= $_GET["pid"] 
+        global $fnc;
+        $sql = "SELECT `proj_id` FROM `project` WHERE `proj_id` = " . $_GET["jid"] . " AND `proj_owner_citizenid` LIKE '" . $_SESSION["admin"]["citizenId"] . "'";
+        if (!empty($fnc->get_db_row($sql)) || $_SESSION["admin"]["auth_lv"] >= 7) {
+        ?>
+            <div class="col-12 col-lg-auto align-self-top text-end fw-bold text-primary" style="font-size:0.75em;">
+                <a href="?p=project&act=viewinfo&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-3 text-uppercase" style="font-size:1em;"><?= $fnc->icon_set["viewinfo"] ?>view project info</a>
+                <a href="?p=activity&act=view&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-success btn-sm px-3 text-uppercase ms-3" style="font-size:1em;"><?= $fnc->icon_set["activities"] ?>activities in project</a>
+                <?PHP if ($_GET['p'] == 'activity' && $_GET['act'] == "info" || $_GET['act'] == "photomgt") { ?>
+                    <div class="text-end mt-2">
+                        <a href="?p=activity&act=update&pid=<?= $_GET["pid"] ?>&paid=<?= $_GET["paid"] ?>" target="_top" class="btn btn-outline-primary btn-sm px-3 text-uppercase" style="font-size:1em;"><?= $fnc->icon_set["updateinfo"] ?>Activity Update</a>
+                        <?PHP if ($_GET['act'] == "info") { ?>
+                            <a id="btn_photomgt" href="?p=activity&act=photomgt&pid=<?= $_GET["pid"] ?>&paid=<?= $_GET["paid"] ?>" target="_top" class="btn btn-outline-primary btn-sm px-3 text-uppercase ms-3" style="font-size:1em;"><?= $fnc->icon_set["tableview"] ?>Photo Management</a>
+                        <?PHP } ?>
+                        <?PHP if ($_GET['act'] == "photomgt") { ?>
+                            <a href="?p=activity&act=info&pid=<?= $_GET["pid"] ?>&paid=<?= $_GET["paid"] ?>" target="_top" class="btn btn-outline-primary btn-sm px-3 text-uppercase ms-3" style="font-size:1em;"><?= $fnc->icon_set["photoview"] ?>Photo View</a>
+                        <?PHP } ?>
+                    </div>
+                <?PHP } ?>
+                <?php if (isset($_GET['act']) && $_GET['act'] == "viewinfo") { ?>
+                    <div class="text-end mt-2">
+                        <a href="?p=project&act=update&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-primary btn-sm px-3 text-uppercase" style="font-size:1em;"><?= $fnc->icon_set["updateinfo"] ?>update project info</a>
+                    </div>
+                <?php } ?>
+                <?php if (isset($_GET['act']) && $_GET['act'] == "view") { ?>
+                    <div class="text-end mt-2">
+                        <a href="?p=activity&act=new&pid=<?= $_GET["pid"] ?>" target="_top" class="btn btn-outline-primary btn-sm px-3 text-uppercase" style="font-size:1em;"><?= $fnc->icon_set["activities_add"] ?>new activity</a>
+                    </div>
+                <?php } ?>
+                <!-- <a href="?p=<? //= $_GET["p"] 
+                                    ?>&act=coWorker&pid=<? //= $_GET["pid"] 
                                                     ?>" target="_top" class="btn btn-outline-success btn-sm px-2 text-uppercase ms-3" style="font-size:1em;">co-worker/attachment</a> -->
-        </div>
-    <?php
+            </div>
+        <?php
+        }
     }
 
     public function gen_data_info($id)
     {
         // $fnc = new web;
-        // global $fnc;
-    ?>
+        global $fnc;
+        ?>
 
         <div class="card p-0 p-md-3 box_shadow">
             <div class="card-header bg-light bg-gradient row justify-content-between">
@@ -954,20 +1010,69 @@ class project_fnc
 
             </div>
 
+
+            <?php $this->gen_activity_in_project($id); ?>
+
             <div class="card-footer text-end">
-                <div class="col mt-3">
-                    <button type="button" class="btn btn-outline-secondary px-4 py-2 text-uppercase" onclick="window.open('?p=project');">close</button>
-                    <?php if ($row["proj_status"] == 'delete') { ?>
-                        <button type="button" class="btn btn-outline-success px-4 py-2 text-uppercase" onclick="window.open('../db_mgt.php?p=project&act=restore&pid=<?= $id ?>','_top');">restore</button>
-                    <?php } else { ?>
-                        <button type="button" class="btn btn-outline-danger px-4 py-2 text-uppercase" onclick="data_delete_confirmation(<?= "'project'," . $id ?>);">deleteee</button>
-                        <!-- <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button> -->
-                    <?php } ?>
+                <div class="col mt-3 me-1">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3 py-2 text-uppercase" onclick="history.back()"><?= $fnc->icon_set["goback"] ?>go back</button>
+                    <?php
+                    $sql = "SELECT `proj_id` FROM `project` WHERE `proj_id` = " . $_GET["jid"] . " AND `proj_owner_citizenid` LIKE '" . $_SESSION["admin"]["citizenId"] . "'";
+                    if (!empty($fnc->get_db_row($sql)) || $_SESSION["admin"]["auth_lv"] >= 7) {
+                        if ($row["proj_status"] == 'delete') { ?>
+                            <button type="button" class="btn btn-outline-success btn-sm px-3 py-2 text-uppercase" onclick="window.open('../db_mgt.php?p=project&act=restore&pid=<?= $id ?>','_top');"><?= $fnc->icon_set["restore"] ?>restore</button>
+                        <?php } else { ?>
+                            <button type="button" class="btn btn-outline-danger btn-sm px-3 py-2 text-uppercase ms-3" onclick="data_delete_confirmation(<?= "'project'," . $id ?>);"><?= $fnc->icon_set["delete"] ?>delete project</button>
+                            <!-- <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button> -->
+                    <?php
+                        }
+                    } ?>
 
                 </div>
             </div>
 
             </form>
+        </div>
+
+    <?php
+    }
+
+    public function gen_activity_in_project($id)
+    {
+        global $fnc;
+    ?>
+
+        <div class="card-body mt-0">
+            <div class="mb-3 mt-0 col-12 col-md-10 mx-auto">
+                <h5 class="text-primary">กิจกรรมภายใต้โครงการ</h5>
+                <table class="table table-striped table-bordered table-hover table-inverse table-responsive">
+                    <thead class="thead-inverse|thead-default">
+                        <tr>
+                            <th class="text-center" style="width:3em;">#</th>
+                            <th style="width:6em;">ระยะเวลา</th>
+                            <th>สถานที่ดำเนินกิจกรรม/รายละเอียด</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.9em;">
+                        <?php
+                        $sql = "SELECT * FROM `project_activity` WHERE `proj_id` = " . $_GET["pid"];
+                        $data_array = $fnc->get_db_array($sql);
+                        if (!empty($data_array)) {
+                            foreach ($data_array as $act) {
+                        ?>
+                                <tr>
+                                    <td scope="row" class="text-center">1</td>
+                                    <td class="text-center"><?= $fnc->gen_date_semi_th($act["pa_period_begin"]); ?></td>
+                                    <td class="text-start"><a href="project.php?p=activity&act=info&pid=<?= $_GET["pid"] ?>&paid=<?= $act["pa_id"] ?>" target="_TOP" class="text-primary"><?= $act["pa_location"] ?></a>
+                                        <?php if (!empty($act["pa_detail"])) { ?><p class="p-0 m-0 mt-2"><strong class="text-dark ps-4">รายละเอียด</strong> <?= $act["pa_detail"] ?></p><?php } ?>
+                                    </td>
+                                </tr>
+                        <?php }
+                        } ?>
+                    </tbody>
+                </table>
+
+            </div>
         </div>
 
     <?php
@@ -1120,7 +1225,6 @@ class project_fnc
                     <h5 class="card-title mt-2 h3 text-primary text-capitalize">project activities</h5>
                     <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ข้อมูลโครงการบริการวิชาการ - กิจกรรม</h6>
                 </div>
-
                 <?php $this->gen_data_action_menu(); ?>
             </div>
 
@@ -1131,137 +1235,197 @@ class project_fnc
 
             </div>
 
-            <?php
-            // ! *********************************          
-            ?>
-
-            <!-- <div class="card-body px-5 mx-5 text-end">
-
-                <a href="?p=activity&act=new&pid=1">NEW</a>
-
-            </div> -->
-
-            <?php if (isset($_GET['act']) && $_GET['act'] == "view") {
-                $sql = "SELECT * FROM `project_activity` WHERE `proj_id` = " . $_GET["pid"];
-                $data_array = $fnc->get_db_array($sql);
-                if (!empty($data_array)) {
-            ?>
-                    <div class="card-body mt-0 px-5 mx-5">
-                        <div class="text-end">
-                            <a href="?p=activity&act=new&pid=1" class="btn btn-sm btn-primary px-4">NEW</a>
-                        </div>
-                        <div class="row gx-3">
-                            <?php foreach ($data_array as $act) { ?>
-                                <div class="col-6 col-md-4 p-2 mx-auto text-center"><a href="?p=activity&act=info&pid=<?= $_GET['pid'] ?>&paid=<?= $act['pa_id'] ?>" class="btn w-100 text-white mx-2 box_shadow activity_gradient"><?php echo $act["pa_location"] .  "<br>";
-                                                                                                                                                                                                                                    $fnc->gen_date_semi_th($act["pa_period_begin"]); ?></a></div>
-                            <?php } ?>
-                        </div>
-
-                    </div>
-
-                <?php }
-            } else if ($_GET['act'] == "info") { ?>
-
-                <div class="card col-10 col-md-8 mx-auto p-0 p-md-3">
-                    <div class="card-header bg-light bg-gradient row justify-content-between">
-                        <div class="col-auto">
-                            <h5 class="card-title mt-2 h3 text-primary">Activity Info</h5>
-                            <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">แสดงรายละเอียดข้อมูลกิจกรรม</h6>
-                        </div>
-                    </div>
-
-
-                    <div class="card-body mt-3">
-
-                        <?php $activity = $this->gen_activity_detail($project, $_GET['paid']); ?>
-
-                    </div>
-
-                    <div class="card-footer text-end">
-                        <div class="col mt-3">
-                            <button type="button" class="btn btn-outline-secondary px-4 py-2 text-uppercase" onclick="window.open('?p=project');">close</button>
-                            <?php if ($row["proj_status"] == 'delete') { ?>
-                                <button type="button" class="btn btn-outline-success px-4 py-2 text-uppercase" onclick="window.open('../db_mgt.php?p=project&act=restore&pid=<?= $id ?>','_top');">restore</button>
-                            <?php } else { ?>
-                                <button type="button" class="btn btn-outline-danger px-4 py-2 text-uppercase" onclick="data_delete_confirmation(<?= "'project'," . $id ?>);">deleteee</button>
-                                <!-- <button type="button" class="btn btn-primary px-4 py-2 text-uppercase">Action</button> -->
-                            <?php } ?>
-
-                        </div>
-                    </div>
-
-                    </form>
-                </div>
-
-            <?php } else if ($_GET['act'] == "new") { ?>
-                <div class="card col-10 col-md-8 mx-auto p-0 p-md-3">
-                    <div class="card-header bg-light bg-gradient">
-                        <h5 class="card-title mt-2 h3 text-primary">NEW: Activity</h5>
-                        <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ข้อมูลกิจกรรม</h6>
-                    </div>
-
-                    <form action="../db_mgt.php" method="post" autocomplete="off">
-                        <div class="card-body mt-3">
-
-                            <div class="col-12 mb-3">
-                                <div class="row g-3">
-                                    <div class="col-md-6 form-floating">
-                                        <input type="date" class="form-control" name="pa_period_begin" id="pa_period_begin" aria-describedby="pa_period_beginHelp" required>
-                                        <label for="pa_period_begin" class="form-label">วันเริ่มต้นกิจกรรม <span class="lbl_required">*</span></label>
-                                    </div>
-                                    <div class="col-md-6  form-floating">
-                                        <input type="date" class="form-control" name="pa_period_finish" id="pa_period_finish" aria-describedby="pa_period_finishHelp">
-                                        <label for="pa_period_finish" class="form-label">วันสิ้นสุดกิจกรรม</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="pa_location" id="pa_location" aria-describedby="pa_locationHelp" placeholder="ชื่อโครงการบริการวิชาการ" required>
-                                <label for="pa_location" class="form-label">สถานที่ <span class="lbl_required">*</span></label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="pa_participant" id="pa_participant" aria-describedby="pa_participantHelp" placeholder="แหล่งทุน">
-                                <label for="pa_participant" class="form-label">ผู้เข้าร่วมกิจกรรม</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="number" class="form-control" name="pa_participant_number" id="pa_participant_number" aria-describedby="pa_participant_numberHelp" placeholder="งบประมาณ" min="0">
-                                <label for="pa_participant_number" class="form-label">จำนวนผู้เข้าร่วมกิจกรรม</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <textarea class="form-control" name="pa_detail" id="pa_detail" rows="10" style="height: 8em;" placeholder="(ถ้ามี)"></textarea>
-                                <label for="pa_detail" class="form-label">รายละเอียด</label>
-                            </div>
-
-                        </div>
-
-                        <div class="card-footer text-end">
-                            <input type="hidden" name="fst" value="activity_append">
-                            <input type="hidden" name="pid" value="<?= $_GET['pid'] ?>">
-                            <div class="row px-3 gx-3 mt-3">
-                                <div class="col-6 col-md-3 offset-md-6">
-                                    <button type="button" class="btn btn-secondary w-100 py-2 text-uppercase" onclick="window.location='?p=activity&act=view&pid=<?= $_GET["pid"] ?>'">close</button>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <button type="submit" class="btn btn-primary w-100 py-2 ms-3 text-uppercase">Create</button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            <?php
-            } ?>
+            <?PHP $this->gen_activity_attachment($project) ?>
 
 
 
         </div>
 
-    <?php
+        <?php
     }
+
+    public function gen_activity_attachment($project)
+    {
+        global $fnc;
+
+        if (isset($_GET['act']) && $_GET['act'] == "view") {
+            $sql = "SELECT * FROM `project_activity` WHERE `proj_id` = " . $_GET["pid"];
+            $data_array = $fnc->get_db_array($sql);
+            if (!empty($data_array)) {
+        ?>
+                <div class="card-body mt-0 px-5 mx-5">
+                    <!-- <div class="text-end">
+                        <a href="?p=activity&act=new&pid=1" class="btn btn-sm btn-primary px-4">NEW</a>
+                    </div> -->
+                    <div class="row gx-3">
+                        <?php foreach ($data_array as $act) { ?>
+                            <div class="col-6 col-md-4 p-2 mx-auto text-center"><a href="?p=activity&act=info&pid=<?= $_GET['pid'] ?>&paid=<?= $act['pa_id'] ?>" class="btn w-100 text-white mx-2 box_shadow activity_gradient"><?php echo $act["pa_location"] .  "<br>";
+                                                                                                                                                                                                                                $fnc->gen_date_semi_th($act["pa_period_begin"]); ?></a></div>
+                        <?php } ?>
+                    </div>
+
+                </div>
+
+            <?php }
+        } else if ($_GET['act'] == "info" || $_GET['act'] == "photomgt") { ?>
+            <div class="card col-10 col-md-8 mx-auto p-0 p-md-3">
+                <div class="card-header bg-light bg-gradient row justify-content-between">
+                    <div class="col-auto">
+                        <h5 class="card-title mt-2 h3 text-primary">รายละเอียดกิจกรรม</h5>
+                        <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">แสดงรายละเอียดข้อมูลกิจกรรม</h6>
+                    </div>
+                </div>
+
+
+                <div class="card-body mt-3">
+
+                    <?php $activity = $this->gen_activity_detail($project, $_GET['paid']); ?>
+
+                </div>
+
+                <div class="card-footer text-end">
+                    <div class="col mt-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3 py-2 text-uppercase" onclick="history.back()"><?= $fnc->icon_set["goback"] ?>go back</button>
+                        <?php
+                        $sql = "SELECT `proj_id` FROM `project` WHERE `proj_id` = " . $_GET["jid"] . " AND `proj_owner_citizenid` LIKE '" . $_SESSION["admin"]["citizenId"] . "'";
+                        if (!empty($fnc->get_db_row($sql)) || $_SESSION["admin"]["auth_lv"] >= 7) {
+                            ?>
+                        <button type="button" class="btn btn-outline-danger btn-sm px-3 py-2 text-uppercase ms-3" onclick="project_activity_delete_confirmation(<?= "'activity'," . $id . "," . $_GET["paid"]; ?>);"><?= $fnc->icon_set["delete"] ?>delete activity</button>
+                        <?php } ?>
+
+                    </div>
+                </div>
+
+                </form>
+            </div>
+
+        <?php } else if ($_GET['act'] == "new") { ?>
+            <div class="card col-10 col-md-8 mx-auto p-0 p-md-3">
+                <div class="card-header bg-light bg-gradient">
+                    <h5 class="card-title mt-2 h3 text-primary">NEW: Activity</h5>
+                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ข้อมูลกิจกรรม</h6>
+                </div>
+
+                <form action="../db_mgt.php" method="post" autocomplete="off">
+                    <div class="card-body mt-3">
+
+                        <div class="col-12 mb-3">
+                            <div class="row g-3">
+                                <div class="col-md-6 form-floating">
+                                    <input type="date" class="form-control" name="pa_period_begin" id="pa_period_begin" aria-describedby="pa_period_beginHelp" required>
+                                    <label for="pa_period_begin" class="form-label">วันเริ่มต้นกิจกรรม <span class="lbl_required">*</span></label>
+                                </div>
+                                <div class="col-md-6  form-floating">
+                                    <input type="date" class="form-control" name="pa_period_finish" id="pa_period_finish" aria-describedby="pa_period_finishHelp">
+                                    <label for="pa_period_finish" class="form-label">วันสิ้นสุดกิจกรรม</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="pa_location" id="pa_location" aria-describedby="pa_locationHelp" placeholder="ชื่อโครงการบริการวิชาการ" required>
+                            <label for="pa_location" class="form-label">สถานที่ <span class="lbl_required">*</span></label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="pa_participant" id="pa_participant" aria-describedby="pa_participantHelp" placeholder="แหล่งทุน">
+                            <label for="pa_participant" class="form-label">ผู้เข้าร่วมกิจกรรม</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" name="pa_participant_number" id="pa_participant_number" aria-describedby="pa_participant_numberHelp" placeholder="งบประมาณ" min="0">
+                            <label for="pa_participant_number" class="form-label">จำนวนผู้เข้าร่วมกิจกรรม</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" name="pa_detail" id="pa_detail" rows="10" style="height: 8em;" placeholder="(ถ้ามี)"></textarea>
+                            <label for="pa_detail" class="form-label">รายละเอียด</label>
+                        </div>
+
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <input type="hidden" name="fst" value="activity_append">
+                        <input type="hidden" name="pid" value="<?= $_GET['pid'] ?>">
+                        <div class="col mt-3 text-end">
+                            <button type="button" class="btn btn-secondary btn-sm px-3 py-2 text-uppercase" onclick="window.location='?p=activity&act=view&pid=<?= $_GET["pid"] ?>','_top'"><?= $fnc->icon_set["goback"] ?>go back</button>
+                            <button type="submit" class="btn btn-primary btn-sm px-3 py-2 ms-3 text-uppercase"><?= $fnc->icon_set["create"] ?>Create</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        <?php } else if ($_GET['act'] == "update") { ?>
+            <div class="card col-10 col-md-8 mx-auto p-0 p-md-3">
+                <div class="card-header bg-light bg-gradient">
+                    <h5 class="card-title mt-2 h3 text-primary">UPDATE: Activity</h5>
+                    <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.8em;">ปรับปรุงข้อมูลกิจกรรม</h6>
+                </div>
+                <?php
+                $sql = "SELECT * FROM `project_activity` WHERE `pa_id` = " . $_GET['paid'];
+                $row = $fnc->get_db_row($sql);
+                $fnc->debug_console("data: ", $row);
+                ?>
+                <form action="../db_mgt.php" method="post" autocomplete="off">
+                    <div class="card-body mt-3">
+
+                        <div class="col-12 mb-3">
+                            <div class="row g-3">
+                                <div class="col-md-6 form-floating">
+                                    <input type="date" class="form-control" name="pa_period_begin" id="pa_period_begin" aria-describedby="pa_period_beginHelp" value="<?= $row['pa_period_begin'] ?>" required>
+                                    <label for="pa_period_begin" class="form-label">วันเริ่มต้นกิจกรรม <span class="lbl_required">*</span></label>
+                                </div>
+                                <div class="col-md-6  form-floating">
+                                    <input type="date" class="form-control" name="pa_period_finish" id="pa_period_finish" value="<?php if ($row['pa_period_finish']) {
+                                                                                                                                        echo $row['pa_period_finish'];
+                                                                                                                                    } ?>" aria-describedby="pa_period_finishHelp">
+                                    <label for="pa_period_finish" class="form-label">วันสิ้นสุดกิจกรรม</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="pa_location" id="pa_location" aria-describedby="pa_locationHelp" placeholder="ชื่อโครงการบริการวิชาการ" value="<?= $row['pa_location'] ?>" required>
+                            <label for="pa_location" class="form-label">สถานที่ <span class="lbl_required">*</span></label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="pa_participant" id="pa_participant" aria-describedby="pa_participantHelp" placeholder="ผู้เข้าร่วมกิจกรรม" value="<?php if ($row['pa_participant']) {
+                                                                                                                                                                                                echo $row['pa_participant'];
+                                                                                                                                                                                            } ?>">
+                            <label for="pa_participant" class="form-label">ผู้เข้าร่วมกิจกรรม</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" name="pa_participant_number" id="pa_participant_number" aria-describedby="pa_participant_numberHelp" placeholder="จำนวนผู้เข้าร่วมกิจกรรม" min="0" value="<?php if ($row['pa_participant_number']) {
+                                                                                                                                                                                                                                    echo $row['pa_participant_number'];
+                                                                                                                                                                                                                                } ?>">
+                            <label for="pa_participant_number" class="form-label">จำนวนผู้เข้าร่วมกิจกรรม</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" name="pa_detail" id="pa_detail" rows="10" style="height: 8em;" placeholder="(ถ้ามี)"><?php if ($row['pa_detail']) {
+                                                                                                                                                    echo $row['pa_detail'];
+                                                                                                                                                } ?></textarea>
+                            <label for="pa_detail" class="form-label">รายละเอียด</label>
+                        </div>
+
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <input type="hidden" name="fst" value="activity_update">
+                        <input type="hidden" name="pid" value="<?= $_GET['pid'] ?>">
+                        <input type="hidden" name="paid" value="<?= $_GET['paid'] ?>">
+                        <div class="mt-3 text-end">
+                            <button type="button" class="btn btn-secondary btn-sm px-3 py-2 text-uppercase" onclick="window.location='?p=activity&act=info&pid=<?= $_GET["pid"] ?>&paid=<?= $_GET["paid"] ?>','_top'"><?= $fnc->icon_set["goback"] ?>go back</button>
+                            <button type="submit" class="btn btn-primary btn-sm px-3 py-2 ms-3 text-uppercase"><?= $fnc->icon_set["update"] ?>Update</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        <?php } ?>
+    <?php }
 
     public function gen_data_attachment($id)
     {
@@ -1318,8 +1482,8 @@ class project_fnc
         global $fnc;
     ?>
         <div class="text-white-50 mb-0 d-print-none" style="background-color:#baa0df; margin-top:3.6em;">
-            <div class="container px-0 px-md-5">
-                <ul class="nav justify-content-end">
+            <div class="px-0 px-md-5">
+                <ul class="nav justify-content-start">
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'personal') {
                                                 echo ' active link-light" aria-current="page';
@@ -1635,7 +1799,7 @@ class project_fnc
         </div>
     <?php
     }
-    
+
     public function gen_report_department()
     {
         $fnc = new web;
@@ -1763,8 +1927,8 @@ class project_fnc
 
             </form>
         </div>
-<?php
-    }    
+    <?php
+    }
 
 
     public function gen_report_personal_old()

@@ -54,25 +54,27 @@ if ($current_page == "index") {
     $current_page = "home";
 }
 $carouselName = "carouselExampleIndicators";
-echo $current_page;
+// echo $current_page;
+// $fnc->debug_console($current_page . "tom");
 if (!empty($carousels)) {
     echo '
     <div id="' . $carouselName . '" class="carousel slide" data-bs-ride="carousel">';
 
     echo '  <div class="carousel-indicators">';
-
+    $x = 0;
     for ($i = 0; $i < count($carousels); $i++) {
         // echo $current_page;
         // echo $carousels[$i]['display'];
         // echo strpos($carousels[$i]['display'], 'home');
-        if (strpos($carousels[$i]['display'], $current_page) >= 0) {
-            if ($i == 0) {
+        if (!empty(strpos($carousels[$i]['display'], $current_page))) {
+            if ($x == 0) {
                 echo '
                   <button type="button" data-bs-target="#' . $carouselName . '" data-bs-slide-to="0" aria-label="Slide 1" class="active" aria-current="true"></button>';
             } else {
                 echo '
-                  <button type="button" data-bs-target="#' . $carouselName . '" data-bs-slide-to="' . $i . '" aria-label="Slide ' . ($i + 1) . '"></button>';
+                  <button type="button" data-bs-target="#' . $carouselName . '" data-bs-slide-to="' . $x . '" aria-label="Slide ' . ($x + 1) . '"></button>';
             }
+            $x++;
         }
     }
     echo '
@@ -80,34 +82,44 @@ if (!empty($carousels)) {
 
     echo '
       <div class="carousel-inner">';
-
+    $x = 0;
     for ($i = 0; $i < count($carousels); $i++) {
         // if ($carousels[$i]['display'] == 'home') {
-            echo $carousels[$i]['display'] . " - " . $current_page;
-        if (strpos($carousels[$i]['display'], $current_page) >= 0) {
-            if ($i == 0) {
+        // $fnc->debug_console($carousels[$i]['display'] . " chk " . $current_page);
+        // if (!empty(strpos($carousels[$i]['display'], $current_page))) {
+        //     $fnc->debug_console("TRUE");
+        // }
+        if (!empty(strpos($carousels[$i]['display'], $current_page))) {
+            if ($x == 0) {
                 echo '
-        <div class="carousel-item active">';
+                <div class="carousel-item active">';
             } else {
                 echo '
-        <div class="carousel-item">';
+                <div class="carousel-item">';
+            }
+            // $fnc->debug_console(strpos($carousels[$i]['display'], $current_page));
+            if ($carousels[$i]['type'] == 'image') {
+                echo '
+                <img src="' . $carousels[$i]['imageUrl'] . '" alt="' . $carousels[$i]['h1Text'] . '" class="img-fluid w-100 rounded-2" onclick="window.open(' . $carousels[$i]['LinkUrl'] . ',_blank);">';
+            } else {
+                echo '
+            <div class="p-4 p-md-5 mb-4 text-white rounded" style="background-color: ' . $carousels[$i]['bgColor'] . '">';
+                echo '
+                <div class="col-md-10 mx-auto px-0">';
+                echo '
+                    <h1 class="' . $carousels[$i]['h1Cls'] . '">' . $carousels[$i]['h1Text'] . '</h1>';
+                echo '
+                    <p class="' . $carousels[$i]['pCls'] . '">' . $carousels[$i]['pText'] . '</p>';
+                echo '
+                    <p class="' . $carousels[$i]['pLinkCls'] . '"><a href="' . $carousels[$i]['LinkUrl'] . '" class="' . $carousels[$i]['LinkCls'] . '">' . $carousels[$i]['LinkText'] . '</a></p>';
+                echo '
+                </div>';
+                echo '
+            </div>';
             }
             echo '
-            <div class="p-4 p-md-5 mb-4 text-white rounded" style="background-color: ' . $carousels[$i]['bgColor'] . '">';
-            echo '
-                <div class="col-md-10 mx-auto px-0">';
-            echo '
-                    <h1 class="' . $carousels[$i]['h1Cls'] . '">' . $carousels[$i]['h1Text'] . '</h1>';
-            echo '
-                    <p class="' . $carousels[$i]['pCls'] . '">' . $carousels[$i]['pText'] . '</p>';
-            echo '
-                    <p class="' . $carousels[$i]['pLinkCls'] . '"><a href="' . $carousels[$i]['LinkUrl'] . '" class="' . $carousels[$i]['LinkCls'] . '">' . $carousels[$i]['LinkText'] . '</a></p>';
-            echo '
-                </div>';
-            echo '
-            </div>';
-            echo '
         </div>';
+            $x++;
         }
     }
     echo '

@@ -33,7 +33,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST
   if (isset($_POST['ref_pid']) && $_POST['ref_pid'] != "") {
     $target_dir = "uploads/" . $_POST["ref_table"] . "/" . "Project-" . $_POST['ref_pid'] . "/";
     if (!file_exists($target_dir)) {
-    mkdir($target_dir);
+      mkdir($target_dir);
     }
     $target_dir = "uploads/" . $_POST["ref_table"] . "/" . "Project-" . $_POST['ref_pid'] . "/" . "Activity-" . $_POST["ref_id"] . "/";
   } else {
@@ -100,7 +100,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST
           break;
         case "activity":
           $fnc->sql_execute("UPDATE `project_activity` SET `pa_attach`='true',`pa_lastupdate`=CURRENT_TIMESTAMP() WHERE `pa_id` =" . $_POST["ref_id"]);
-          $link_back = 'project.php?p=activity&act=info&pid=' . $_POST['ref_pid'] . '&paid=' . $_POST['ref_id'];
+          $link_back = 'project.php?p=activity&act=photomgt&pid=' . $_POST['ref_pid'] . '&paid=' . $_POST['ref_id'];
           break;
       }
       // echo "passed.";
@@ -456,11 +456,22 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "deletefile" && 
         }
         // $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"],0,1)) . 'id=' . $_GET["id"];
         break;
+      case "activity":
+        if (!$cnt) {
+          $fnc->sql_execute("UPDATE `project_activity` SET `pa_attach`=NULL,`pa_lastupdate`=CURRENT_TIMESTAMP WHERE `pa_id` =" . $_GET["paid"]);
+        }
+        // $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"],0,1)) . 'id=' . $_GET["id"];
+        // project.php?p=activity&act=photomgt&pid=12&paid=36
+        $link_back = 'project.php?p=' . $_GET["p"] . '&act=photomgt&pid=' . $_GET["id"] . '&paid=' . $_GET["paid"];
+        break;
     }
-    $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"], 0, 1)) . 'id=' . $_GET["id"];
+    if (empty($link_back)) {
+      $link_back = $_GET["p"] . '.php?p=' . $_GET["p"] . '&act=coWorker&' . strtolower(substr($_GET["p"], 0, 1)) . 'id=' . $_GET["id"];
+    }
 
     // echo "admin/" . $link_back . "&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ " . $_GET['p'] . " เรียบร้อย.";
-    echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ ' . ucfirst($_GET['p']) . ' เรียบร้อย." />';
+    // die($link_back);
+    die('<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=ลบไฟล์แนบของ ' . ucfirst($_GET['p']) . ' เรียบร้อย." />');
   } else {
     die("ERROR is empty :" . $sql);
     echo '<meta http-equiv="refresh" content="3; URL=admin/' . $link_back . '&alert=warning&title=ผิดพลาด&msg=ลบไฟล์แนบของ ' . ucfirst($_GET['p']) . ' ไม่สำเร็จ." />';
@@ -508,6 +519,12 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "datadelete" && 
     case "project";
       $sql = "DELETE FROM `project` WHERE `proj_id` = " . $_GET["id"];
       break;
+    case "activity";
+      $sql = "DELETE FROM `project_activity` WHERE `proj_id` = " . $_GET["id"] . " AND `pa_id` = "  . $_GET["paid"];
+      break;
+      // case "activity_image";
+      //   $sql = "DELETE FROM `project_activity` WHERE `pa_id` = " . $_GET["id"];
+      //   break;
   }
   // die($sql);
   $fnc->sql_execute($sql);
@@ -529,8 +546,12 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "datadelete" && 
     $fnc->sql_execute($sql);
   }
   // die();
-  echo '<meta http-equiv="refresh" content="0; URL=admin/' . $_GET["p"] . '.php?p=' . $_GET["p"] . '&alert=success&title=สำเร็จ&msg=ลบข้อมูล ' . ucfirst($_GET["p"]) . ' เรียบร้อย." />';
-  die();
+  if ($_GET["p"] = "activity") {
+    die('<meta http-equiv="refresh" content="0; URL=admin/project.php?p=' . $_GET["p"] . '&act=view&pid=' . $_GET["id"] . '&alert=success&title=สำเร็จ&msg=ลบข้อมูล ' . ucfirst($_GET["p"]) . ' เรียบร้อย." />');
+  } else {
+    die('<meta http-equiv="refresh" content="0; URL=admin/' . $_GET["p"] . '.php?p=' . $_GET["p"] . '&alert=success&title=สำเร็จ&msg=ลบข้อมูล ' . ucfirst($_GET["p"]) . ' เรียบร้อย." />');
+  }
+  // die();
 }
 
 // * Research insert
@@ -697,23 +718,27 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "project_update") {
 
 // * Activity insert
 if (isset($_POST["fst"]) && $_POST["fst"] == "activity_append") {
+  if (empty($_POST["pa_period_finish"])) {
+    $_POST["pa_period_finish"] = $_POST["pa_period_begin"];
+  }
   $sql = "INSERT INTO `project_activity`(`proj_id`, `pa_period_begin`, `pa_period_finish`, `pa_location`, `pa_participant`, `pa_participant_number`, `pa_detail`, `pa_create_datetime`, `pa_status`, `pa_editor`, `pa_lastupdate`) 
 VALUES ('" . $_POST["pid"] . "','" . $_POST["pa_period_begin"] . "','" . $_POST["pa_period_finish"] . "','" . addslashes($_POST["pa_location"]) . "','" . addslashes($_POST["pa_participant"]) . "','" . $_POST["pa_participant_number"] . "','" . addslashes($_POST["pa_detail"]) . "',CURRENT_TIMESTAMP(),'enable','admin',CURRENT_TIMESTAMP())";
 
   //  die($sql);
   $fnc->sql_execute($sql);
-  echo '<meta http-equiv="refresh" content="0; URL=admin/project.php?p=activity&act=view&pid=' . $_POST["pid"] . '&alert=success&title=สำเร็จ&msg=บันทึกข้อมูล project เรียบร้อย." />';
+  die('<meta http-equiv="refresh" content="0; URL=admin/project.php?p=activity&act=view&pid=' . $_POST["pid"] . '&alert=success&title=สำเร็จ&msg=บันทึกข้อมูล project เรียบร้อย." />');
   die();
 }
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "activity_update") {
-  $sql = "UPDATE `project` SET `proj_owner_citizenid`='" . $_POST["proj_owner_citizenid"] . "',`proj_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`proj_owner_firstname`='" . addslashes($owner["firstName"]) . "',`proj_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
-`proj_name`='" . addslashes($_POST["proj_name"]) . "',`proj_budget`=" . $_POST["proj_budget"] . ",`proj_budget_source`='" . addslashes($_POST["proj_budget_source"]) . "',`proj_period_begin`='" . $_POST["proj_period_begin"] . "',`proj_period_finish`='" . $_POST["proj_period_finish"] . "',`proj_fiscalyear`='" . $fiscal_year . "',
-`proj_target`='" . addslashes($_POST["proj_target"]) . "',`proj_detail`='" . addslashes($_POST["proj_detail"]) . "',`proj_editor`='Admin',`proj_lastupdate`=CURRENT_TIMESTAMP() WHERE `proj_id` = " . $_POST["proj_id"];
+  $sql = "UPDATE `project_activity` SET `pa_period_begin`='" . $_POST["pa_period_begin"] . "',`pa_period_finish`='" . $_POST["pa_period_finish"] . "',
+`pa_location`='" . addslashes($_POST["pa_location"]) . "',`pa_participant`='" . addslashes($_POST["pa_participant"]) . "',
+`pa_participant_number`='" . $_POST["pa_participant_number"] . "',`pa_detail`='" . addslashes($_POST["pa_detail"]) . "',`pa_editor`='admin',
+`pa_lastupdate`=CURRENT_TIMESTAMP WHERE `pa_id` = " . $_POST["paid"];
 
-  die($sql);
+  // die($sql);
   $fnc->sql_execute($sql);
-  echo '<meta http-equiv="refresh" content="0; URL=admin/project.php?p=project&act=viewinfo&rid=' . $_POST["proj_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Academic Service Project เรียบร้อย." />';
+  die('<meta http-equiv="refresh" content="0; URL=admin/project.php?p=activity&act=info&pid=' . $_POST["pid"] . '&paid=' . $_POST["paid"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Academic Service Project เรียบร้อย." />');
   die();
 }
 

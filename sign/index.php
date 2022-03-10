@@ -44,9 +44,9 @@ if (empty($_REQUEST["T"])) {
         } elseif ($api_array["citizenId"] == "3500700050680") { // admin Kanchana
             $auth_lv = 9;
             $homepage = "index.php";
-        } elseif ($api_array["citizenId"] == "") { // officer // ?
-            $auth_lv = 7;
-            $homepage = "officer.php";
+        // } elseif ($api_array["citizenId"] == "3500700050680") { // officer // ?
+        //     $auth_lv = 7;
+        //     $homepage = "officer.php";
         } elseif ($api_array["citizenId"] == "3570500079277") { // dean SomKiat  // board
             $auth_lv = 5;
             $homepage = "board.php";
@@ -64,19 +64,23 @@ if (empty($_REQUEST["T"])) {
             } else {
                 // * view api data
                 // print_r($api_array);
-                $auth_lv = 3;
-                $homepage = "member.php";
+                // $auth_lv = 3;
+                // $homepage = "member.php";
             }
         }
         $fnc = new CommonFnc();
         $_SESSION["admin"] = array(
             "citizenId" => $api_array["citizenId"],
-            "titlePosition" => $fnc->gen_titlePosition_short($api_array["titlePosition"]),
+            // "titlePosition" => $fnc->gen_titlePosition_short($api_array["titlePosition"]),
+            "titlePosition" => $api_array["titlePosition"],
             "firstName" => $api_array["firstName"],
             "lastName" => $api_array["lastName"],
+            "titleNameEn" => $api_array["titleNameEn"],
+            "positionEn" => $api_array["positionEn"],
             "firstName_en" => $api_array["fistNameEn"],
             "lastName_en" => $api_array["lastNameEn"],
             "positionTypeId" => $api_array["positionTypeId"],
+            "personnelPhoto" => str_replace("http://", "https://", $api_array["personnelPhoto"]),
             "homepage" => $homepage,
             "auth_lv" => $auth_lv
         );
@@ -85,7 +89,7 @@ if (empty($_REQUEST["T"])) {
             // echo "you have authentication level data is: ";
             // print_r($_SESSION["admin"]);
             // header("location:index.html");
-            die('<meta http-equiv="refresh" content="0;url=../admin/?p=welcome">');
+            die('<meta http-equiv="refresh" content="0;url=../admin/">');
         } else {
             echo "you have no authorize";
             die('<meta http-equiv="refresh" content="3;url=../e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');

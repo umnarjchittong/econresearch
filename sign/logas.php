@@ -19,18 +19,18 @@ if ($logAs) {
             $auth_lv = 9;
             $homepage = "index.php";
             break;
-        case "admin":
-            $API_URL .= "3500700050680"; // kanchana
-            $auth_lv = 9;
-            $homepage = "index.php";
-            break;
+        // case "admin":
+        //     $API_URL .= "3500700050680"; // kanchana
+        //     $auth_lv = 9;
+        //     $homepage = "index.php";
+        //     break;
         case "officer":
-            $API_URL .= ""; // ?
+            $API_URL .= "3500700050680"; // ?
             $auth_lv = 7;
             $homepage = "officer.php";
             break;
         case "dean":
-            $API_URL .= "3570500079277"; // Dean's SomKiat
+            $API_URL .= "3509901232112"; // Dean's SomKiat
             $auth_lv = 5;
             $homepage = "board.php";
             break;
@@ -44,6 +44,11 @@ if ($logAs) {
             $auth_lv = 3;
             $homepage = "member.php";
             break;
+        case "Kanitta":
+            $API_URL .= "3509901353611"; // member
+            $auth_lv = 3;
+            $homepage = "member.php";
+            break;
         default:
             die("not right parameter.");
             break;
@@ -52,12 +57,15 @@ if ($logAs) {
     $fnc = new CommonFnc();
     $_SESSION["admin"] = array(
         "citizenId" => $api_array["citizenId"],
-        "titlePosition" => $fnc->gen_titlePosition_short($api_array["titlePosition"]),
+        "titlePosition" => $api_array["titlePosition"],
         "firstName" => $api_array["firstName"],
         "lastName" => $api_array["lastName"],
+        "titleNameEn" => $api_array["titleNameEn"],
+        "positionEn" => $api_array["positionEn"],
         "firstName_en" => $api_array["fistNameEn"],
         "lastName_en" => $api_array["lastNameEn"],
         "positionTypeId" => $api_array["positionTypeId"],
+        "personnelPhoto" => str_replace("http://", "https://", $api_array["personnelPhoto"]),
         "homepage" => $homepage,
         "auth_lv" => $auth_lv
     );
@@ -69,7 +77,7 @@ if ($logAs) {
         // $fnc->debug_console("admin", $_SESSION["admin"]);
         // echo '<meta http-equiv="refresh" content="1;url=' . $SignInSuccess_URL . '">';
         // echo '<meta http-equiv="refresh" content="0;url=../admin/' . $_SESSION["admin"]["homepage"] . '?p=welcome">';
-        echo '<meta http-equiv="refresh" content="0;url=../admin/?p=welcome">';
+        echo '<meta http-equiv="refresh" content="0;url=../admin/">';
     } else {
         echo "you have no authorize";
         // echo '<meta http-equiv="refresh" content="0;url=https://faed.mju.ac.th/ddm/e401.php?err=ท่านไม่มีสิทธิ์ใช้ระบบนี้">';

@@ -129,6 +129,29 @@
         })
     }
 
+    function activity_photo_delete_confirmation(pid, paid, fid) {
+        Swal.fire({
+            title: 'Are you sure ?',
+            text: "คุณต้องการลบภาพนี้ออกจากกิจกรรม !",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'ยันยัน !',
+            cancelButtonColor: '#666',
+            cancelButtonText: 'ยกเลิก',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire(
+                    'Delete Confirmed !',
+                    'กำลังดำเนินการลบภาพ.',
+                    'success'
+                ).then(function() {
+                    window.location = "../db_mgt.php?p=activity&act=deletefile&id=" + pid + "&paid=" + paid + "&fid=" + fid;
+                });
+            }
+        })
+    }
+
     function proceeding_coworker_delete_confirmation(pid, cowid) {
         Swal.fire({
             title: 'Are you sure ?',
@@ -170,6 +193,29 @@
                     'success'
                 ).then(function() {
                     window.location = "../db_mgt.php?p=" + page + "&act=datadelete&id=" + id;
+                });
+            }
+        })
+    }
+
+    function project_activity_delete_confirmation(page, id, paid) {
+        Swal.fire({
+            title: 'Are you sure ?',
+            text: "คุณต้องการลบข้อมูล " + page + " นี้ !",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'ยันยัน !',
+            cancelButtonColor: '#666',
+            cancelButtonText: 'ยกเลิก',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire(
+                    'Delete Confirmed !',
+                    'กำลังดำเนินการลบ ' + page + '.',
+                    'success'
+                ).then(function() {
+                    window.location = "../db_mgt.php?p=" + page + "&act=datadelete&id=" + id + "&paid=" + paid;
                 });
             }
         })
