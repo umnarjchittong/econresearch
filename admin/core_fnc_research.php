@@ -613,7 +613,7 @@ class research_fnc
                             <button class="btn btn-outline-info btn-sm" type="submit" id="button-addon2">ค้น</button>
                         </div>
                         <?php
-                        $sql_year = "Select Year(res_period_begin) As b_year From research Where res_status = 'enable' Group By Year(res_period_begin)";
+                        $sql_year = "Select Year(res_period_begin) As b_year From research Where res_status = 'enable' Group By Year(res_period_begin) Order by res_period_begin Desc";
                         $byear = $fnc->get_db_array($sql_year);
                         // $fnc->debug_console("b year = ", $byear);
                         if (!empty($byear)) {

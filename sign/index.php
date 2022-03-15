@@ -9,14 +9,14 @@ if (isset($_GET["p"]) && $_GET["p"] = "signout") {
     // destroy the session
     session_destroy();
 
-    header("location:../home/");
+    header("location:https://econ.mju.ac.th/academicservice/home/");
 }
 
 // * Setup the initial config
 $WebToken = "95db669a55c0406c881eca261eae50e9"; // dev mode
 $AuthPath = "https://passport.mju.ac.th?W=" . $WebToken;
 $SignInSuccess_URL = "../admin/";
-$SignInFailure_URL = "../home/";
+$SignInFailure_URL = "https://econ.mju.ac.th/academicservice/home/";
 
 // * Check for request parameter
 if (empty($_REQUEST["T"])) {

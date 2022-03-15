@@ -386,7 +386,7 @@ class project_fnc
                             <button class="btn btn-outline-info btn-sm" type="submit" id="button-addon2">ค้น</button>
                         </div>
                         <?php
-                        $sql_year = "Select Year(proj_period_begin) As b_year From project Where proj_status = 'enable' Group By Year(proj_period_begin)";
+                        $sql_year = "Select Year(proj_period_begin) As b_year From project Where proj_status = 'enable' Group By Year(proj_period_begin) Order by proj_period_begin Desc";
                         $byear = $fnc->get_db_array($sql_year);
                         // $fnc->debug_console("b year = ", $byear);
                         if (!empty($byear)) {
@@ -1290,7 +1290,7 @@ class project_fnc
                         $sql = "SELECT `proj_id` FROM `project` WHERE `proj_id` = " . $_GET["jid"] . " AND `proj_owner_citizenid` LIKE '" . $_SESSION["admin"]["citizenId"] . "'";
                         if (!empty($fnc->get_db_row($sql)) || $_SESSION["admin"]["auth_lv"] >= 7) {
                             ?>
-                        <button type="button" class="btn btn-outline-danger btn-sm px-3 py-2 text-uppercase ms-3" onclick="project_activity_delete_confirmation(<?= "'activity'," . $id . "," . $_GET["paid"]; ?>);"><?= $fnc->icon_set["delete"] ?>delete activity</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm px-3 py-2 text-uppercase ms-3" onclick="project_activity_delete_confirmation(<?= "'activity'," . $_GET["pid"] . "," . $_GET["paid"]; ?>);"><?= $fnc->icon_set["delete"] ?>delete activity</button>
                         <?php } ?>
 
                     </div>

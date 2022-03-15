@@ -439,7 +439,7 @@ class journal_fnc
                             <button class="btn btn-outline-info btn-sm" type="submit" id="button-addon2">ค้น</button>
                         </div>
                         <?php
-                        $sql_year = "Select Year(jour_date_avaliable) As b_year From journal Where jour_status = 'enable' Group By Year(jour_date_avaliable)";
+                        $sql_year = "Select Year(jour_date_avaliable) As b_year From journal Where jour_status = 'enable' Group By Year(jour_date_avaliable) Order by jour_date_avaliable Desc";
                         $byear = $fnc->get_db_array($sql_year);
                         // $fnc->debug_console("b year = ", $byear);
                         if (!empty($byear)) {
