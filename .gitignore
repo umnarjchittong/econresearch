@@ -1,0 +1,5 @@
+uploads/
+resources/
+vendor/
+node_modules/
+*.log
