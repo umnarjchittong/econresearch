@@ -51,7 +51,7 @@ $proceeding_fnc = new proceeding_fnc();
     ?>
 
     <?php
-    if (isset($_GET['p']) && $_GET['p'] == 'proceeding' && $_GET['act'] != 'report') {
+    if (isset($_GET['p']) && $_GET['p'] == 'proceeding' || $_GET['act'] != 'report') {
         echo '<main class="mb-3">
                 <div class="container mx-auto py-3">';
         if (isset($_GET['act']) && $_GET['act'] == "append") {

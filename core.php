@@ -4,7 +4,9 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
 $_SESSION['coding_indent'] = 1;
 
 // ini_set('display_errors', 1);
@@ -487,7 +489,7 @@ class CommonFnc extends Constants
 
 class database extends CommonFnc
 {
-  protected $mysql_server = "10.1.3.5:3306";
+  protected $mysql_server = "10.1.245.45:3306";
   protected $mysql_user = "econ_research";
   protected $mysql_pass = "faedadmin";
   protected $mysql_name = "econ_research";
@@ -863,14 +865,12 @@ class APP_API extends CommonFnc
 
     // return $array_data ? $array_data : null;
     $api_url = $api_url . $api_url_section;
-    $this->debug_console($api_url);
+    // $this->debug_console($api_url);
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $api_url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
     $data = curl_exec($curl);
     curl_close($curl);
     $array_data = json_decode($data, true);

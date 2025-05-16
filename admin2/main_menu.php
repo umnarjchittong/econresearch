@@ -174,34 +174,34 @@ function NavExpand()
         </ul>
         <ul>
             <li>research</li>
-            <li><a class="dropdown-item" href="research.php?p=research" target="_blank">Data Manager</a></li>
-            <li><a class="dropdown-item" href="research.php?p=research&act=append" target="_blank">Create New</a></li>
-            <!-- <li><a class="dropdown-item" href="?p=research&act=viewdeleted" target="_blank">Deleted Data</a></li> -->
-            <li><a class="dropdown-item" href="research.php?p=research&act=report">reports</a></li>
+            <li><a class="dropdown-item" href="../admin/research.php?p=research" target="_blank">Data Manager</a></li>
+            <li><a class="dropdown-item" href="../admin/research.php?p=research&act=append" target="_blank">Create New</a></li>
+            <!-- <li><a class="dropdown-item" href="../admin/?p=research&act=viewdeleted" target="_blank">Deleted Data</a></li> -->
+            <li><a class="dropdown-item" href="../admin/research.php?p=research&act=report">reports</a></li>
         </ul>
         <ul>
             <li>Proceeding</li>
-            <li><a class="dropdown-item" href="proceeding.php?p=proceeding" target="_blank">Data Manager</a></li>
-            <li><a class="dropdown-item" href="proceeding.php?p=proceeding&act=append" target="_blank">Create
+            <li><a class="dropdown-item" href="../admin/proceeding.php?p=proceeding" target="_blank">Data Manager</a></li>
+            <li><a class="dropdown-item" href="../admin/proceeding.php?p=proceeding&act=append" target="_blank">Create
                     New</a></li>
-            <!-- <li><a class="dropdown-item" href="?p=proceeding&act=viewdeleted" target="_blank">Deleted Data</a></li> -->
-            <li><a class="dropdown-item" href="proceeding.php?p=proceeding&act=report">reports</a></li>
+            <!-- <li><a class="dropdown-item" href="../admin/?p=proceeding&act=viewdeleted" target="_blank">Deleted Data</a></li> -->
+            <li><a class="dropdown-item" href="../admin/proceeding.php?p=proceeding&act=report">reports</a></li>
         </ul>
         <ul>
             <li>Journal</li>
-            <li><a class="dropdown-item" href="journal.php?p=journal" target="_blank">Data Manager</a></li>
-            <li><a class="dropdown-item" href="journal.php?p=journal&act=append" target="_blank">Create
+            <li><a class="dropdown-item" href="../admin/journal.php?p=journal" target="_blank">Data Manager</a></li>
+            <li><a class="dropdown-item" href="../admin/journal.php?p=journal&act=append" target="_blank">Create
                     New</a></li>
-            <!-- <li><a class="dropdown-item" href="?p=journal&act=viewdeleted" target="_blank">Deleted Data</a></li> -->
-            <li><a class="dropdown-item" href="journal.php?p=journal&act=report">reports</a></li>
+            <!-- <li><a class="dropdown-item" href="../admin/?p=journal&act=viewdeleted" target="_blank">Deleted Data</a></li> -->
+            <li><a class="dropdown-item" href="../admin/journal.php?p=journal&act=report">reports</a></li>
         </ul>
         <ul>
             <li>Project</li>
-            <li><a class="dropdown-item" href="project.php?p=project" target="_blank">Data Manager</a></li>
-            <li><a class="dropdown-item" href="project.php?p=project&act=append" target="_blank">Create
+            <li><a class="dropdown-item" href="../admin/project.php?p=project" target="_blank">Data Manager</a></li>
+            <li><a class="dropdown-item" href="../admin/project.php?p=project&act=append" target="_blank">Create
                     New</a></li>
-            <!-- <li><a class="dropdown-item" href="?p=project&act=viewdeleted" target="_blank">Deleted Data</a></li> -->
-            <li><a class="dropdown-item" href="project.php?p=project&act=report">reports</a></li>
+            <!-- <li><a class="dropdown-item" href="../admin/?p=project&act=viewdeleted" target="_blank">Deleted Data</a></li> -->
+            <li><a class="dropdown-item" href="../admin/project.php?p=project&act=report">reports</a></li>
         </ul>
         <ul>
             <li>admin</li>

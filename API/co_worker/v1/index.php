@@ -27,64 +27,22 @@ function verifyExist($body)
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $data = $_GET;
     if (isset($data["method"]) && $data["method"] != "") {
-        $res = null;
         switch (strtolower($data["method"])) {
-            case "byear":
-                $sql = "Select Year(proj_period_begin) As b_year From project Where proj_status = 'enable' Group By Year(proj_period_begin) Order by proj_period_begin Desc";
-                // $res = get_result($sql);
-                break;
-
             case "view":
                 if (isset($data["option"]) && strtolower($data["option"]) === "all") {
-                    $sql = "Select * From researcher";
-                    $sql .= " Order By researcher.firstName, researcher.lastName";
-                    // if (isset($data["limit"]) && is_numeric($data["limit"])) {
-                    //     $sql .= " Limit " . $data["limit"];
-                    // }
-                    // die($sql);
-                    // $res = get_result($sql);
-                } elseif (isset($data["option"]) && strlen($data["option"]) && isset($data["byear"]) && is_numeric($data["byear"])) {
-                    $sql = "Select * From researcher Where researcher.firstName LIKE '%" . strtolower($data["option"]) . "%' OR researcher.lastName LIKE '%" . strtolower($data["option"]) . "%'";
-                    $sql .= " Order By researcher.firstName, researcher.lastName";
+                    $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable'";
+                } elseif (isset($data["status"]) && strtolower($data["status"]) === "delete") {
+                    $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = '" . $data["status"] . "'";
+                } elseif (isset($data["option"]) && strlen($data["option"]) && isset($data["proj_id"]) && is_numeric($data["proj_id"])) {
+                    $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = '" . $data["option"] . "' AND `cow_ref_id` = " . $data["proj_id"];
                 } elseif (isset($data["option"]) && strlen($data["option"])) {
-                    $sql = "Select * From researcher Where researcher.firstName LIKE '%" . strtolower($data["option"]) . "%' OR researcher.lastName LIKE '%" . strtolower($data["option"]) . "%'";
-                    $sql .= " Order By researcher.firstName, researcher.lastName";
-                    // if (isset($data["limit"]) && is_numeric($data["limit"])) {
-                    //     $sql .= " Limit " . $data["limit"];
-                    // }
-                    // die($sql);
-                    // $res = get_result($sql);
-                } else {
-                    isset($data["status"]) && $data["status"] != "" ? $data_status = $data["status"] : $data_status = "enable";
-                    $sql = "Select proj.* From project proj Left Join co_worker cowo On cowo.cow_ref_id = proj.proj_id Where proj.proj_status Like '" . $data_status . "'";
-                    // if (isset($data["limit"]) && is_numeric($data["limit"])) {
-                    //     $sql .= " Limit " . $data["limit"];
-                    // }
-                    $sql_year = "";
-                    // if (isset($data["byear"]) && is_numeric($data["byear"])) {
-                    //     $sql_year = " AND Year(proj.proj_period_begin) LIKE '" . $_GET["byear"] . "'";
-                    // }
-                    if (isset($data["byear"]) && is_numeric($data["byear"])) {
-                        $sql .= strpos($sql, "Where") ? " AND" : "";
-                        $sql .= " Year(proj.proj_period_begin) LIKE '" . $_GET["byear"] . "'";
-                    }
-                    $sql .= " Group By proj.proj_period_begin, proj.proj_id";
-                    $sql .= " Order By proj.proj_period_begin Desc"; // order
-                    // $sql;
-                    // die($sql);
-                    // $res = get_result($sql);
+                    $sql = "SELECT * FROM `co_worker` WHERE `cow_status` = 'enable' AND `cow_ref_table` = '" . $data["option"] . "'";
                 }
                 break;
-
         }
 
-        // $sql .= " Order By proj.proj_period_begin Desc"; // order
-        // if (isset($data["byear"]) && is_numeric($data["byear"])) {
-        //     $sql .= strpos($sql, "Where") ? " AND" : "";
-        //     $sql .= " Year(proj.proj_period_begin) = '" . $_GET["byear"] . "'";
-        // }
+        $sql .= " Order By cow_id Desc";
         if (isset($data["limit"]) && is_numeric($data["limit"])) $sql .= " limit " . $data["limit"];
-        // die($sql);
         $res = $sql ? get_result($sql) : null;
 
         if (empty($res) || !$res || !count($res) > 0) {
