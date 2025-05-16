@@ -143,7 +143,7 @@ if (isset($_GET['exp']) && $_GET['exp'] != "") {
             <aside class="col-md-4">
                 <div class="p-4 mb-3 bg-light rounded">
                     <h4 class="font-italic">About Researcher</h4>
-                    <p class="mb-0"> <em>ทำเนียบนักวิจัย : Researcher</em> แสดงข้อมูลนักวิจัยสังกัดคณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้ มีการจัดหมวดหมู่ตามความชำนาญ ความเชี่ยวชาญ
+                    <p class="mb-0" style="text-indent: 3em;"> <em>ทำเนียบนักวิจัย : Researcher</em> แสดงข้อมูลนักวิจัยสังกัดคณะเศรษฐศาสตร์ มหาวิทยาลัยแม่โจ้ มีการจัดหมวดหมู่ตามความชำนาญ ความเชี่ยวชาญ
                 ประสบการณ์การดำเนินการวิจัยของนักวิจัย</p>
                 </div>
 
@@ -154,19 +154,22 @@ if (isset($_GET['exp']) && $_GET['exp'] != "") {
                         $sql = "SELECT `expert_group` FROM `res_expert` GROUP BY `expert_group` ORDER BY `expert_group`";
                         $fiscalyear = $fnc->get_db_rows($sql);
                         foreach ($fiscalyear as $row) {
-                            echo '<li><a href="?exp=' . $row['expert_group'] . '">' . $row['expert_group'] . '</a></li>';
+                            echo '<li><a href="?exp=' . $row['expert_group'] . '" class="news_link">' . $row['expert_group'] . '</a></li>';
                         }
                         ?>
                     </ol>
                 </div>
 
                 <div class="p-4">
-                    <h4 class="font-italic">Download</h4>
-                    <ol class="list-unstyled">
-                        <li><a href="#">แบบฟอร์ม 1</a></li>
-                        <li><a href="#">แบบฟอร์ม 2</a></li>
-                        <li><a href="#">แบบฟอร์ม 3</a></li>
-                    </ol>
+                    <h4 class="font-italic">Downloads</h4>
+                    <!-- <ol class="list-unstyled mb-0"> -->
+                    <ul class="mb-0">
+                        <?php
+                        foreach ($download_list as $dl) {
+                            echo '<li><a href="' . $dl[1] . '" class="news_link">' . $dl[0] . '</a></li>';
+                        }
+                        ?>
+                    </ul>
                 </div>
             </aside>
 

@@ -28,6 +28,13 @@ include("core.php");
 $fnc = new Web();
 $MJU_API = new MJU_API();
 
+if (empty($_SESSION["admin"])) {
+  die('<meta http-equiv="refresh" content="0;url=../sign/">');
+} else {
+  $fnc->debug_console("Admin: \\n", $_SESSION["admin"]);
+}
+
+
 if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST["ref_table"]) && isset($_POST["ref_id"])) {
   // echo "uploading...";
   if (isset($_POST['ref_pid']) && $_POST['ref_pid'] != "") {

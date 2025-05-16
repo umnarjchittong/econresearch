@@ -92,9 +92,9 @@ $home_features = array(
     array(
         "type" => "image", // image
         "titleCls" => "d-inline-block mb-2 text-primary",
-        "titleText" => "Research",
+        "titleText" => "Academis Service Project",
         "h3Cls" => "mb-0",
-        "h3Text" => "Featured post",
+        "h3Text" => "โครงการบริการวิชาการ - ล่าสุด",
         "dateCls" => "mb-1 text-muted",
         "dateText" => "Nov 12",
         "pCls" => "card-text mb-auto",
@@ -109,26 +109,72 @@ $home_features = array(
 );
 
 // * About
-$about_text = 'Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur
-purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.';
+$about_text = 'โครงการพัฒนารูปแบบการจัดเก็บ/รวบรวมข้อมูลงานวิจัยและบริการวิชาการ มุ่งเน้นพัฒนากระบวนการจัดเก็บ รวบรวม เพื่อนำเสนอสารสนเทศด้านงานวิจัยและการบริการวิชาการ รวมไปถึงเป็นการสร้างช่องทางในการรับ ส่งผ่านข้อมูล และเผยแพร่ประชาสัมพันธ์ ข้อมูลที่เป็นประโยชน์แก่บุคลากรและผู้ที่สนใจ';
 
 // * Notices เอกสาร
 $notice = array(
-    array('ประกาศทุนสนับสนุนวิจัยคณะฯ 65','../download/Announcement researchECON 65.pdf'),
+    array('ประกาศทุนสนับสนุนวิจัยคณะฯ 65', '../download/Announcement researchECON 65.pdf'),
     array('ประกาศหลักเกณฑ์และวิธีการสนับสนุนงบประมาณเพื่อการพัฒนาบุคลากรคณะฯ 65', '../download/Announcement personnel development fund ECON 65.pdf')
 );
 
 // * Download เอกสาร
 $download_list = array(
-    array('แบบเสนอโครงการวิจัย (Research Project) คณะเศรษฐศาสตร์ ','../download/Research Project Form [65].pdf'),
+    array('แบบเสนอโครงการวิจัย (Research Project) คณะเศรษฐศาสตร์ ', '../download/Research Project Form [65].pdf'),
     array('แบบฟอร์มรายงานความก้าวหน้าการดำเนินงานโครงการวิจัยฯ', '../download/Reserch project progress report form.pdf'),
     array('แบบฟอร์มการนำผลงานวิจัยหรืองานสร้างสรรค์ไปเผยแพร่และใช้ประโยชน์', '../download/Publishing research form.pdf')
 );
 
 // * Links Other
 $Links_list = array(
-    array('แบบฟอร์มงานวิจัย','#'),
+    array('แบบฟอร์มงานวิจัย', '#'),
     array('รายงานความก้าวหน้า', '#'),
     array('การนำไปใช้ประโยชน์', '#')
 );
 
+// * Gauge Chart
+$charts = array(
+    array(
+        "ChartName" => "gauge1",
+        "ChartTitle" => "จำนวนเงินวิจัย งปม. 2565",
+        "ChartUnit" => "(หน่วย : ล้านบาท)",
+        "ChartValue" => 2.2,
+        "ChartTarget" => 4,
+        "ChartCaption" => "",
+        "ChartDanger" => 1,
+        "ChartWarning" => 3.9,
+        "ChartSuccess" => 4
+    ),
+    array(
+        "ChartName" => "gauge2",
+        "ChartTitle" => "จำนวนผลงานการนำเสนอ",
+        "ChartUnit" => "(หน่วย : ชิ้นงาน)",
+        "ChartValue" => 8,
+        "ChartTarget" => 5,
+        "ChartCaption" => "",
+        "ChartDanger" => 5,
+        "ChartWarning" => 10,
+        "ChartSuccess" => 15
+    ),
+    array(
+        "ChartName" => "gauge3",
+        "ChartTitle" => "จำนวนผลงานตีพิมพ์",
+        "ChartUnit" => "(หน่วย : ชิ้นงาน)",
+        "ChartValue" => 15,
+        "ChartTarget" => 20,
+        "ChartCaption" => "",
+        "ChartDanger" => 10,
+        "ChartWarning" => 15,
+        "ChartSuccess" => 20
+    ),
+    array(
+        "ChartName" => "gauge4",
+        "ChartTitle" => "งบประมาณการบริการวิชาการ",
+        "ChartUnit" => "(หน่วย : หมื่นบาท)",
+        "ChartValue" => 2,
+        "ChartTarget" => 10,
+        "ChartCaption" => "",
+        "ChartDanger" => 4,
+        "ChartWarning" => 8,
+        "ChartSuccess" => 10
+    )
+);

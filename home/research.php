@@ -106,30 +106,33 @@ if (!isset($_GET['fyear']) || $_GET['fyear'] == "") {
             <aside class="col-md-4">
                 <div class="p-4 mb-3 bg-light rounded">
                     <h4 class="font-italic">About</h4>
-                    <p class="mb-0">Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur
+                    <p class="mb-0" style="text-indent: 3em;">Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur
                         purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
                 </div>
 
                 <div class="p-4">
                     <h4 class="font-italic">Archives</h4>
-                    <ol class="list-unstyled mb-0">
+                    <ul class="mb-0">
                         <?php
                         $sql = "SELECT res_fiscalyear FROM research WHERE res_status = 'enable' GROUP BY res_fiscalyear ORDER BY res_fiscalyear DESC";
                         $fiscalyear = $fnc->get_db_rows($sql);
                         foreach ($fiscalyear as $row) {
-                            echo '<li><a href="?fyear=' . $row['res_fiscalyear'] . '">ปี งปม. ' . $row['res_fiscalyear'] . '</a></li>';
+                            echo '<li><a href="?fyear=' . $row['res_fiscalyear'] . '" class="news_link">ปี งปม. ' . $row['res_fiscalyear'] . '</a></li>';
                         }
                         ?>
-                    </ol>
+                    </ul>
                 </div>
 
                 <div class="p-4">
-                    <h4 class="font-italic">Download</h4>
-                    <ol class="list-unstyled">
-                        <li><a href="#">แบบฟอร์ม 1</a></li>
-                        <li><a href="#">แบบฟอร์ม 2</a></li>
-                        <li><a href="#">แบบฟอร์ม 3</a></li>
-                    </ol>
+                    <h4 class="font-italic">Downloads</h4>
+                    <!-- <ol class="list-unstyled mb-0"> -->
+                    <ul class="mb-0">
+                        <?php
+                        foreach ($download_list as $dl) {
+                            echo '<li><a href="' . $dl[1] . '" class="news_link">' . $dl[0] . '</a></li>';
+                        }
+                        ?>
+                    </ul>
                 </div>
             </aside>
 

@@ -346,3 +346,13 @@
 //     $(e.currentTarget).find('input[name="bookId"]').val(bookId);
 // });
 </script>
+
+
+<script>
+    // * bootstrap tooltip
+    //  data-bs-toggle="tooltip" data-bs-placement="top/bottom/left/right" title="ยกเลิกและกลับ"
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>

@@ -4,6 +4,13 @@ require('../vendor/autoload.php');
 require('../core.php');
 $fnc = new web();
 $MJU_API = new MJU_API();
+
+if (empty($_SESSION["admin"])) {
+    die('<meta http-equiv="refresh" content="0;url=../sign/">');
+} else {
+    $fnc->debug_console("Admin: \\n", $_SESSION["admin"]);
+}
+
 // require('core_fnc.php');
 // $core_fnc = new general_fnc();
 require('core_fnc_journal.php');

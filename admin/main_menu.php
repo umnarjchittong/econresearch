@@ -1,3 +1,11 @@
+<?php
+if (empty($_SESSION["admin"])) {
+    die('<meta http-equiv="refresh" content="0;url=../sign/">');
+} else {
+    $fnc->debug_console("Admin: \\n", $_SESSION["admin"]);
+}
+
+?>
 <nav class="navbar navbar-expand-md navbar-dark fixed-top" style="background-color: #592464;">
         <div class="container-fluid">
             <a class="navbar-brand" href="../admin/"><?= $fnc->system_name ?></a>
