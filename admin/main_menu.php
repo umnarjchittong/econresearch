@@ -93,7 +93,8 @@ if (empty($_SESSION["admin"])) {
                     </li>
                     <?PHP } ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="signout_confirmation();">Sign-out</a>
+                        <!-- <a class="nav-link" href="#" onclick="signout_confirmation();">Sign-out</a> -->
+                        <a class="nav-link" href="../mjusso/signout.php" target="_top">Sign-out</a>
                     </li>
                 </ul>
             </div>
