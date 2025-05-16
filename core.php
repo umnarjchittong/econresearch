@@ -1,4 +1,9 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 session_start();
 $_SESSION['coding_indent'] = 1;
 
@@ -43,39 +48,39 @@ class CommonFnc extends Constants
   public function debug_console($val1, $val2 = null)
   {
     // if (!empty($_SESSION["member"]["setting"]) && $_SESSION["member"]["setting"]["setting_debug_show"] && $_SESSION["member"]["auth_lv"] >= 9) {
-    if ($this->system_debug === true) {
-      if (is_array($val1)) {
-        // $val1 = implode(',', $val1);
-        $val1 = str_replace(
-          chr(34),
-          '',
-          json_encode($val1, JSON_UNESCAPED_UNICODE)
-        );
-        $val1 = str_replace(chr(58), chr(61), $val1);
-        $val1 = str_replace(chr(44), ', ', $val1);
-        $val1 = 'Array:' . $val1;
-      }
-      if (is_array($val2)) {
-        // $val2 = implode(',', $val2);
-        $val2 = str_replace(
-          chr(34),
-          '',
-          json_encode($val2, JSON_UNESCAPED_UNICODE)
-        );
-        $val2 = str_replace(chr(58), chr(61), $val2);
-        $val2 = str_replace(chr(44), ', ', $val2);
-        $val2 = 'Array:' . $val2;
-      }
-      if (isset($val1) && isset($val2) && !is_null($val2)) {
-        echo '<script>console.log("' .
-          $val1 .
-          '\\n' .
-          $val2 .
-          '");</script>';
-      } else {
-        echo '<script>console.log("' . $val1 . '");</script>';
-      }
+    // if ($this->system_debug === true) {
+    if (is_array($val1)) {
+      // $val1 = implode(',', $val1);
+      $val1 = str_replace(
+        chr(34),
+        '',
+        json_encode($val1, JSON_UNESCAPED_UNICODE)
+      );
+      $val1 = str_replace(chr(58), chr(61), $val1);
+      $val1 = str_replace(chr(44), ', ', $val1);
+      $val1 = 'Array:' . $val1;
     }
+    if (is_array($val2)) {
+      // $val2 = implode(',', $val2);
+      $val2 = str_replace(
+        chr(34),
+        '',
+        json_encode($val2, JSON_UNESCAPED_UNICODE)
+      );
+      $val2 = str_replace(chr(58), chr(61), $val2);
+      $val2 = str_replace(chr(44), ', ', $val2);
+      $val2 = 'Array:' . $val2;
+    }
+    if (isset($val1) && isset($val2) && !is_null($val2)) {
+      echo '<script>console.log("' .
+        $val1 .
+        '\\n' .
+        $val2 .
+        '");</script>';
+    } else {
+      echo '<script>console.log("' . $val1 . '");</script>';
+    }
+    // }
   }
 
   public function get_client_info()
@@ -427,12 +432,12 @@ class CommonFnc extends Constants
     //     1                       =>  'second'
     // );
     $condition = array(
-      12 * 30 * 24 * 60 * 60 =>  'yr',
-      30 * 24 * 60 * 60       =>  'month',
-      24 * 60 * 60            =>  'day',
-      60 * 60                 =>  'hr',
-      60                      =>  'min',
-      1                       =>  'sec'
+      12 * 30 * 24 * 60 * 60 => 'yr',
+      30 * 24 * 60 * 60 => 'month',
+      24 * 60 * 60 => 'day',
+      60 * 60 => 'hr',
+      60 => 'min',
+      1 => 'sec'
     );
 
     foreach ($condition as $secs => $str) {
@@ -466,7 +471,8 @@ class CommonFnc extends Constants
           break;
       }
     }
-    return $complex_str;;
+    return $complex_str;
+    ;
   }
 
   public function gen_titlePosition_short($titlePosition)
@@ -549,7 +555,8 @@ class database extends CommonFnc
   {
     if (isset($sql)) {
       $result = $this->get_result($sql);
-      if (!empty($result)) {;
+      if (!empty($result)) {
+        ;
         // if ($result->num_rows > 0) {;
         return $result->fetch_assoc();
       }
@@ -692,7 +699,7 @@ class Thailand_Province extends CommonFnc
                 <label for="province">จังหวัด</label>
                 <select name="province_id" id="province" class="form-select">
                     <option value="">เลือกจังหวัด</option>';
-    while ($result = mysqli_fetch_assoc($query)) :
+    while ($result = mysqli_fetch_assoc($query)):
       echo '
             <option value="' . $result['id'] . '">' . $result['name_th'] . '</option>';
     endwhile;
@@ -842,6 +849,32 @@ class Web extends database
       }
     }
     return $econ_member;
+  }
+}
+
+class APP_API extends CommonFnc
+{
+
+  public function getAPI($api_url_section)
+  {
+    $api_url = "https://aed.mju.ac.th/econ-research/api/";
+    // $data = file_get_contents($this->api_url . $api_url_section); // put the contents of the file into a variable
+    // $array_data = json_decode($data, true);
+
+    // return $array_data ? $array_data : null;
+    $api_url = $api_url . $api_url_section;
+    $this->debug_console($api_url);
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $api_url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+    $data = curl_exec($curl);
+    curl_close($curl);
+    $array_data = json_decode($data, true);
+    return $array_data ? $array_data : null;
   }
 }
 

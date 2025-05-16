@@ -52,7 +52,8 @@ $project_fnc = new project_fnc();
     ?>
 
     <?php
-    if (isset($_GET['p']) && $_GET['p'] == 'project' && $_GET['act'] != 'report') {
+    // if (isset($_GET['p']) && $_GET['p'] == 'project' && isset($_GET['act']) && $_GET['act'] != 'report') {
+    if (isset($_GET['p']) && $_GET['p'] == 'project') {
         echo '<main class="mb-3">
                 <div class="container mx-auto py-3">';
         if (isset($_GET['act']) && $_GET['act'] == "append") {
@@ -69,11 +70,12 @@ $project_fnc = new project_fnc();
             $project_fnc->gen_data_attachment($_GET['pid']);
         } else {
             $project_fnc->gen_data_table();
+            // $project_fnc->gen_data_table2();
         }
         echo '</div>
                 </main>';
     } else {
-        // echo "none parameters";
+        echo "none parameters";
     }
 
     if (isset($_GET['p']) && $_GET['p'] == 'activity' && isset($_GET['pid']) && $_GET['act'] != 'report') {

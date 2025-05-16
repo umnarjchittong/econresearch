@@ -80,9 +80,9 @@ if ($logAs) {
         echo '<meta http-equiv="refresh" content="0;url=../admin/">';
     } else {
         echo "you have no authorize";
-        // echo '<meta http-equiv="refresh" content="0;url=https://faed.mju.ac.th/ddm/e401.php?err=ท่านไม่มีสิทธิ์ใช้ระบบนี้">';
+        // echo '<meta http-equiv="refresh" content="0;url=https://faed.mju.ac.th/ddm/src/e401.php?err=ท่านไม่มีสิทธิ์ใช้ระบบนี้">';
     }
 } else {
     echo "your info is not founded";
-    // echo '<meta http-equiv="refresh" content="0;url=https://faed.mju.ac.th/ddm/e401.php?err=ระบบไม่พบข้อมูลของท่าน โปรดติดต่อฝ่ายไอที umnarj@mju.ac.th">';
+    // echo '<meta http-equiv="refresh" content="0;url=https://faed.mju.ac.th/ddm/src/e401.php?err=ระบบไม่พบข้อมูลของท่าน โปรดติดต่อฝ่ายไอที umnarj@mju.ac.th">';
 }

@@ -22,9 +22,11 @@ if ($ac && isset($userInfo) && $userInfo["e_mail"] !== "") {
     } elseif (strtolower($userInfo["e_mail"]) == "3570500079277" || $userInfo["e_mail"] == "3570500079277") { // dean SomKiat  // board
         $auth_lv = 5;
         $homepage = "board.php";
-    } else { // econ general member
+    } elseif (strtolower($userInfo["e_mail"]) == "3570500079277" || $userInfo["e_mail"] == "3570500079277") { // econ general member
         $auth_lv = 3;
         $homepage = "member.php";
+    } else {
+        die('<meta http-equiv="refresh" content="0;url=../src/e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
     }
 
     echo strtolower($userInfo["e_mail"]);
@@ -36,7 +38,7 @@ if ($ac && isset($userInfo) && $userInfo["e_mail"] !== "") {
             // $auth_lv = 1;
             // $homepage = "guest.php";
             echo "The authorize for ECON faculty employee only";
-            // die('<meta http-equiv="refresh" content="5;url=../e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
+            // die('<meta http-equiv="refresh" content="5;url=../src/e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
         } else {
             // * view api data
             // print_r($userInfo);
@@ -56,7 +58,7 @@ if ($ac && isset($userInfo) && $userInfo["e_mail"] !== "") {
         "firstName" => $userInfo["firstName"],
         "lastName" => $userInfo["lastName"],
         "titleNameEn" => $userInfo["titleNameEn"],
-        "positionEn" => $userInfo["firstNameEn"],
+        "positionEn" => $userInfo["position"],
         "firstName_en" => $userInfo["fistNameEn"],
         "lastName_en" => $userInfo["lastNameEn"],
         "positionTypeId" => null,
@@ -68,17 +70,19 @@ if ($ac && isset($userInfo) && $userInfo["e_mail"] !== "") {
     );
 
     print_r($_SESSION["admin"]);
+    echo "<br/><br/>";
+    print_r($userInfo);
 
     if (isset($auth_lv) && $auth_lv > 1 && $_SESSION["admin"]) {
         // echo "you have authentication level data is: ";
         // print_r($_SESSION["admin"]);
         // die('<meta http-equiv="refresh" content="0;url=../admin/">');
         // header("location:../admin/index.php");
-        die("<meta http-equiv='refresh' content='1; URL=../admin/index.php'>");
+        die("<meta http-equiv='refresh' content='3; URL=../admin/index.php'>");
         // die("<meta http-equiv='refresh' content='0; URL=../home/'>");
     } else {
         echo "you have no authorize";
-        // die('<meta http-equiv="refresh" content="3;url=../e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
+        // die('<meta http-equiv="refresh" content="3;url=../src/e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
     }
 }
 

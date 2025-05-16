@@ -70,7 +70,7 @@ if (empty($_REQUEST["T"])) {
                 // $auth_lv = 1;
                 // $homepage = "guest.php";
                 echo "The authorize for ECON faculty employee only";
-                die('<meta http-equiv="refresh" content="5;url=../e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
+                die('<meta http-equiv="refresh" content="5;url=../src/e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
             } else {
                 // * view api data
                 // print_r($api_array);
@@ -102,10 +102,10 @@ if (empty($_REQUEST["T"])) {
             die('<meta http-equiv="refresh" content="0;url=../admin/">');
         } else {
             echo "you have no authorize";
-            die('<meta http-equiv="refresh" content="3;url=../e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
+            die('<meta http-equiv="refresh" content="3;url=../src/e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
         }
     } else {
         echo "your info is not founded";
-        die('<meta http-equiv="refresh" content="3;url=../e401.php?err=ระบบไม่พบข้อมูลของท่าน โปรดติดต่อผู้ดูแลระบบ Kanchana_c@mju.ac.th">');
+        die('<meta http-equiv="refresh" content="3;url=../src/e401.php?err=ระบบไม่พบข้อมูลของท่าน โปรดติดต่อผู้ดูแลระบบ Kanchana_c@mju.ac.th">');
     }
 }

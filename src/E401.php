@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+<?php
+require_once('../src/includes/app.php');
+?>
 
 <head>
     <title>Dean's direct message</title>
@@ -14,14 +17,15 @@
     <link rel="shortcut icon" href="../img/favicon/favicon.ico">
 
     <!-- FontAwesome JS-->
-    <script defer src="../js/all.min.js"></script>
+    <!-- <script defer src="../js/all.min.js"></script> -->
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300&family=Prompt:wght@300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300&family=Prompt:wght@300&display=swap" rel="stylesheet"> -->
 
     <!-- CSS -->
-    <link id="theme-style" rel="stylesheet" href="../css/bootstrap.min.css">
+    <!-- <link id="theme-style" rel="stylesheet" href="../css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="../src/css/styles.css">
     <style>
         body {
             /* font-family: 'Kanit', sans-serif; */
@@ -35,7 +39,7 @@
 
 <body>
 
-    <div class="container text-center">
+    <div class="text-center mx-auto">
         <h2 class="text-warning mt-5 mb-0" style="font-size: 3em;">ERROR</h2>
         <h1 class="text-warning mb-2" style="font-size: 15em;">401</h1>
         <h3 class="text-white-50 mb-5" style="font-size: 3em;">UNAUTHORIZED</h3>
@@ -47,9 +51,9 @@
         }
         ?>
 
-        <a href="https://faed.mju.ac.th/ddm" target="_top" class="text-primary">[ HOME PAGE ]</a>
+        <a href="<?= BASE_URL ?>" target="_top" class="text-primary">[ HOME PAGE ]</a>
         <span class="mx-3">|</span>
-        <a href="https://faed.mju.ac.th/ddm/sign/index.php" target="_top" class="text-primary">[ SIGN-IN ]</a>
+        <a href="<?= BASE_URL ?>mjusso/" target="_top" class="text-primary">[ SIGN-IN ]</a>
     </div>
 
 

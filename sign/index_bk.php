@@ -60,7 +60,7 @@ if (empty($_REQUEST["T"])) {
                 // $auth_lv = 1;
                 // $homepage = "guest.php";
                 echo "The authorize for ECON faculty employee only";
-                die('<meta http-equiv="refresh" content="5;url=../e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
+                die('<meta http-equiv="refresh" content="5;url=../src/e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
             } else {
                 // * view api data
                 // print_r($api_array);
