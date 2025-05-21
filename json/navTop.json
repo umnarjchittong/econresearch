@@ -1,0 +1,102 @@
+[
+    {
+        "id": 1,
+        "text": "หน้าหลัก",
+        "link": "/",
+        "target": "_self"
+    },
+    {
+        "id": 2,
+        "text": "mass media",
+        "link": "/mass/",
+        "target": "_blank"
+    },
+    {
+        "id": "navService",
+        "text": "Our Service",
+        "link": "#",
+        "target": "_self",
+        "children": [
+            {
+                "id": 1,
+                "text": "บริการของเรา",
+                "link": "https://drive.google.com/file/d/1WOax-yX_LnmsLWV-3MsfmhL0xjqYjqrD/view?usp=sharing",
+                "target": "_blank"
+            },
+            {
+                "id": 2,
+                "text": "Brand Image (อัตลักษณ์แม่โจ้)",
+                "link": "https://brand.mju.ac.th",
+                "target": "_blank"
+            },
+            {
+                "id": 3,
+                "text": "Info Graphic",
+                "link": "https://issuu.com/prmju",
+                "target": "_blank"
+            },
+            {
+                "id": 5,
+                "text": "Inside Maejo",
+                "link": "https://issuu.com/prmju",
+                "target": "_blank"
+            },
+            {
+                "id": 4,
+                "text": "MJU Community",
+                "link": "#",
+                "target": "_blank"
+            }
+        ]
+    },
+    {
+        "id": "navAbout",
+        "text": "เกี่ยวกับหน่วยงาน",
+        "link": "#",
+        "target": "_self",
+        "children": [
+            {
+                "id": 8,
+                "text": "ประวัติความเป็นมา",
+                "link": "/about/?page=history",
+                "target": "_self"
+            },
+            {
+                "id": 6,
+                "text": "แผนกลยุทธ์สื่อสารองค์กร",
+                "link": "/download/files/strategy_plan_pr-mju.pdf",
+                "target": "_blank"
+            },
+            {
+                "id": 6,
+                "text": "คู่มือปฏิบัติงาน",
+                "link": "https://pr.mju.ac.th/goverment/25590428090422_prMJU/Doc_25620829160544_49945.pdf",
+                "target": "_blank"
+            },
+            {
+                "id": 10,
+                "text": "โครงสร้างการบริหารงาน",
+                "link": "/about/?page=organization",
+                "target": "_self"
+            },
+            {
+                "id": 10,
+                "text": "บุคลากร",
+                "link": "/about/?page=staff",
+                "target": "_self"
+            },
+            {
+                "id": 5,
+                "text": "กล่องเอกสาร",
+                "link": "https://pr.mju.ac.th/wtms_document.aspx?&lang=th-TH",
+                "target": "_blank"
+            },
+            {
+                "id": 10,
+                "text": "ที่อยู่และการติดต่อ",
+                "link": "/about/?page=contact",
+                "target": "_self"
+            }
+        ]
+    }
+]

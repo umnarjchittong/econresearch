@@ -96,6 +96,13 @@ if (empty($_SESSION["admin"])) {
                         <!-- <a class="nav-link" href="#" onclick="signout_confirmation();">Sign-out</a> -->
                         <a class="nav-link" href="../mjusso/signout.php" target="_top">Sign-out</a>
                     </li>
+                    <li>||</li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../admin2/" target="_blank">ADMIN2</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../admin2/theme.php" target="_blank">theme</a>
+                    </li>
                 </ul>
             </div>
         </div>

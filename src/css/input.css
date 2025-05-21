@@ -3,32 +3,45 @@
 @import "tailwindcss";
 
 @theme {
-    --color-clifford: #da373d;
-    --color-mint: #1fd1b8;
-    --color-bg-primary: oklch(54.6% 0.1 238 / 97.64%);
-    --color-emerald-200: #96dcc6;
-    --font-display: "Kanit", "sans-serif";
-    --color-light: #eaeaea;
+  --color-clifford: #da373d;
+  --color-mint: #1fd1b8;
+  --color-bg-primary: oklch(54.6% 0.1 238 / 97.64%);
+  --color-emerald-200: #96dcc6;
+  --font-display: "Kanit", "sans-serif";
+  --color-light: #eaeaea;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 html {
-    font-family: var(--font-display);
+  font-family: var(--font-display);
 }
 
 body {
-    @apply bg-[#DFD9EA] text-base font-normal;
-}
-
-main {
-    @apply px-4;
+  @apply bg-violet-200/25 text-base font-normal;
 }
 
 .body-wrapper {
-    /* @apply bg-pink-500; */
+  /* @apply bg-pink-500; */
+  @apply w-full flex flex-col h-svh;
+}
+
+#nav-main {
+  @apply bg-violet-800 text-white h-14 items-center;
+}
+
+main {
+  @apply px-4 mb-auto;
+}
+
+footer {
+  @apply bg-violet-300 text-gray-800 h-16 py-2 items-start text-center text-sm font-light;
+}
+
+.member-info-card {
+  @apply min-w-[400px] max-w-[800px] w-full p-4 bg-amber-400 mx-auto rounded-2xl shadow-2xl;
 }
 
 .member_avatar {
-    @apply w-[120px] shadow-sm border-2;
+  @apply w-[120px] shadow-sm border-2;
 }

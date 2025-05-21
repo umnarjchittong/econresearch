@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <?php
+if ($_SERVER["HTTP_HOST"] === "localhost") {
+    session_start();
+    $_SESSION["admin"] = array(
+        "citizenId" => '3500700238956',
+        // "titlePosition" => $fnc->gen_titlePosition_short($userInfo["titlePosition"]),
+        "titlePosition" => 'นาย',
+        "firstName" => 'อำนาจ',
+        "lastName" => 'ชิดทอง',
+        "titleNameEn" => 'Mr.',
+        "positionEn" => 'นักวิชาการคอมพิวเตอร์',
+        "firstName_en" => 'Umnarj',
+        "lastName_en" => 'Chittong',
+        "positionTypeId" => null,
+        // "personnelPhoto" => str_replace("http://", "https://", $userInfo["personnelPhoto"]),
+        "personnelPhoto" => 'https://erp.mju.ac.th/images/wdv5e67d35ghlp908/7caf371175ca4f4fbcde23640d9decbc.JPG',
+        "email" => 'umnarj@mju.ac.th',
+        "homepage" => 'index.php',
+        "auth_lv" => 9
+    );
+    die("<meta http-equiv='refresh' content='0; URL=../admin/" . $_SESSION["admin"]["homepage"] . "'>");
+    // header("location:../admin/");
+}
+
+
 // แก้ไข Client ID ตามที่ได้รับจากการลงทะเบียนไว้
 $clientId = '63845c675e46447d8c91cfdf7f1c81e8';
 // นำเข้าชุดคำสั่งจากไฟล์ mjusso.php
@@ -29,8 +53,8 @@ if ($ac && isset($userInfo) && $userInfo["e_mail"] !== "") {
         die('<meta http-equiv="refresh" content="0;url=../src/e401.php?err=ขออภัยท่านไม่ได้รับสิทธิ์เข้าใช้ระบบ">');
     }
 
-    echo strtolower($userInfo["e_mail"]);
-    echo "<br/>" . $auth_lv;
+    // echo strtolower($userInfo["e_mail"]);
+    // echo "<br/>" . $auth_lv;
 
 
     if ($auth_lv < 9) {
@@ -46,8 +70,6 @@ if ($ac && isset($userInfo) && $userInfo["e_mail"] !== "") {
             // $homepage = "member.php";
         }
     }
-
-    echo "line 48";
 
     require_once('../core.php');
     // $fnc = new CommonFnc();
@@ -69,16 +91,16 @@ if ($ac && isset($userInfo) && $userInfo["e_mail"] !== "") {
         "auth_lv" => $auth_lv
     );
 
-    print_r($_SESSION["admin"]);
-    echo "<br/><br/>";
-    print_r($userInfo);
+    // print_r($_SESSION["admin"]);
+    // echo "<br/><br/>";
+    // print_r($userInfo);
 
     if (isset($auth_lv) && $auth_lv > 1 && $_SESSION["admin"]) {
         // echo "you have authentication level data is: ";
         // print_r($_SESSION["admin"]);
         // die('<meta http-equiv="refresh" content="0;url=../admin/">');
         // header("location:../admin/index.php");
-        die("<meta http-equiv='refresh' content='3; URL=../admin/index.php'>");
+        die("<meta http-equiv='refresh' content='0; URL=../admin/index.php'>");
         // die("<meta http-equiv='refresh' content='0; URL=../home/'>");
     } else {
         echo "you have no authorize";
@@ -87,7 +109,7 @@ if ($ac && isset($userInfo) && $userInfo["e_mail"] !== "") {
 }
 
 // header("Location:" . $url_signout . $clientId);
-die("<meta http-equiv='refresh' content='0; URL=".$url_signin . $clientId."'>");
+die("<meta http-equiv='refresh' content='0; URL=" . $url_signin . $clientId . "'>");
 
 ?>
 

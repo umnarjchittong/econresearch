@@ -388,9 +388,9 @@ function gen_my_project($data_array)
 <body style="background-color: #DFD9EA;">
 
     <?php
-    // include('main_menu.php');
-    include_once("../admin2/main_menu.php");
-    NavExpand();
+    include('main_menu.php');
+    // include_once("../admin2/main_menu.php");
+    // NavExpand();
     ?>
 
     <div style="margin-top:3em;">&nbsp;</div>

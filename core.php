@@ -1,7 +1,7 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 0);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -532,7 +532,7 @@ class database extends CommonFnc
     $conn->multi_query($sql);
   }
 
-  public function sql_execute_debug($st = "", $sql)
+  public function sql_execute_debug($sql, $st = "")
   {
     if ($st != "") {
       if ($st == "die") {
@@ -881,7 +881,7 @@ class APP_API extends CommonFnc
 class MJU_API extends CommonFnc
 {
   private $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
-  public function get_api_info($title = "", $api_url, $print_r = false)
+  public function get_api_info($api_url, $title = "", $print_r = false)
   {
     $array_data = $this->GetAPI_array($api_url);
     echo "<h3 style='color:#1f65cf'>API Information: $title</h3>";
