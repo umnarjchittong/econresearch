@@ -31,10 +31,20 @@ if (empty($_SESSION["admin"])) {
 
   <div class="container-fluid p-3">
     Table: 
-    <a href="?tbl=proceeding" class="ms-2 text-primary">proceeding</a>
     <a href="?tbl=co_worker" class="ms-2 text-primary">co-worker</a>
     <a href="?tbl=attachment" class="ms-2 text-primary">attachment</a>
     <a href="?tbl=department" class="ms-2 text-primary">department</a>
+    <a href="?tbl=expertise" class="ms-2 text-primary">expertise</a>
+    <a href="?tbl=member_outsider" class="ms-2 text-primary">member_outsider</a>
+    <a href="?tbl=research" class="ms-2 text-primary">research</a>
+    <a href="?tbl=researcher" class="ms-2 text-primary">researcher</a>
+    <a href="?tbl=proceeding" class="ms-2 text-primary">proceeding</a>
+    <a href="?tbl=journal" class="ms-2 text-primary">journal</a>
+    <a href="?tbl=project" class="ms-2 text-primary">project</a>
+    <a href="?tbl=project_activity" class="ms-2 text-primary">project_activity</a>
+    <a href="?tbl=sdg" class="ms-2 text-primary">sdg</a>
+    <a href="?tbl=res_expert" class="ms-2 text-primary">res_expert</a>
+    <a href="?tbl=settings" class="ms-2 text-primary">settings</a>
   </div>
 
   <div class="container-fluid p-3">
