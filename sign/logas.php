@@ -12,7 +12,8 @@ $logAs = $_GET["logAs"];
 if ($logAs) {
     // * Using PID get the API information
     $MJU_API = new MJU_API();
-    $API_URL = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/";
+    // $API_URL = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/";
+    $API_URL = "https://apissandbox.mju.ac.th/api/v1/person/";
     switch ($logAs) {
         case "dev":
             $API_URL .= "3500700238956";

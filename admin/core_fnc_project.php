@@ -104,7 +104,8 @@ class project_fnc
                                         id="proj_owner_citizenid" aria-describedby="proj_owner_citizenidHelp" required>
                                         <?php
                                         $MJU_API = new MJU_API;
-                                        $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                        // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                        $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                         $econ_member = $MJU_API->GetAPI_array($api_url);
                                         $fnc->debug_console("econ member", $econ_member[0]);
                                         if (!empty($econ_member)) {
@@ -271,7 +272,8 @@ class project_fnc
                                     id="proj_owner_citizenid" aria-describedby="proj_owner_citizenidHelp">
                                     <?php
                                     $MJU_API = new MJU_API();
-                                    $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                     $econ_member = $MJU_API->GetAPI_array($api_url);
                                     // $fnc->debug_console("econ member", $econ_member[0]);
                                     $econ_member = $fnc->econ_member_remove_exists("project", $id, $econ_member, "owner");
@@ -1290,7 +1292,8 @@ class project_fnc
 
             <?php
             $MJU_API = new MJU_API;
-            $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+            // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+            $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
             // $econ_member = $MJU_API->GetAPI_array($api_url);                                    
             $econ_member = $fnc->econ_member_remove_exists("project", $id, $MJU_API->GetAPI_array($api_url));
             // $econ_member = $fnc->econ_member_remove_exists("proceeding", $id, $MJU_API->GetAPI_array($api_url));
@@ -1719,21 +1722,21 @@ class project_fnc
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=project&act=report&cat=personal">รายบุคคล</a>
+                                            } ?>" href="?act=report&cat=personal">รายบุคคล</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'department') {
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=project&act=report&cat=department">รายหลักสูตร</a>
+                                            } ?>" href="?act=report&cat=department">รายหลักสูตร</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'apasample') {
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=project&act=report&cat=apasample">APA's Ref</a>
+                                            } ?>" href="?act=report&cat=apasample">APA's Ref</a>
                     </li>
                 </ul>
             </div>
@@ -2204,7 +2207,8 @@ class project_fnc
                             <select class="form-select form-select-sm" name="k" id="k" onchange="this.form.submit();">
                                 <?php
                                 $MJU_API = new MJU_API;
-                                $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                 $econ_member = $MJU_API->GetAPI_array($api_url);
                                 $fnc->debug_console("econ member", $econ_member[0]);
                                 echo '<option value=""';
@@ -2572,9 +2576,10 @@ class project_fnc
     public function gen_report_apa()
     {
         // $fnc = new web;
+        die("Project Report APA is not available yet.");
         global $fnc;
         echo '<div class="bg-white p-3">';
-        $data_array = $fnc->get_db_array("SELECT * FROM `project` WHERE `jour_status` = 'enable'");
+        $data_array = $fnc->get_db_array("SELECT * FROM `project` WHERE `proj_status` = 'enable'");
         $fnc->debug_console("data array:", $data_array);
         if (!empty($data_array)) {
             echo '<table id="myTable" class="table table-striped table-bordered table-hover table-inverse table-responsive">';
@@ -2588,26 +2593,26 @@ class project_fnc
             echo '<tbody>';
             foreach ($data_array as $row) {
                 echo '<tr style="font-size: 0.75em;">
-                <td scope="row">' . $row['jour_id'] . '</td>';
+                <td scope="row">' . $row['proj_id'] . '</td>';
                 echo '<td>';
-                echo $fnc->gen_titlePosition_short($row['jour_owner_prename']);
-                echo $row['jour_owner_firstname'] . ' ' . $row['jour_owner_lastname'];
+                echo $fnc->gen_titlePosition_short($row['proj_owner_prename']);
+                echo $row['proj_owner_firstname'] . ' ' . $row['proj_owner_lastname'];
                 echo '</td>';
-                echo '<td>' . '<a href="?p=project&act=report&cat=apasample&pid=' . $row['jour_id'] . '">' . $row['jour_study'] . '</a>' . '</td>
+                echo '<td>' . '<a href="?p=project&act=report&cat=apasample&pid=' . $row['proj_id'] . '">' . $row['proj_name'] . '</a>' . '</td>
             </tr>';
             }
         }
 
         if (isset($_GET['pid']) && $_GET['pid'] != '') {
             $pid = $_GET['pid'];
-            $row = $fnc->get_db_row("SELECT * FROM `project` WHERE `jour_id` = " . $pid);
+            $row = $fnc->get_db_row("SELECT * FROM `project` WHERE `proj_id` = " . $pid);
             if (!empty($row)) {
                 echo '<h4>data</h4>';
                 echo '<pre style="font-size: 0.6em;">' . print_r($row, true) . '</pre>';
                 echo '<hr class="my-3">';
                 echo '<strong>Sample: </strong>' . 'เกวลิน สมบูรณ์, ชลระดา หนันติ๊ และวรัทยา แจ้งกระจ่าง. (2564). Rice Price volatility of Exports Leaders in World Markets using TGARCH model. 2021 International Conference on Internet Finance and Digital Economy (ICIFDE 2021).' . '<br>';
                 // ชื่อผู้เขียนบทความ
-                $apa_owner = $row['jour_owner_firstname'] . ' ' . $row['jour_owner_lastname'];
+                $apa_owner = $row['proj_owner_firstname'] . ' ' . $row['proj_owner_lastname'];
                 $cow = $fnc->get_db_array("SELECT * FROM `co_worker` WHERE `cow_ref_table` = 'project' AND `cow_ref_id` = " . $pid);
                 if (!empty($cow)) {
                     for ($i = 0; $i < count($cow); $i++) {
@@ -2620,12 +2625,12 @@ class project_fnc
                 }
                 $apa = $apa_owner;
                 // ปีที่พิมพ์
-                if (!empty($row['jour_date_avaliable'])) {
-                    $apa .= '. ' . '(' . (date("Y", strtotime($row['jour_date_avaliable'])) + 543) . ').';
-                }
+                // if (!empty($row['jour_date_avaliable'])) {
+                //     $apa .= '. ' . '(' . (date("Y", strtotime($row['jour_date_avaliable'])) + 543) . ').';
+                // }
                 // ชื่อบทความ
-                if (!empty($row['jour_study'])) {
-                    $apa .= ' ' . $row['jour_study'] . '.';
+                if (!empty($row['proj_name'])) {
+                    $apa .= ' ' . $row['proj_name'] . '.';
                 }
                 // ชื่อวารสาร
                 if (!empty($row['jour_journal'])) {

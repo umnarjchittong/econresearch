@@ -75,7 +75,7 @@ $project_fnc = new project_fnc();
         echo '</div>
                 </main>';
     } else {
-        echo "none parameters";
+        // echo "none parameters";
     }
 
     if (isset($_GET['p']) && $_GET['p'] == 'activity' && isset($_GET['pid']) && $_GET['act'] != 'report') {

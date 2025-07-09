@@ -157,7 +157,8 @@ class proceeding_fnc extends general_fnc
                                 <select class="form-select" size="8" style="height: 10em;" name="pro_owner_citizenid" id="pro_owner_citizenid" aria-describedby="pro_owner_citizenidHelp" required>
                                     <?php
                                     $MJU_API = new MJU_API;
-                                    $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                     $econ_member = $MJU_API->GetAPI_array($api_url);
                                     $fnc->debug_console("econ member", $econ_member[0]);
                                     if (!empty($econ_member)) {
@@ -337,7 +338,8 @@ class proceeding_fnc extends general_fnc
                                 <select class="form-select" size="8" style="height: 10em;" name="pro_owner_citizenid" id="pro_owner_citizenid" aria-describedby="pro_owner_citizenidHelp">
                                     <?php
                                     $MJU_API = new MJU_API();
-                                    $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                     $econ_member = $MJU_API->GetAPI_array($api_url);
                                     $fnc->debug_console("econ member", $econ_member[0]);
                                     $econ_member = $this->econ_member_remove_exists($pro_id, $econ_member, "owner");
@@ -943,7 +945,8 @@ class proceeding_fnc extends general_fnc
 
             <?php
             $MJU_API = new MJU_API;
-            $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+            // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+            $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
             // $econ_member = $MJU_API->GetAPI_array($api_url);                                    
             $econ_member = $this->econ_member_remove_exists($pro_id, $MJU_API->GetAPI_array($api_url), "coworking");
             $fnc->debug_console("econ member", $econ_member[0]);
@@ -1180,7 +1183,8 @@ class proceeding_fnc extends general_fnc
                             <select class="form-select form-select-sm" name="k" id="k" onchange="this.form.submit();">
                                 <?php
                                 $MJU_API = new MJU_API;
-                                $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                 $econ_member = $MJU_API->GetAPI_array($api_url);
                                 $fnc->debug_console("econ member", $econ_member[0]);
                                 echo '<option value=""';

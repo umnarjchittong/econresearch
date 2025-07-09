@@ -46,7 +46,8 @@ if (empty($_REQUEST["T"])) {
         // * Using PID get the API information
         // echo "pid: " . $pid;
         $MJU_API = new MJU_API();
-        $API_URL = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/" . $pid;
+        // $API_URL = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/" . $pid;
+        $API_URL = "https://apissandbox.mju.ac.th/api/v1/person/" . $pid;
         $api_array = $MJU_API->GetAPI_array($API_URL)[0];
         if ($api_array["citizenId"] == "3500700238956") { // developer
             $auth_lv = 9;
