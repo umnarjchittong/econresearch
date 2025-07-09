@@ -75,7 +75,7 @@ if (empty($_SESSION["admin"])) {
         foreach ($data_array as $row) {
           echo '<tr>';
           foreach ($col_name as $col) {
-            echo '<th>' . $row[$col] . '</th>';
+            echo '<td class="text-nowrap">' . $row[$col] . '</td>';
           }
           echo '</tr>';
         }
