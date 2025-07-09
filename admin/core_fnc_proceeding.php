@@ -1107,21 +1107,21 @@ class proceeding_fnc
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=proceeding&act=report&cat=personal">รายบุคคล</a>
+                                            } ?>" href="?act=report&cat=personal">รายบุคคล</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'department') {
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=proceeding&act=report&cat=department">รายหลักสูตร</a>
+                                            } ?>" href="?act=report&cat=department">รายหลักสูตร</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'apasample') {
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=proceeding&act=report&cat=apasample">APA's Ref</a>
+                                            } ?>" href="?act=report&cat=apasample">APA's Ref</a>
                     </li>
                 </ul>
             </div>

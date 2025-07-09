@@ -166,7 +166,7 @@
             if (result.isConfirmed) {
                 Swal.fire(
                     'Delete Confirmed !',
-                    'กำลังนำผู้ร่วมงานท่านนี้ออก.',
+                    'นำผู้ร่วมงานท่านนี้ออกเรียบร้อยแล้ว.',
                     'success'
                 ).then(function() {
                     window.location = "../db_mgt.php?p=proceeding&act=coWorkerRemove&pid=" + pid + "&cowid=" + cowid;
@@ -189,7 +189,7 @@
             if (result.isConfirmed) {
                 Swal.fire(
                     'Delete Confirmed !',
-                    'กำลังดำเนินการลบ ' + page + '.',
+                    'ดำเนินการลบ ' + page + ' เรียบร้อยแล้ว.',
                     'success'
                 ).then(function() {
                     window.location = "../db_mgt.php?p=" + page + "&act=datadelete&id=" + id;
@@ -212,7 +212,7 @@
             if (result.isConfirmed) {
                 Swal.fire(
                     'Delete Confirmed !',
-                    'กำลังดำเนินการลบ ' + page + '.',
+                    'ดำเนินการลบ ' + page + ' เรียบร้อยแล้ว.',
                     'success'
                 ).then(function() {
                     window.location = "../db_mgt.php?p=" + page + "&act=datadelete&id=" + id + "&paid=" + paid;
@@ -235,7 +235,7 @@
             if (result.isConfirmed) {
                 Swal.fire(
                     'Delete Confirmed !',
-                    'กำลังดำเนินการลบ journal.',
+                    'ดำเนินการลบ journal เรียบร้อยแล้ว.',
                     'success'
                 ).then(function() {
                     window.location = "../db_mgt.php?p=journal&act=delete&pid=" + pid
@@ -258,7 +258,7 @@
             if (result.isConfirmed) {
                 Swal.fire(
                     'Delete Confirmed !',
-                    'กำลังดำเนินการลบไฟล์แนบนี้.',
+                    'ดำเนินการลบไฟล์แนบนี้เรียบร้อยแล้ว.',
                     'success'
                 ).then(function() {
                     window.location = "../db_mgt.php?p=" + page + "&act=deletefile&id=" + id + "&fid=" + att_id;
@@ -281,7 +281,7 @@
             if (result.isConfirmed) {
                 Swal.fire(
                     'Delete Confirmed !',
-                    'กำลังนำผู้ร่วมงานท่านนี้ออก.',
+                    'นำผู้ร่วมงานท่านนี้ออกเรียบร้อยแล้ว.',
                     'success'
                 ).then(function() {
                     window.location = "../db_mgt.php?p=" + page + "&act=coWorkerRemove&id=" + id + "&cowid=" + cowid;
@@ -304,12 +304,21 @@
             if (result.isConfirmed) {
                 Swal.fire(
                     'Delete Confirmed !',
-                    'กำลังลบหลักสูตร/สาขาวิชา.',
+                    'ดำเนินการลบหลักสูตร/สาขาวิชาเรียบร้อยแล้ว.',
                     'success'
                 ).then(function() {
                     window.location = "../db_mgt.php?p=setting&act=department_remove&d_id=" + d_id
                 });
             }
+        })
+    }
+
+    function alertPopUp(icon = "success", title = "", html = "") {
+        Swal.fire({
+            title: title,
+            // text: text,
+            html: html,
+            icon: icon,
         })
     }
 

@@ -102,7 +102,8 @@ class journal_fnc
                                 <select class="form-select" size="8" style="height: 10em;" name="jour_owner_citizenid" id="jour_owner_citizenid" aria-describedby="jour_owner_citizenidHelp" required>
                                     <?php
                                     $MJU_API = new MJU_API;
-                                    $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                     $econ_member = $MJU_API->GetAPI_array($api_url);
                                     $fnc->debug_console("econ member", $econ_member[0]);
                                     if (!empty($econ_member)) {
@@ -276,7 +277,8 @@ class journal_fnc
                                 <select class="form-select" size="8" style="height: 10em;" name="jour_owner_citizenid" id="jour_owner_citizenid" aria-describedby="jour_owner_citizenidHelp">
                                     <?php
                                     $MJU_API = new MJU_API();
-                                    $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                    $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                     $econ_member = $MJU_API->GetAPI_array($api_url);
                                     // $fnc->debug_console("econ member", $econ_member[0]);
                                     // $econ_member = $fnc->econ_member_remove_exists("journal", $id, $econ_member);
@@ -899,7 +901,8 @@ class journal_fnc
 
             <?php
             $MJU_API = new MJU_API;
-            $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+            // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+            $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
             // $econ_member = $MJU_API->GetAPI_array($api_url);                                    
             $econ_member = $fnc->econ_member_remove_exists("journal", $id, $MJU_API->GetAPI_array($api_url));
             $fnc->debug_console("econ member", $econ_member[0]);
@@ -1074,21 +1077,21 @@ class journal_fnc
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=journal&act=report&cat=personal">รายบุคคล</a>
+                                            } ?>" href="?act=report&cat=personal">รายบุคคล</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'department') {
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=journal&act=report&cat=department">รายหลักสูตร</a>
+                                            } ?>" href="?act=report&cat=department">รายหลักสูตร</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?php if (isset($_GET['cat']) && $_GET['cat'] == 'apasample') {
                                                 echo ' active link-light" aria-current="page';
                                             } else {
                                                 echo ' link-primary';
-                                            } ?>" href="?p=journal&act=report&cat=apasample">APA's Ref</a>
+                                            } ?>" href="?act=report&cat=apasample">APA's Ref</a>
                     </li>
                 </ul>
             </div>
@@ -1450,7 +1453,8 @@ class journal_fnc
                             <select class="form-select form-select-sm" name="k" id="k" onchange="this.form.submit();">
                                 <?php
                                 $MJU_API = new MJU_API;
-                                $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                // $api_url = "https://api.mju.ac.th/Person/API/PERSON9486bba19bca462da44dc8ac447dea9723052020/Department/20500";
+                                $api_url = "https://apissandbox.mju.ac.th/api/v1/person/Department/20500";
                                 $econ_member = $MJU_API->GetAPI_array($api_url);
                                 $fnc->debug_console("econ member", $econ_member[0]);
                                 echo '<option value=""';

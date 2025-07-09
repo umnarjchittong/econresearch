@@ -8,7 +8,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <!-- Bootstrap CSS v5.0.2 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
 </head>
 
@@ -125,7 +126,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "uploadAttachments" && isset($_POST
 // * insert proceeding
 if (isset($_POST["fst"]) && $_POST["fst"] == "proceeding_append") {
   $api_url = $fnc->api_url_personal . $_POST["pro_owner_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -163,7 +164,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "proceeding_append") {
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "proceeding_update") {
   $api_url = $fnc->api_url_personal . $_POST["pro_owner_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -222,7 +223,7 @@ if (isset($_GET["p"]) && $_GET["p"] == "proceeding" && isset($_GET["act"]) && $_
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "proceedingCoWorkerIntAppend") {
   $api_url = $fnc->api_url_personal . $_POST["cow_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -366,7 +367,7 @@ if (isset($_GET['p']) && $_GET['p'] == "setting" && isset($_GET['act']) && $_GET
 // * Journals insert
 if (isset($_POST["fst"]) && $_POST["fst"] == "journal_append") {
   $api_url = $fnc->api_url_personal . $_POST["jour_owner_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -407,7 +408,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "journal_append") {
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "journal_update") {
   $api_url = $fnc->api_url_personal . $_POST["jour_owner_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -488,7 +489,7 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "deletefile" && 
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "journalCoWorkerIntAppend") {
   $api_url = $fnc->api_url_personal . $_POST["cow_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -527,11 +528,11 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "datadelete" && 
       $sql = "DELETE FROM `project` WHERE `proj_id` = " . $_GET["id"];
       break;
     case "activity";
-      $sql = "DELETE FROM `project_activity` WHERE `proj_id` = " . $_GET["id"] . " AND `pa_id` = "  . $_GET["paid"];
+      $sql = "DELETE FROM `project_activity` WHERE `proj_id` = " . $_GET["id"] . " AND `pa_id` = " . $_GET["paid"];
       break;
-      // case "activity_image";
-      //   $sql = "DELETE FROM `project_activity` WHERE `pa_id` = " . $_GET["id"];
-      //   break;
+    // case "activity_image";
+    //   $sql = "DELETE FROM `project_activity` WHERE `pa_id` = " . $_GET["id"];
+    //   break;
   }
   // die($sql);
   $fnc->sql_execute($sql);
@@ -553,7 +554,7 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "datadelete" && 
     $fnc->sql_execute($sql);
   }
   // die();
-  if ($_GET["p"] = "activity") {
+  if ($_GET["p"] === "activity") {
     die('<meta http-equiv="refresh" content="0; URL=admin/project.php?p=' . $_GET["p"] . '&act=view&pid=' . $_GET["id"] . '&alert=success&title=สำเร็จ&msg=ลบข้อมูล ' . ucfirst($_GET["p"]) . ' เรียบร้อย." />');
   } else {
     die('<meta http-equiv="refresh" content="0; URL=admin/' . $_GET["p"] . '.php?p=' . $_GET["p"] . '&alert=success&title=สำเร็จ&msg=ลบข้อมูล ' . ucfirst($_GET["p"]) . ' เรียบร้อย." />');
@@ -564,7 +565,7 @@ if (isset($_GET["p"]) && isset($_GET["act"]) && $_GET["act"] == "datadelete" && 
 // * Research insert
 if (isset($_POST["fst"]) && $_POST["fst"] == "research_append") {
   $api_url = $fnc->api_url_personal . $_POST["res_owner_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -575,10 +576,10 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "research_append") {
   $fiscal_year = $fnc->get_fiscal_year($_POST["res_period_begin"]);
   $sql = "INSERT INTO `research` (`res_owner_citizenid`, `res_owner_prename`, `res_owner_firstname`, `res_owner_lastname`, `department_name`, 
 `res_name`, `res_ratio`, `res_period_begin`, `res_period_finish`, `res_fiscalyear`, 
-`res_budget_source`, `res_budget`, `res_budget_province`, `res_tier`, `res_detail`, `res_create_datetime`, `res_status`, `res_editor`, `res_lastupdate`) 
+`res_budget_source`, `res_budget`, `res_budget_province`, `res_tier`, `res_detail`, `res_create_datetime`, `res_status`, `res_editor`, `res_lastupdate` , `res_isLeader`, `res_budget_researcher`) 
  VALUES ('" . $_POST["res_owner_citizenid"] . "', '" . addslashes($owner["titlePosition"]) . "', '" . addslashes($owner["firstName"]) . "', '" . addslashes($owner["lastName"]) . "', '" . addslashes($_POST["department_name"]) . "', 
  '" . addslashes($_POST["res_name"]) . "', '" . addslashes($_POST["res_ratio"]) . "', '" . $_POST["res_period_begin"] . "', '" . $_POST["res_period_finish"] . "', '" . $fiscal_year . "', 
- '" . addslashes($_POST["res_budget_source"]) . "', " . $_POST["res_budget"] . ", '" . addslashes($_POST["res_budget_province"]) . "', '" . addslashes($_POST["res_tier"]) . "', '" . addslashes($_POST["res_detail"]) . "', current_timestamp(), 'enable', 'Admin', current_timestamp())";
+ '" . addslashes($_POST["res_budget_source"]) . "', " . $_POST["res_budget"] . ", '" . addslashes($_POST["res_budget_province"]) . "', '" . addslashes($_POST["res_tier"]) . "', '" . addslashes($_POST["res_detail"]) . "', current_timestamp(), 'enable', 'Admin', current_timestamp(), '" . addslashes($_POST["res_isLeader"]) . "', " . $_POST["res_budget_researcher"] . ")";
 
   //  die($sql);
   $fnc->sql_execute($sql);
@@ -588,7 +589,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "research_append") {
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "research_update") {
   $api_url = $fnc->api_url_personal . $_POST["res_owner_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -605,14 +606,14 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "research_update") {
   $sql = "UPDATE `research` SET `res_researchID`=" . $_POST["res_researchID"] . ",`res_researchCode`='" . $_POST["res_researchCode"] . "',`res_owner_citizenid`='" . $_POST["res_owner_citizenid"] . "',`res_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`res_owner_firstname`='" . addslashes($owner["firstName"]) . "',`res_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
 `res_name`='" . addslashes($_POST["res_name"]) . "',`res_ratio`='" . $_POST["res_ratio"] . "',`res_period_begin`='" . $_POST["res_period_begin"] . "',`res_period_finish`='" . $_POST["res_period_finish"] . "',`res_fiscalyear`='" . $fiscal_year . "',
 `res_budget_source`='" . addslashes($_POST["res_budget_source"]) . "',`res_budget`=" . $_POST["res_budget"] . ",`res_budget_province`='" . addslashes($_POST["res_budget_province"]) . "',`res_tier`='" . addslashes($_POST["res_tier"]) . "',
-`res_detail`='" . addslashes($_POST["res_detail"]) . "',`res_editor`='Admin',`res_lastupdate`=CURRENT_TIMESTAMP() WHERE `res_id` = " . $_POST["res_id"];
+`res_detail`='" . addslashes($_POST["res_detail"]) . "',`res_editor`='Admin',`res_lastupdate`=CURRENT_TIMESTAMP(), `res_isLeader`='" . addslashes($_POST["res_isLeader"]) . "', `res_budget_researcher`=" . $_POST["res_budget_researcher"] . " WHERE `res_id` = " . $_POST["res_id"];
 
   //   $sql = "UPDATE `research` SET `jour_owner_citizenid`='" . $_POST["jour_owner_citizenid"] . "',`jour_owner_prename`='" . addslashes($owner["titlePosition"]) . "',`jour_owner_firstname`='" . addslashes($owner["firstName"]) . "',`jour_owner_lastname`='" . addslashes($owner["lastName"]) . "'" . $department_name . ",
   // `jour_study`='" . addslashes($_POST["jour_study"]) . "',`jour_ratio`='" . $_POST["jour_ratio"] . "',`jour_tier`='" . $_POST["jour_tier"] . "',`jour_research`='" . addslashes($_POST["jour_research"]) . "',`jour_value`='" . addslashes($_POST["jour_value"]) . "',
   // `jour_volume_issue`='" . addslashes($_POST["jour_volume_issue"]) . "',`jour_page`='" . addslashes($_POST["jour_page"]) . "',`jour_link`='" . addslashes($_POST["jour_link"]) . "',`jour_date_avaliable`='" . addslashes($_POST["jour_date_avaliable"]) . "',`jour_fiscalyear`='" . $fiscal_year . "',
   // `jour_detail`='" . addslashes($_POST["jour_detail"]) . "',`jour_notes`='" . addslashes($_POST["jour_notes"]) . "',`jour_editor`='Admin',`jour_lastupdate`=CURRENT_TIMESTAMP() WHERE jour_id = " . $_POST["jour_id"];
 
-  // die($sql);
+  die($sql);
   $fnc->sql_execute($sql);
   echo '<meta http-equiv="refresh" content="0; URL=admin/research.php?p=research&act=viewinfo&rid=' . $_POST["res_id"] . '&alert=success&title=สำเร็จ&msg=ปรับปรุงข้อมูล Research เรียบร้อย." />';
   die();
@@ -620,7 +621,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "research_update") {
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "CoWorkerIntAppend") {
   $api_url = $fnc->api_url_personal . $_POST["cow_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -643,8 +644,22 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "CoWorkerIntAppend") {
       break;
   }
   $fnc->sql_execute($sql);
+  
+  $sql = "SELECT res_ratio, res_budget FROM `research` where res_id = 328;";
+  $res = $fnc->get_db_row($sql);
+ 
+  $sql = "SELECT sum(cow_ratio) FROM `co_worker` where cow_ref_table = 'research' and cow_ref_id = 328 and department_name != ''";
+  $cow_ratio = $fnc->get_db_col($sql);
+  if (empty($cow_ratio)) {
+    $cow_ratio = 0;
+  }
+  $res_budget_researcher = ($res["res_budget"] * ($res["res_ratio"] + $cow_ratio)) /100;
+  $sql = "UPDATE `research` SET `res_budget_researcher`='" . $res_budget_researcher . "' WHERE `res_id` = " . $_POST["ref_id"];
+  $fnc->sql_execute($sql);
+
   echo '<meta http-equiv="refresh" content="0; URL=admin/' . $link_back . '&alert=success&title=สำเร็จ&msg=เพิ่มผู้ร่วมงานใน ' . ucfirst($_POST["ref_table"]) . ' เรียบร้อย." />';
-  die();
+  return;
+  // die();
 }
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "CoWorkerExtAppend") {
@@ -673,7 +688,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "CoWorkerExtAppend") {
 // * Academic Service Project insert
 if (isset($_POST["fst"]) && $_POST["fst"] == "project_append") {
   $api_url = $fnc->api_url_personal . $_POST["proj_owner_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
@@ -697,7 +712,7 @@ if (isset($_POST["fst"]) && $_POST["fst"] == "project_append") {
 
 if (isset($_POST["fst"]) && $_POST["fst"] == "project_update") {
   $api_url = $fnc->api_url_personal . $_POST["proj_owner_citizenid"];
-  $owner = $MJU_API->GetAPI_array($api_url)[0];
+  $owner = $MJU_API->GetAPI_array($api_url);
   // echo "<pre>";
   // print_r($owner);
   // echo "</pre>";
